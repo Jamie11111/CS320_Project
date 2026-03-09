@@ -2,15 +2,27 @@ import { StyleSheet, Text, View, Image } from 'react-native'
 import "../global.css"
 import { storage } from '../lib/firebase'
 import {useEffect} from 'react'
+import Navbar from '../components/navbar'
+import FeedCard from '../components/feed-card'
 const Home = () => {
   return (
-    <View className="flex-1 items-center justify-center">
-      <Text className="text-xl">Welcome to UMarket!</Text>
+    <View >
+      <Navbar />
+      <View className="flex-row flex-wrap">
+        <FeedCard/>
+        <FeedCard/>
+        <FeedCard/>
+        <FeedCard/>
+        <FeedCard/>
+        <FeedCard/>
+        <FeedCard/>
+        <FeedCard/>
+      </View>
     </View>
   )
 }
 
 export default Home
 
-const styles = StyleSheet.create({})
+
 
