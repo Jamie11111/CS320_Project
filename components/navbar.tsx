@@ -5,10 +5,8 @@ const Navbar = () => {
   return (
     <View className="w-full h-16 bg-umass-red flex-row items-center justify-between px-4">
         <Text className="text-white text-lg font-bold">UMarket</Text>
-        <Text className="text-gray-300">Home</Text>
-        <Text className="text-gray-300">Products</Text>
-        <Text className="text-gray-300">Cart</Text>
-        <Text className="text-gray-300">Profile</Text>
+        <View className="bg-white/50 w-[60%] h-8 rounded-full"></View>
+        <View className="bg-white w-9 h-9 rounded-full"></View>
     </View>
   )
 }
