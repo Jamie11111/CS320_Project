@@ -12,7 +12,7 @@ const Home = () => {
       <Navbar />
       <ScrollView>
         <View className="flex-row flex-wrap justify-center">
-          <FeedCard title = "test" />
+          <FeedCard description = "aefneoifnaiweufnaoiwefaoiwuhefiaowehfiauwehfiawedoiajfoawejfpaowiejfoawiefjaopwefowhuefoiahuwefioauhwefoiauwhefioahwefiuawefnawiefaiuwefhaiwuehfiawuhefoiahuwefiahuwefuiuawheifohawioehfaioweuhfiaawefjaopwejifapowiejfpoaijwefopaiwejfoawjefopjawoepfjaoweijawoefijawefopjiaweopfjawpoejfaopweijfaoiwjefpoawjiefpoijawefpoijaoweijfaowefjiapwoejfapwoefjwefjoeawoifjawopefjawoefawefapweoifjapowejifopawijefoajweopfjawpjeffopaiwjefpoiawjeofjawoejfoawiejfpoaiwjefpoajwepfjapwjiefpawjefoaijwefoawjefpaiwjefopajpweifjapoewjifawpefjawoejfawoepfjaowejfawepfawefuwhefiauwhefioauhwefouhawehfaoiuwehfoaiuwhefoiahuweufioahwieofuhaweoifuhaoiwuehfaoiwuehfoaiwehufiauwhefoiawehfaewhaweifhaoiwhef" />
           <FeedCard/>
           <FeedCard/>
           <FeedCard/>
