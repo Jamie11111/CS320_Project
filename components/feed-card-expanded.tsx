@@ -1,5 +1,6 @@
 import "../global.css"
 import { View, Text, ScrollView, Pressable } from "react-native"
+import { useRouter } from "expo-router"
 interface FeedCardExpandedProps {
     title: string
     location: string
@@ -9,6 +10,8 @@ interface FeedCardExpandedProps {
 }
 
 const FeedCardExpanded = ({ title, location, price, description, onClose }: FeedCardExpandedProps) => {
+  const router = useRouter()
+
   return (
     <View className="flex-1 pt-16">
       <View className="flex-1 w-full bg-white overflow-hidden">
@@ -31,12 +34,18 @@ const FeedCardExpanded = ({ title, location, price, description, onClose }: Feed
           <View className="flex-row items-start justify-between">
             <View className="flex-1 pr-3">
               <Text className="text-xl font-bold">{title}</Text>
-              <Text className="text-lg font-medium text-black">{location}</Text>
-              <Text className="text-lg font-medium text-black">{price}</Text>
+              <Text className="text-lg font-medium">{location}</Text>
+              <Text className="text-lg font-medium">{price}</Text>
             </View>
-            <View className="mb-4">
-              <View className="bg-white shadow-lg w-16 h-16 rounded-full ml-2"></View>
-            </View>
+            <Pressable
+              className="mb-4"
+              onPress={() => {
+                onClose()
+                router.push("/my-profile")
+              }}
+            >
+              <View className="bg-white shadow-sm w-16 h-16 rounded-full ml-2" />
+            </Pressable>
           </View>
           <ScrollView
             className="mt-2 h-64 mb-12" 
