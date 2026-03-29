@@ -4,20 +4,23 @@ import { useState } from "react"
 import { useRouter } from "expo-router"
 import FeedCardExpanded from "./feed-card-expanded"
 
+type FeedImageSource = import("react-native").ImageSourcePropType | string
+
 interface FeedCardProps {
   title?: string
   location?: string
   price?: string
   description?: string
+  images?: FeedImageSource[]
   isEditing?: boolean
 }
-// destructuring the feed card props with default values for title, location, price, and description instead of using FeedCard - (props: FeedCardProps) and then internally 
-// specifying props.title, props.location, etc, making for more concise code
+
 const FeedCard = ({
   title = "Product Name",
   location = "Location",
   price = "Price",
   description = "Description",
+  images = [],
   isEditing = false,
 }: FeedCardProps) => {
   const [expanded, setExpanded] = useState(false)
@@ -61,6 +64,7 @@ const FeedCard = ({
           location={location}
           price={price}
           description={description}
+          images={images}
           onClose={() => setExpanded(false)}
         />
       </Modal>
