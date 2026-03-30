@@ -46,6 +46,7 @@ async function verifyAuthToken(supabase: SupabaseClient, request: Request) {
 
 // Example of getting a listing from the database
 async function getListingById(supabase: SupabaseClient, listingId: number) {
+    // Inside of the route, we can call 'verifyAuthToken' prior to calling this function for auth verification
   const { data, error } = await supabase
     .from('listings')
     .select('*')
