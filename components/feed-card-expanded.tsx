@@ -50,7 +50,7 @@ const FeedCardExpanded = ({ title, location, price, description, images = [], on
         className="mb-4"
         onPress={() => {
         onClose()
-        router.push("/my-profile")
+        router.push("/profile-feed")
         }}
       >
         <View className="bg-gray-200 shadow-sm w-16 h-16 rounded-full ml-2" />
@@ -68,8 +68,11 @@ const FeedCardExpanded = ({ title, location, price, description, images = [], on
       <Pressable onPress={onClose} className="mb-4 mt-auto w-52 bg-umass-red rounded-xl p-3 items-center">
       <Text className="text-white font-bold">Close</Text>
       </Pressable>
-      <Pressable onPress={onClose} className="mb-4 mt-auto w-52 bg-umass-red rounded-xl p-3 items-center">
-      <Text className="text-white font-bold">Message this Seller</Text>
+      <Pressable onPress={() => {
+        onClose()
+        router.push("/messages")
+      }} className="mb-4 mt-auto w-52 bg-umass-red rounded-xl p-3 items-center">
+        <Text className="text-white font-bold">Message this Seller</Text>
       </Pressable>
     </View>
     </View>

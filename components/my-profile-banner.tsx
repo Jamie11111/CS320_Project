@@ -10,20 +10,32 @@ interface MyProfileBannerProps {
 
 const MyProfileBanner = ({ name, location, email }: MyProfileBannerProps) => {
   return (
-    <View className="px-4 pt-4 pb-3 bg-white border-b border-gray-200 flex-row justify-around items-center sticky">
-      <View className="relative">
-        <View className="bg-white shadow-sm w-28 h-28 rounded-full ml-2" />
-        <Pressable className="absolute bottom-0 right-0 bg-blue-500 rounded-full p-2">
-          <Text className="text-white text-xs font-bold">Edit</Text>
-        </Pressable>
+    <View>
+
+      <View className="px-4 pt-4 pb-3 bg-white flex-row">
+        <View>
+          <View className="bg-gray-200 shadow-sm w-28 h-28 rounded-full ml-2" />
+          <Pressable className="absolute bottom-0 right-0 bg-blue-500 rounded-full p-2">
+            <Text className="text-white text-xs font-bold">Edit</Text>
+          </Pressable>
+        </View>
+        <View className="ml-5 mt-3 flex-1">
+            <Text className="text-xl font-bold">Name: {name}</Text>
+            <View className="flex-row">
+              <Text className="text-lg font-medium">Email: {email}</Text>
+            </View>
+            <View className="flex-row">
+              <Text className="text-lg font-medium mt-1">Location: </Text>
+              <TextInput 
+                className="bg-gray-300 rounded-lg w-[50%] p-2 overflow-y-scroll" 
+                defaultValue={location}
+                placeholder="Enter"
+                maxLength={50}
+              />
+            </View>
+        </View>
       </View>
-      <View>
-          <Text className="text-xl font-bold">Name: {name}</Text>
-          <Text className="text-lg font-medium">Location: {location}</Text>
-          <View className="flex-row">
-            <Text className="text-lg font-medium">Email: {email}</Text>
-          </View>
-      </View>
+    <Text className="text-black text-3xl font-bold m-4 mb-1">Your Products</Text>
     </View>
   )
 }

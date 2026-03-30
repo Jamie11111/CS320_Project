@@ -3,7 +3,7 @@ import "../global.css"
 import Navbar from "../components/navbar"
 import ProfileFeedBanner from "../components/profile-feed-banner"
 import FeedCard from "../components/feed-card"
-import { useLocalSearchParams } from "expo-router"
+import { useLocalSearchParams, useRouter } from "expo-router"
 
 interface UploadProductPageProps {
     isEditing?: boolean
@@ -20,6 +20,7 @@ const UploadProductPage = ({
     initialLocation = "",
     initialDescription = ""
 }: UploadProductPageProps) => {
+        const router = useRouter()
         const params = useLocalSearchParams<{
                 isEditing?: string
                 initialName?: string
@@ -36,6 +37,7 @@ const UploadProductPage = ({
 
     return (
         <View>
+                <Text className="text-black  font-bold text-3xl m-4">{resolvedIsEditing ? "Edit" : "Upload"} Product</Text>
                 <View className="flex-row justify-between m-2">
                         <Text className="text-lg font-medium p-3">Product Name:</Text>
                         <TextInput 
@@ -54,18 +56,9 @@ const UploadProductPage = ({
                                 maxLength={50}
                         />
                 </View>
-                <View className="flex-row justify-between m-2">
-                        <Text className="text-lg font-medium p-3">Location:</Text>
-                        <TextInput 
-                                className="bg-gray-300 rounded-lg w-[50%] p-3 overflow-y-scroll" 
-                                placeholder="Enter"
-                                defaultValue={resolvedLocation}
-                                maxLength={50}
-                        />
-                </View>
                 <View className="flex-col m-2">
                         <Text className="text-lg font-medium p-3">Images:</Text>
-                        <Pressable className="ml-3 w-44 h-64 bg-gray-300 rounded-lg items-center justify-center">
+                        <Pressable className="ml-3 w-44 h-64 bg-gray-300 shadow-md rounded-lg items-center justify-center">
                                 <View className="w-[84%] h-[84%] rounded-lg border-2 border-dashed border-gray-700/70 items-center justify-center">
                                 <Text className="text-7xl text-gray-700/70">+</Text>
                                 </View>
@@ -73,7 +66,7 @@ const UploadProductPage = ({
                 </View>
                 <View className="flex-col m-2 mb-16">
                         <Text className="text-lg font-medium p-3">Description:</Text>
-                        <TextInput 
+                  <TextInput 
                                 className="ml-3 mr-3 bg-gray-300 rounded-lg h-32 p-3"
                                 placeholder="Enter"
                                 defaultValue={resolvedDescription}
@@ -82,13 +75,21 @@ const UploadProductPage = ({
                         />
                 </View>
                 <View className="flex-row justify-around">
-                        <Pressable className="mb-4 mt-auto w-52 bg-umass-red rounded-xl p-3 items-center">
+                        <Pressable onPress={() => router.push("/my-profile")} className="mb-4 mt-auto w-52 bg-umass-red rounded-xl p-3 items-center">
                                 <Text className="text-white font-bold">Cancel</Text>
                         </Pressable>
-                        <Pressable className="mb-4 mt-auto w-52 bg-umass-red rounded-xl p-3 items-center">
+                        <Pressable onPress={() => router.push("/my-profile")} className="mb-4 mt-auto w-52 bg-umass-red rounded-xl p-3 items-center">
                                 <Text className="text-white font-bold">{resolvedIsEditing ? "Update" : "Upload"}</Text>
                         </Pressable>
                 </View>
+                <View className="flex-row justify-around">
+                                {resolvedIsEditing && (
+                                                <Pressable onPress={() => router.back()} className="mb-4 mt-auto w-52 bg-umass-red rounded-xl p-3 items-center">
+                                                                <Text className="text-white font-bold">Delete</Text>
+                                                </Pressable>
+                                )}
+                </View>
+                
         </View>
     )
 }

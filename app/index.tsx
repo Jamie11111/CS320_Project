@@ -21,9 +21,9 @@ const Home = () => {
               params: { isEditing: "false" },
             })
           }
-          className="absolute z-10 top-20 right-5 bg-umass-red rounded-full px-5 py-3 shadow-lg"
+          className="absolute z-10 top-20 right-4 bg-umass-red rounded-full px-5 py-3 shadow-lg"
         >
-          <Text className="text-white font-bold">Upload Product</Text>
+          <Text className="text-white text-2xl font-bold">+</Text>
       </Pressable>
       <ScrollView>
         <View className="flex-row flex-wrap justify-center mb-16">
