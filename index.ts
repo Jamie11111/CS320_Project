@@ -1,14 +1,17 @@
 import { accountRoutes } from "./routes/account";
 import { chatRoutes } from "./routes/chats";
-import { listingRoutes } from "./routes/posts";
+import { listingRoutes } from "./routes/listings";
 import { userRoutes } from "./routes/users";
+// This will get replaced with the real supabase database instance that the database team sets up
+import { supabase } from "./database/example";
+import type { SupabaseClient } from "@supabase/supabase-js";
 
 console.log("Hello via Bun!");
 
-Bun.serve({
+export const initApp = (supabase: SupabaseClient) => Bun.serve({
     port: 3000,
     routes: {
-        ...listingRoutes,
+        ...listingRoutes(supabase),
         ...userRoutes,
         ...accountRoutes,
         ...chatRoutes,
@@ -16,4 +19,6 @@ Bun.serve({
     }
 });
 
-console.log("App is running on port 3000");
+const app = initApp(supabase);
+
+console.log("App is running on port " + app.port);
