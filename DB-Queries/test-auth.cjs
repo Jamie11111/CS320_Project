@@ -56,4 +56,4 @@ async function testLogin(){
   console.log('Login Result:', loginResult);
 }
 
-testSignUp();
+testLogin();
