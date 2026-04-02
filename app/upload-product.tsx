@@ -25,6 +25,13 @@ const UploadProductPage = ({
         initialDescription = "",
         initialCondition = ""
 }: UploadProductPageProps) => {
+        
+
+
+
+
+
+
         const [open, setOpen] = useState(false);
         const [value, setValue] = useState(null);
         const [items, setItems] = useState([
@@ -115,9 +122,9 @@ const UploadProductPage = ({
                 </View>
                 <View className="flex-row justify-around">
                                 {resolvedIsEditing && (
-                                                <Pressable onPress={() => router.back()} className="mb-4 mt-auto w-52 bg-umass-red rounded-xl p-3 items-center">
-                                                                <Text className="text-white font-bold">Delete</Text>
-                                                </Pressable>
+                                        <Pressable onPress={() => router.back()} className="mb-4 mt-auto w-52 bg-umass-red rounded-xl p-3 items-center">
+                                                        <Text className="text-white font-bold">Delete</Text>
+                                        </Pressable>
                                 )}
                 </View>
                 

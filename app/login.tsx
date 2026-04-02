@@ -2,19 +2,53 @@ import { View, Text, TextInput, Pressable, KeyboardAvoidingView, ScrollView, Act
 import { useRouter } from "expo-router"
 import { useState } from "react"
 import "../global.css"
+import AsyncStorage from "@react-native-async-storage/async-storage"
 
 const LoginScreen = () => {
   const router = useRouter()
   const [showPass, setShowPass] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [email, setEmail] = useState("")
+  const [password, setPassword] = useState("")
 
-  const handleLogin = () => {
-    setLoading(true)
+  const handleLogin = async () => {
+    try {
+      const response = await fetch('http://localhost:8081/api/account/login', {
+      method: 'POST',
+      headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+      },
+      body: JSON.stringify({
+          email: "irawizza@umass.edu",
+          password: "123456",
+      })
+      });
 
-    setTimeout(() => {
-      setLoading(false)
-      router.push("/")
-    }, 1000)
+      console.log("Response status:", response.status)
+
+      const responseJson = await response.body?.json();
+      
+      console.log("Response JSON:", responseJson);  
+
+  
+      const { session } = responseJson;
+      await AsyncStorage.setItem("access_token", session.access_token);
+      await AsyncStorage.setItem("refresh_token", session.refresh_token);
+      if (session.access_token) {
+        router.push("/")
+      }
+      else {
+        console.error("Login failed:", responseJson.message)
+      }
+    } catch (error) {
+      console.error("Login error", error)
+    }
+//     Once logged in, you should include the following line in all your fetch request headers:
+// 'Authorization': `Bearer ${accessToken} ${refreshToken}`
+
+// Additionally, all responses that the server sends to signed-in users will include the following in the header:
+// "Session-Tokens": `${session.access_token} ${session.refresh_token}`You should periodically update the locally stored accessToken and refreshToken using these values, since the tokens will expire after some time. But it's not super important for now
   }
 
   return (
@@ -37,6 +71,8 @@ const LoginScreen = () => {
               placeholderTextColor="#666"
               textAlign="left"
               autoCapitalize="none"
+              value={email}
+              onChangeText={setEmail}
             />
           </View>
 
@@ -47,6 +83,8 @@ const LoginScreen = () => {
                 className="flex-1 text-xl font-bold"
                 secureTextEntry={!showPass}
                 placeholder=""
+                value={password}
+                onChangeText={setPassword}
               />
               <Pressable onPress={() => setShowPass(!showPass)}>
                 <Text className="text-gray-600 font-bold">{showPass ? "Hide" : "Show"}</Text>
@@ -55,7 +93,7 @@ const LoginScreen = () => {
           </View>
 
           <Pressable
-            onPress={handleLogin}
+            onPress={() => handleLogin()}
             className="bg-white w-full py-4 rounded-[30px] h-20 justify-center active:bg-gray-200 mb-8"
           >
             {loading ? (
