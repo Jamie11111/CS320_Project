@@ -5,12 +5,15 @@
   "private": true,
   "devDependencies": {
     "@types/bun": "latest",
-    "supabase": "^2.84.4"
+    "@types/node": "^25.5.0",
+    "supabase": "^2.84.4",
+    "tsx": "^4.21.0",
+    "typescript": "^6.0.2"
   },
   "peerDependencies": {
     "typescript": "^5"
   },
   "dependencies": {
-    "@supabase/supabase-js": "^2.100.1"
+    "@supabase/supabase-js": "^2.101.1"
   }
 }
