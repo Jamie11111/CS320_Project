@@ -9,11 +9,12 @@ interface FeedCardExpandedProps {
   location: string
   price: string
   description: string
+  condition: string
   images?: FeedImageSource[]
   onClose: () => void
 }
 
-const FeedCardExpanded = ({ title, location, price, description, images = [], onClose }: FeedCardExpandedProps) => {
+const FeedCardExpanded = ({ title, location, price, condition, description, images = [], onClose }: FeedCardExpandedProps) => {
   const router = useRouter()
   const displayImages = images.slice(0, 5)
 
@@ -45,6 +46,7 @@ const FeedCardExpanded = ({ title, location, price, description, images = [], on
         <Text className="text-xl font-bold">{title}</Text>
         <Text className="text-lg font-medium">{location}</Text>
         <Text className="text-lg font-medium">{price}</Text>
+        <Text className="text-lg font-medium">{condition}</Text>
       </View>
       <Pressable
         className="mb-4"
@@ -57,7 +59,7 @@ const FeedCardExpanded = ({ title, location, price, description, images = [], on
       </Pressable>
       </View>
       <ScrollView
-      className="mt-2 h-64 mb-12" 
+      className="mt-2 h-64 mb-10" 
       showsVerticalScrollIndicator={true}
       contentContainerStyle={{ paddingBottom: 8 }}
       >

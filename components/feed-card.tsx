@@ -13,6 +13,7 @@ interface FeedCardProps {
   description?: string
   images?: FeedImageSource[]
   isEditing?: boolean
+  condition?: string
 }
 
 const FeedCard = ({
@@ -20,6 +21,7 @@ const FeedCard = ({
   location = "Location",
   price = "Price",
   description = "Description",
+  condition = "Condition",
   images = [],
   isEditing = false,
 }: FeedCardProps) => {
@@ -35,6 +37,7 @@ const FeedCard = ({
           initialName: title,
           initialPrice: price,
           initialLocation: location,
+          initialCondition: condition,
           initialDescription: description,
         },
       })
@@ -63,6 +66,7 @@ const FeedCard = ({
           title={title}
           location={location}
           price={price}
+          condition={condition}
           description={description}
           images={images}
           onClose={() => setExpanded(false)}
