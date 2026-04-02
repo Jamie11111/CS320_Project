@@ -5,7 +5,7 @@ import { useRouter } from "expo-router"
 type FeedImageSource = import("react-native").ImageSourcePropType | string
 
 interface FeedCardExpandedProps {
-  title: string
+  name: string
   location: string
   price: string
   description: string
@@ -14,7 +14,7 @@ interface FeedCardExpandedProps {
   onClose: () => void
 }
 
-const FeedCardExpanded = ({ title, location, price, condition, description, images = [], onClose }: FeedCardExpandedProps) => {
+const FeedCardExpanded = ({ name, location, price, condition, description, images = [], onClose }: FeedCardExpandedProps) => {
   const router = useRouter()
   const displayImages = images.slice(0, 5)
 
@@ -43,7 +43,7 @@ const FeedCardExpanded = ({ title, location, price, condition, description, imag
     <View className="p-4">
       <View className="flex-row items-start justify-between">
       <View className="flex-1 pr-3">
-        <Text className="text-xl font-bold">{title}</Text>
+        <Text className="text-xl font-bold">{name}</Text>
         <Text className="text-lg font-medium">{location}</Text>
         <Text className="text-lg font-medium">{price}</Text>
         <Text className="text-lg font-medium">{condition}</Text>

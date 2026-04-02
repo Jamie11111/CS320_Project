@@ -7,7 +7,7 @@ import FeedCardExpanded from "./feed-card-expanded"
 type FeedImageSource = import("react-native").ImageSourcePropType | string
 
 interface FeedCardProps {
-  title?: string
+  name?: string
   location?: string
   price?: string
   description?: string
@@ -17,7 +17,7 @@ interface FeedCardProps {
 }
 
 const FeedCard = ({
-  title = "Product Name",
+  name = "Product Name",
   location = "Location",
   price = "Price",
   description = "Description",
@@ -34,7 +34,7 @@ const FeedCard = ({
         pathname: "/upload-product",
         params: {
           isEditing: "true",
-          initialName: title,
+          initialName: name,
           initialPrice: price,
           initialLocation: location,
           initialCondition: condition,
@@ -52,7 +52,7 @@ const FeedCard = ({
       <Pressable className="w-[46%] h-[200px] bg-gray-300 rounded-lg shadow-sm m-2 flex-col" onPress={handlePress}>
         <View className="bg-umass-red absolute bottom-0 w-full h-[25%] rounded-br-lg rounded-bl-lg flex-row flex-grow flex-1 p-1">
             <View className="flex-1 ml-0.5">
-                <Text className="text-lg font-bold text-white">{title}</Text>
+                <Text className="text-lg font-bold text-white">{name}</Text>
                 <Text className="text-md text-white">{location}</Text>
             </View>
             <View className="justify-center absolute right-0 top-[40%] mr-2">
@@ -63,7 +63,7 @@ const FeedCard = ({
 
       <Modal visible={expanded} transparent animationType="fade" onRequestClose={() => setExpanded(false)}>
         <FeedCardExpanded
-          title={title}
+          name={name}
           location={location}
           price={price}
           condition={condition}
