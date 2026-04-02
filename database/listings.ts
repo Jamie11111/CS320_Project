@@ -1,6 +1,5 @@
 import {SupabaseClient} from '@supabase/supabase-js'
 
-// Note: all functions assume authentication has been done by the backend
 
 /* Get all information about a listing based on the listing's id.
    Returns json object corresponding to listing or null if error */
@@ -20,7 +19,7 @@ export async function getListingByID(supabase: SupabaseClient, listingID: number
 }
 
 /* Get all info about all listings for a given user. 
-   UserID should be UUID from auth.users which is a string in TS.
+   UserID should be UUID from auth.users 
    Returns array of json objects, each one representing a listing,
    ordered by date posted. Empty array if error */
 export async function getListingsByUserID(supabase: SupabaseClient, userID: string) {
