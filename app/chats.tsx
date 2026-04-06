@@ -28,10 +28,14 @@ const ChatListScreen = () => {
             <Text className="text-gray-500 text-xl font-bold text-center">No chats yet!</Text>
           </View>
         }
-        renderItem={({ item }) => (
+        renderItem={({ item, index }) => (
           <Pressable onPress={() => router.push("/messages")}>
-            <ChatRow {...item} />
-          </Pressable>
+           <ChatRow
+             {...item}
+             isUnread={index === 0}
+           />
+         </Pressable>
+
         )}
         keyExtractor={(_, i) => i.toString()}
       />
