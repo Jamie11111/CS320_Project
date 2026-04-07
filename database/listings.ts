@@ -73,7 +73,7 @@ export async function createListing(supabase: SupabaseClient,
             product_name: listing.product_name,
             product_desc: listing.product_desc,
             item_condition: listing.item_condition,
-            price: listing.price
+            price: listing.price,
         })
         .select()
         .single();
@@ -100,7 +100,7 @@ export async function markListingAsSold(supabase: SupabaseClient, listingID: num
         return null;
     }
 
-    return data
+    return data;
 }
 
 // Updates a listing's primary attributes and returns all its information
@@ -135,8 +135,11 @@ export async function deleteListing(supabase: SupabaseClient, listingID: number)
         .eq('listing_id', listingID);
 
     if (error) {
-        console.error('Error deleting listing', error.message)
+        console.error('Error deleting listing', error.message);
+        return false;
     }
+
+    return true;
 }
 
 /* Sample filtering function. Need to add more complexity like
