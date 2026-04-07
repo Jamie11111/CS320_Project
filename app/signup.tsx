@@ -22,6 +22,15 @@ const SignUpScreen = () => {
       return
     }
 
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/
+    if (!passwordRegex.test(password)) {
+      Alert.alert(
+        "Weak Password",
+        "Password must be at least 8 characters long and include an uppercase letter, a lowercase letter, a number, and a special character (@$!%*?&)."
+      )
+      return
+    }
+
     if (password !== confirmPassword) {
       Alert.alert("Error", "Passwords do not match.")
       return
@@ -105,6 +114,9 @@ const SignUpScreen = () => {
           
           <View className="mb-4">
             <Text className="text-white font-bold text-2xl mb-2 ">Password</Text>
+            <Text className="text-white/80 text-xs mb-2 italic">
+              Min 8 characters: 1 Upper, 1 Lower, 1 Number, 1 Special (@$!%*?&)
+            </Text>
             <View className="bg-white h-16 rounded-2xl px-4 flex-row items-center">
               <TextInput 
                 className="flex-1 text-xl font-bold"
