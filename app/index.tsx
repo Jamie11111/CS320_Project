@@ -32,7 +32,7 @@ const Home = () => {
   useEffect(() => {
     const fetchListings = async () => {
       try {
-        const response = await fetch('http://localhost:8081/api/listings', {
+        const response = await fetch('http://localhost:3000/api/listings', {
           method: 'GET',
           headers: {
               'Content-Type': 'application/json',
@@ -68,7 +68,7 @@ const Home = () => {
         >
           <Text className="text-white text-2xl font-bold">+</Text>
       </Pressable>
-      <ScrollView>
+      <ScrollView contentContainerStyle={{ flexDirection: "row", alignItems: "center", paddingVertical: 16 }}>
         {listings.map((listing, index) => (
           <FeedCard
             key={index}

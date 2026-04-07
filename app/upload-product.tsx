@@ -35,6 +35,7 @@ const UploadProductPage = ({
         const [open, setOpen] = useState(false);
         const [value, setValue] = useState(null);
         const [items, setItems] = useState([
+        {label: 'New', value: 'new'},
         {label: 'Good', value: 'good'},
         {label: 'Fair', value: 'fair'},
         {label: 'Poor', value: 'poor'}

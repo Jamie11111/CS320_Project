@@ -1,6 +1,7 @@
 import { View, Text, TextInput, Pressable, ScrollView, ActivityIndicator, Alert, KeyboardAvoidingView, Platform } from "react-native"
 import { useRouter } from "expo-router"
 import { useState } from "react"
+import AsyncStorage from "@react-native-async-storage/async-storage"
 import "../global.css"
 
 const SignUpScreen = () => {
@@ -8,12 +9,13 @@ const SignUpScreen = () => {
   const [loading, setLoading] = useState(false)
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
+  const [name, setName] = useState("")
   const [confirmPassword, setConfirmPassword] = useState("")
   
   const [showPass, setShowPass] = useState(false)
   const [showConfirmPass, setShowConfirmPass] = useState(false)
 
-  const handleSignUp = () => {
+  const handleSignUp = async () => {
     const umassRegex = /^[a-zA-Z0-9._%+-]+@umass\.edu$/
     if (!umassRegex.test(email)) {
       Alert.alert("UMass Only", "Please use a valid @umass.edu email address.")
@@ -24,12 +26,41 @@ const SignUpScreen = () => {
       Alert.alert("Error", "Passwords do not match.")
       return
     }
+    try {
+      const response = await fetch('http://localhost:3000/api/account/signup', {
+      method: 'POST',
+      headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+      },
+      body: JSON.stringify({
+          email: email,
+          password: password,
+          name: name,
+      })
+      });
 
-    setLoading(true)
-    setTimeout(() => {
-      setLoading(false)
-      router.push("/my-profile") 
-    }, 1500)
+      console.log("Response status:", response.status)
+
+      const responseJson: any = await response.json();
+      
+      console.log("Response JSON:", responseJson);  
+
+  
+      const { session } = responseJson;
+      await AsyncStorage.setItem("access_token", session.accessToken);
+      await AsyncStorage.setItem("refresh_token", session.refreshToken);
+      if (session.accessToken) {
+        router.push("/")
+      }
+      else {
+        console.error("Login failed:", responseJson.message)
+      }
+    } catch (error) {
+      console.error("Login error", error)
+    }
+
+    
   }
 
   return (
@@ -53,6 +84,8 @@ const SignUpScreen = () => {
               placeholder=""
               placeholderTextColor="#666"
               textAlign="left"
+              value={name}
+              onChangeText={setName}
             />
           </View>
 

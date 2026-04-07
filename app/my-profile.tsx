@@ -22,7 +22,7 @@ const MyProfilePage = () => {
       <MyProfileBanner name="John Doe" location="Amherst, MA" email="johndoe@example.com" />
       <ScrollView >
         <View className="flex-row flex-wrap justify-center mb-48">
-          <FeedCard isEditing={true}/>
+          <FeedCard condition={"Good"}isEditing={true}/>
           <FeedCard/>
           <FeedCard/>
           <FeedCard/>

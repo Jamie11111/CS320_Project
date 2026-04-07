@@ -13,29 +13,28 @@ const LoginScreen = () => {
 
   const handleLogin = async () => {
     try {
-      const response = await fetch('http://localhost:8081/api/account/login', {
+      const response = await fetch('http://localhost:3000/api/account/login', {
       method: 'POST',
       headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json'
       },
       body: JSON.stringify({
-          email: "irawizza@umass.edu",
-          password: "123456",
+          email: email,
+          password: password,
       })
       });
 
       console.log("Response status:", response.status)
 
-      const responseJson = await response.body?.json();
+      const responseJson: any = await response.json();
       
       console.log("Response JSON:", responseJson);  
 
-  
       const { session } = responseJson;
-      await AsyncStorage.setItem("access_token", session.access_token);
-      await AsyncStorage.setItem("refresh_token", session.refresh_token);
-      if (session.access_token) {
+      await AsyncStorage.setItem("access_token", session.accessToken);
+      await AsyncStorage.setItem("refresh_token", session.refreshToken);
+      if (session.accessToken) {
         router.push("/")
       }
       else {
