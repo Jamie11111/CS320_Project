@@ -88,5 +88,8 @@ export async function deleteUserProfile(supabase: SupabaseClient, userID: string
     
     if (error) {
         console.error('Error deleting user profile', error.message);
+        return false;
     }
+
+    return true
 }
