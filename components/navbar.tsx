@@ -17,7 +17,7 @@ const Navbar = () => {
         <Pressable
           onPress={(e) => {
             e.stopPropagation()
-            router.push("/chats")
+            router.push("/login")
           }}
           className="px-2 py-1"
         >

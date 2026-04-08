@@ -68,8 +68,9 @@ const Home = () => {
         >
           <Text className="text-white text-2xl font-bold">+</Text>
       </Pressable>
-      <ScrollView contentContainerStyle={{ flexDirection: "row", alignItems: "center", paddingVertical: 16 }}>
+      <ScrollView contentContainerStyle={{ flexDirection: "row", flexWrap: "wrap", marginLeft: 3}}>
         {listings.map((listing, index) => (
+          
           <FeedCard
             key={index}
             name={listing.product_name}
