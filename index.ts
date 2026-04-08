@@ -24,7 +24,7 @@ function convertRoutes(conn: {supabaseURL: string, supabaseKey: string}, routes:
         const resp = await func(req, supabase);
         const body: any = await resp.json();
         // idk whether to put session tokens in header or body
-        return Response.json(body, {status: resp.status, headers: { ...resp.headers, "Session-Tokens": `${session.access_token} ${session.refresh_token}` }});
+        return Response.json(body, {status: resp.status, headers: { ...resp.headers, "Set-Session-Tokens": `${session.access_token} ${session.refresh_token}` }});
     }]))]));
 }
 
