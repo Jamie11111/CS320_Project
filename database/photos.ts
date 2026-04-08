@@ -1,4 +1,5 @@
 import {SupabaseClient} from '@supabase/supabase-js'
+import {deleteFromStorage} from './storage'
 
 // add photo url to listings table
 export async function addListingPhoto(supabase: SupabaseClient, listingID: number, photoURL: string, photoPath: string) {
@@ -25,7 +26,7 @@ export async function getPhotosByListingID(supabase: SupabaseClient, listingID: 
     const {data, error} = await supabase
         .from('photos')
         .select('*')
-        .eq('listing_id', listingID)
+        .eq('listing_id', listingID);
     
     if (error) {
         console.error('Error getting photos for a listing', error.message);
@@ -35,14 +36,34 @@ export async function getPhotosByListingID(supabase: SupabaseClient, listingID: 
     return data;
 }
 
-// delete one photo url
+// delete a photo from storage and general database
 export async function deletePhotoById(supabase: SupabaseClient, photoID: number) {
-    const {error} = await supabase
+    const {data, error} = await supabase
         .from('photos')
-        .delete()
+        .select('photo_path')
         .eq('photo_id', photoID)
+        .single();
     
     if (error) {
-        console.error('Error deleting a photo', error.message);
+        console.error('Error finding photo in storage', error.message);
+        return false;
     }
+
+    if (data?.photo_path) {
+        const success = await deleteFromStorage(supabase, data.photo_path);
+        if (!success) 
+            return false;
+    }
+    
+    const {error: e} = await supabase
+        .from('photos')
+        .delete()
+        .eq('photo_id', photoID);
+    
+    if (e) {
+        console.error('Error deleting a photo', e.message);
+        return false;
+    }
+
+    return true;
 }
