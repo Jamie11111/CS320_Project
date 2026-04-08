@@ -1,15 +1,22 @@
-import { View, Text, ScrollView, Pressable} from "react-native"
+import { View, Text, ScrollView, Pressable, Alert} from "react-native"
 import "../global.css"
 import Navbar from "../components/navbar"
 import MyProfileBanner from "../components/my-profile-banner"
 import FeedCard from "../components/feed-card"
 import { useRouter } from "expo-router"
+import { useState } from "react"
 const MyProfilePage = () => {
 
   const router = useRouter()
+  const [userLocation, setUserLocation] = useState("Amherst, MA")
+  const handleLocationUpdate = (newLoc: string) => {
+    setUserLocation(newLoc); 
+  };
+
+  
   return (
     <View >
-      <Navbar />
+      <Navbar canNavigate={userLocation.trim() !== ""}/>
       <Pressable
                 onPress={() =>
                   router.push({
@@ -19,7 +26,7 @@ const MyProfilePage = () => {
                 }
                 className="absolute z-10 top-64 mt-6 right-4 bg-umass-red rounded-full px-5 py-3 shadow-lg"
       ><Text className="text-white text-2xl font-bold">+</Text></Pressable>
-      <MyProfileBanner name="John Doe" location="Amherst, MA" email="johndoe@example.com" />
+      <MyProfileBanner name="John Doe" location={userLocation} email="johndoe@example.com" onLocationChange={handleLocationUpdate}/>
       <ScrollView >
         <View className="flex-row flex-wrap justify-center mb-48">
           <FeedCard condition={"Good"}isEditing={true}/>
