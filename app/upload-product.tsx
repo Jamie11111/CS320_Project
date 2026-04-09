@@ -7,6 +7,8 @@ import { useLocalSearchParams, useRouter } from "expo-router"
 import DropDownPicker from "react-native-dropdown-picker"
 import { useState, useEffect } from "react"
 import AsyncStorage from "@react-native-async-storage/async-storage"
+import React from "react"
+import {fetchWithAuth} from "../scripts/authFetch"
 interface UploadProductPageProps {
     isEditing?: boolean
     initialName?: string
@@ -15,7 +17,6 @@ interface UploadProductPageProps {
     initialDescription?: string
     initialCondition?: string
 }
-
 
 const UploadProductPage = ({ 
         isEditing = false,
@@ -69,6 +70,10 @@ const UploadProductPage = ({
                         alert("Please fill in all required fields");
                         return;
                 }
+                if (isNaN(parseFloat(price))) {
+                        alert("Price should be a number.");
+                        return;
+                }
                 
                 setIsLoading(true);
                 try {
@@ -86,7 +91,7 @@ const UploadProductPage = ({
                                         return;
                                 }
                                 
-                                const response = await fetch(`http://localhost:3000/api/listing/${listingId}`, {
+                                const response = await fetchWithAuth(`http://localhost:3000/api/listing/${listingId}`, {
                                         method: 'PATCH',
                                         headers: { 'Content-Type': 'application/json' },
                                         body: JSON.stringify(listingData)
@@ -100,16 +105,8 @@ const UploadProductPage = ({
                                 
                                 alert('Listing updated successfully');
                         } else {
-                                const accessToken = await AsyncStorage.getItem('access_token');
-                                const refreshToken = await AsyncStorage.getItem('refresh_token');
-                                if (!accessToken) {
-                                        alert('Not authenticated. Please log in.');
-                                        return;
-                                }
-
-                                const userResponse = await fetch('http://localhost:3000/api/user', {
+                                const userResponse = await fetchWithAuth('http://localhost:3000/api/user', {
                                 headers: {
-                                        'Authorization': `Bearer ${accessToken} ${refreshToken}`,
                                         'Content-Type': 'application/json'
                                 }
                                 });
@@ -120,10 +117,9 @@ const UploadProductPage = ({
                                 
                                 
                                 const userData = await userResponse.json();
-                                const response = await fetch('http://localhost:3000/api/listing', {
+                                const response = await fetchWithAuth('http://localhost:3000/api/listing', {
                                         method: 'POST',
                                         headers: {
-                                                'Authorization': `Bearer ${accessToken} ${refreshToken}`,
                                                 'Content-Type': 'application/json'
                                         },
                                         body: JSON.stringify({

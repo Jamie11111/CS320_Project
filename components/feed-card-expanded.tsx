@@ -1,7 +1,7 @@
 import "../global.css"
 import { View, Text, ScrollView, Pressable, Image } from "react-native"
 import { useRouter } from "expo-router"
-
+import React from "react"
 type FeedImageSource = import("react-native").ImageSourcePropType | string
 
 interface FeedCardExpandedProps {
@@ -12,9 +12,10 @@ interface FeedCardExpandedProps {
   condition: string
   images?: FeedImageSource[]
   onClose: () => void
+  userId: string
 }
 
-const FeedCardExpanded = ({ name, location, price, condition, description, images = [], onClose }: FeedCardExpandedProps) => {
+const FeedCardExpanded = ({ name, location, price, condition, description, images = [], onClose, userId }: FeedCardExpandedProps) => {
   const router = useRouter()
   const displayImages = images.slice(0, 5)
 
@@ -51,8 +52,11 @@ const FeedCardExpanded = ({ name, location, price, condition, description, image
       <Pressable
         className="mb-4"
         onPress={() => {
-        onClose()
-        router.push("/profile-feed")
+          onClose()
+          router.push({
+        pathname: "/profile-feed",
+        params: { userId },
+          })
         }}
       >
         <View className="bg-gray-200 shadow-sm w-16 h-16 rounded-full ml-2" />

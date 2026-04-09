@@ -2,7 +2,7 @@ import "../global.css"
 import { View, Text, Pressable , TextInput} from "react-native"
 import { useRouter } from "expo-router"
 import { useState } from "react"
-
+import React from "react"
 interface MyProfileBannerProps {
     name: string
     location: string

@@ -1,6 +1,6 @@
 import { View, Text } from "react-native"
 import "../global.css"
-
+import React from "react"
 interface ChatRowProps {
   name: string
   lastMessage: string
