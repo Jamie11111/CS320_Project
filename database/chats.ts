@@ -51,3 +51,18 @@ export async function getChatsByUserId(supabase: SupabaseClient, userID: string)
 
     return data;
 }
+
+// More advanced - get list of chats with last message, ordered by last message
+export async function getChatsByUserId2(supabase: SupabaseClient, userID: string) {
+    
+    // runs an sql function defined in supabase
+    const {data, error} = await supabase
+        .rpc('get_chat_list', {uid: userID});
+    
+    if (error) {
+        console.error('Error getting chat list', error.message);
+        return [];
+    }
+
+    return data;
+}

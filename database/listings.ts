@@ -149,8 +149,9 @@ export async function filterListings(supabase: SupabaseClient,
     filters: {
         query?: string;
         priceLimit?: number;
-        condition?: string;
-        sold?: boolean
+        condition?: 'new' | 'good' | 'fair' | 'poor';
+        sold?: boolean;
+        sort_by?: 'price' | 'distance' | 'relevance' | 'date';
     }) {
         let query = supabase.from('listings').select('*');
 
