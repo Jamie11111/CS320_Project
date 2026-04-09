@@ -22,6 +22,7 @@ const ProfileFeedPage = () => {
     product_desc: string | null
     item_condition: string
     price: string
+    listing_id: string
     // using API Listings (above) but actual listings (below) should have more dataa
     // id: number
     // name: string
@@ -83,6 +84,7 @@ const ProfileFeedPage = () => {
                 condition={listing.item_condition}
                 userId={listing.user_id}
                 images={[couch1, couch2]}
+                listingId={listing.listing_id}
               />
             ))}
           </ScrollView>

@@ -16,6 +16,7 @@ interface UploadProductPageProps {
     initialLocation?: string
     initialDescription?: string
     initialCondition?: string
+    listingId?: string
 }
 
 const UploadProductPage = ({ 
@@ -57,6 +58,7 @@ const UploadProductPage = ({
         const resolvedDescription = params.initialDescription ?? initialDescription
         
         useEffect(() => {
+                console.log("Params:\n", params);
                 setProductName(resolvedName);
                 setPrice(resolvedPrice);
                 setDescription(resolvedDescription);
@@ -66,6 +68,7 @@ const UploadProductPage = ({
         }, [resolvedName, resolvedPrice, resolvedDescription, resolvedCondition]);
         
         const handleSubmit = async () => {
+                
                 if (!productName.trim() || !price.trim() || !value) {
                         alert("Please fill in all required fields");
                         return;
@@ -85,7 +88,7 @@ const UploadProductPage = ({
                         };
                         
                         if (resolvedIsEditing) {
-                                const listingId = params.listingId;
+                                const listingId = params.listingId ? parseFloat(params.listingId) : NaN;
                                 if (!listingId) {
                                         alert("Listing ID is missing");
                                         return;

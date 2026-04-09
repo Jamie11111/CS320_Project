@@ -6,15 +6,6 @@ import FeedCardExpanded from "./feed-card-expanded"
 import React from "react"
 type FeedImageSource = import("react-native").ImageSourcePropType | string
 
-interface FeedCardProps {
-  name?: string
-  location?: string
-  price?: string
-  description?: string
-  images?: FeedImageSource[]
-  isEditing?: boolean
-  condition?: string
-}
 
 interface FeedCardProps {
   name?: string
@@ -25,6 +16,7 @@ interface FeedCardProps {
   isEditing?: boolean
   condition?: string
   userId?: string
+  listingId?: string
 }
 
 const FeedCard = ({
@@ -36,6 +28,7 @@ const FeedCard = ({
   images = [],
   isEditing = false,
   userId,
+  listingId
 }: FeedCardProps) => {
   const [expanded, setExpanded] = useState(false)
   const router = useRouter()
@@ -52,6 +45,7 @@ const FeedCard = ({
           initialCondition: condition,
           initialDescription: description,
           userId,
+          listingId,
         },
       })
       return

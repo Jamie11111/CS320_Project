@@ -18,6 +18,7 @@ const MyProfilePage = () => {
   }
   type Listing = {
   user_id: string
+  listing_id: string
   product_name: string
   product_desc: string | null
   item_condition: string
@@ -105,6 +106,7 @@ const MyProfilePage = () => {
               description={listing.product_desc ?? ""}
               condition={listing.item_condition}
               userId={listing.user_id}
+              listingId={listing.listing_id}
               images={[couch1, couch2]}
               isEditing={true}
             />
