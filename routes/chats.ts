@@ -1,6 +1,7 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { BunRequest, ServerWebSocket } from "bun";
-import { createChat, getChatsByUser, getMessages, saveMessage } from "../database/chats";
+import { createOrGetChat, getChatsByUserId } from "../database/chats";
+import { createMessage, getMessagesByChatId } from "../database/messages";
 
 type WsData = {
     chatId: number;
@@ -29,7 +30,7 @@ export const wsHandlers = {
         }
         if (!text?.trim()) return;
 
-        const saved = await saveMessage(supabase, chatId, userId, text);
+        const saved = await createMessage(supabase, { message: text, sender_id: userId, chat_id: chatId });
         if (!saved) {
             ws.send(JSON.stringify({ error: "Failed to save message" }));
             return;
@@ -69,7 +70,7 @@ export const chatRoutes = {
             if (body.seller_id === user.id) {
                 return Response.json({ error: "Cannot create a chat with yourself" }, { status: 400 });
             }
-            const chat = await createChat(supabase, body.seller_id, user.id);
+            const chat = await createOrGetChat(supabase, user.id, body.seller_id);
             if (!chat) {
                 return Response.json({ error: "Failed to create chat" }, { status: 500 });
             }
@@ -81,7 +82,7 @@ export const chatRoutes = {
             if (authError || !user) {
                 return Response.json({ error: "Unauthorized" }, { status: 401 });
             }
-            const chats = await getChatsByUser(supabase, user.id);
+            const chats = await getChatsByUserId(supabase, user.id);
             return Response.json(chats, { status: 200 });
         },
     },
@@ -96,11 +97,7 @@ export const chatRoutes = {
             if (isNaN(chatId)) {
                 return Response.json({ error: "Invalid chat ID" }, { status: 400 });
             }
-            const url = new URL(req.url);
-            const limit = url.searchParams.has("limit")
-                ? parseInt(url.searchParams.get("limit")!)
-                : undefined;
-            const messages = await getMessages(supabase, chatId, limit);
+            const messages = await getMessagesByChatId(supabase, chatId);
             return Response.json(messages, { status: 200 });
         },
     },
