@@ -30,10 +30,15 @@ export async function upload(
 }
 
 export async function deleteFromStorage(supabase: SupabaseClient, filePath: string) {
-    const {error} = await supabase.storage.from('uploads').remove([filePath]);
+
+    const {data, error} = await supabase.storage.from('uploads').remove([filePath]);
 
     if (error) {
         console.error('Error deleting from storage', error.message);
+        return false;
+    }
+
+    if (!data || data.length === 0) {
         return false;
     }
 

@@ -19,6 +19,7 @@ export async function addListingPhoto(supabase: SupabaseClient, listingID: numbe
 
         if (nextDisplay > 4) {
             console.error('Photo limit per listing reached');
+            await deleteFromStorage(supabase, photoPath);
             return null;
         }
 
