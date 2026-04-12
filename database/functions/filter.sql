@@ -1,4 +1,5 @@
 create or replace function filter_listings(
+    viewer_id uuid default null,
     query text default null,
     price_limit numeric default null,
     condition text default null,
@@ -59,6 +60,7 @@ as $$
                 and (price_limit is null or l.price <= price_limit)
                 and (condition is null or l.item_condition = condition)
                 and (sold is null or l.sold = sold)
+                and (viewer_id is null or l.user_id != viewer_id)
     ) filtered
 
     -- order as desired, date_posted is always tiebreaker

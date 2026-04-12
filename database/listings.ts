@@ -39,11 +39,12 @@ export async function getListingsByUserID(supabase: SupabaseClient, userID: stri
 
 /* Get all info about the most recent listings that are still available. 
    Can specify the number of listings desired, default value is 100. */
-export async function getAvailableListings(supabase: SupabaseClient, limit: number = 100) {
+export async function getAvailableListings(supabase: SupabaseClient, userID: string, limit: number = 100) {
     const {data, error} = await supabase
         .from('listings')
         .select('*')
         .eq('sold', false)
+        .neq('user_id', userID)
         .order('date_posted', {ascending: false})
         .limit(limit);
     
@@ -144,7 +145,7 @@ export async function deleteListing(supabase: SupabaseClient, listingID: number)
 
 /* Filtering function - takes in set of optional filters, user_id of user 
    making request required in order to sort by distance. */
-export async function filterListings(supabase: SupabaseClient,
+export async function filterListings(supabase: SupabaseClient, user_id: string,
     filters: {
         query?: string;
         priceLimit?: number;
@@ -152,7 +153,7 @@ export async function filterListings(supabase: SupabaseClient,
         sold?: boolean;
         sort_by?: 'price' | 'distance' | 'relevance' | 'date';
         lmt?: number;
-    }, user_id?: string) {
+    }) {
         
         const query = filters.query?.trim();
 
@@ -160,11 +161,6 @@ export async function filterListings(supabase: SupabaseClient,
         let long: number | null = null;
         
         if (filters.sort_by === 'distance') {
-            if (!user_id) {
-                console.error('Need a user_id to sort by distance');
-                return [];
-            }
-
             const {data, error} = await supabase
                 .from('users')
                 .select('latitude, longitude')
@@ -181,6 +177,7 @@ export async function filterListings(supabase: SupabaseClient,
         }
 
         const {data, error} = await supabase.rpc('filter_listings', {
+            viewer_id: user_id,
             query: query,
             price_limit: filters.priceLimit,
             condition: filters.condition,
