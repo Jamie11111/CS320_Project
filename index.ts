@@ -6,7 +6,7 @@ import { userRoutes } from "./routes/users";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { type BunRequest } from "bun";
 import { setSession } from "./routes/helpers";
-import { getChatByID } from "./database/chats";
+import { getChatByID } from "./database/chats"; // used for WebSocket upgrade membership check
 
 const supabaseUrl = process.env.SUPABASE_URL!
 const supabaseKey = process.env.SUPABASE_ANON_KEY!
