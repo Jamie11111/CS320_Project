@@ -64,3 +64,9 @@ export async function generateUsers(supabase: SupabaseClient, count: number) {
 
     return generatedProfiles;
 }
+
+const supabaseUrl = Bun.env.SUPABASE_URL!;
+const supabaseKey = Bun.env.SUPABASE_KEY!;
+const supabase = createClient(supabaseUrl, supabaseKey);
+
+resetDatabase(supabase);
