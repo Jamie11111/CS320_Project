@@ -85,7 +85,8 @@ describe('listing tests', () => {
         expect(goodUpdate.price).toBe(40);
 
         // check user can't update other's listing
-        await updateListing(user2Client, listing1.listing_id, {price: 10});
+        const badUpdate = await updateListing(user2Client, listing1.listing_id, {price: 10});
+        expect(!badUpdate || badUpdate.length === 0).toBeTruthy();
         const listing1Info = await getListingByID(user2Client, listing1.listing_id);
         expect(listing1Info.price).toBe(40);        
 
@@ -141,10 +142,10 @@ describe('listing tests', () => {
         expect(textbooksListed[1].listing_id).toBe(listing4.listing_id);
 
         // check sorting by distance. make user 1 closer to user 2 than user 3 
-        const updateUser1 = updateUserProfile(user1Client, profiles[0].user_id, 
+        const updateUser1 = await updateUserProfile(user1Client, profiles[0].user_id, 
             {latitude: 45, longitude: -76});
         expect(updateUser1).toBeTruthy();
-        const updateUser2 = updateUserProfile(user2Client, profiles[1].user_id, 
+        const updateUser2 = await updateUserProfile(user2Client, profiles[1].user_id, 
             {latitude: 20, longitude: -90});
         expect(updateUser2).toBeTruthy();
 
