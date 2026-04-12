@@ -69,4 +69,4 @@ const supabaseUrl = Bun.env.SUPABASE_URL!;
 const supabaseKey = Bun.env.SUPABASE_KEY!;
 const supabase = createClient(supabaseUrl, supabaseKey);
 
-resetDatabase(supabase);
+generateUsers(supabase, 10);
