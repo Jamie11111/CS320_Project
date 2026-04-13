@@ -1,4 +1,5 @@
 import {SupabaseClient} from '@supabase/supabase-js'
+import {deleteFromStorage} from './storage'
 
 /* Add a user to own users table and returns all info. 
    Only call after auth signup complete and UUID retrieved. */
@@ -84,9 +85,47 @@ export async function deleteUserProfile(supabase: SupabaseClient, userID: string
     const {error} = await supabase
         .from('users')
         .delete()
-        .eq('user_id', userID)
+        .eq('user_id', userID);
     
     if (error) {
         console.error('Error deleting user profile', error.message);
+        return false;
     }
+
+    return true;
+}
+
+// Deletes a user's profile picture given their ID
+export async function deleteProfilePicture(supabase: SupabaseClient, userID: string) {
+    const {data, error} = await supabase
+        .from('users')
+        .select('profile_picture_path')
+        .eq('user_id', userID)
+        .single();
+    
+    if (error) {
+        console.error('Error finding profile pic', error.message);
+        return false;
+    }
+
+    if (data?.profile_picture_path) {
+        const success = await deleteFromStorage(supabase, data.profile_picture_path);
+        if (!success)
+            return false;
+    }
+
+    const {error: e} = await supabase
+        .from('users')
+        .update({
+            profile_picture_url: null,
+            profile_picture_path: null,
+        })
+        .eq('user_id', userID);
+
+    if (e) {
+        console.error('Error clearing profile pic', e.message);
+        return false;
+    }
+
+    return true;
 }

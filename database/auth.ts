@@ -1,3 +1,4 @@
+import * as fs from 'fs';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
 /**
@@ -18,7 +19,7 @@ export async function signUpUser(supabase: SupabaseClient, email: string, passwo
     return { success: false, message: error.message };
   }
 
-  return { success: true, user: data.user };
+  return { success: true, user: data.user, session: data.session };
 }
 
 /**
@@ -34,5 +35,6 @@ export async function loginUser(supabase: SupabaseClient, email: string, passwor
     return { success: false, message: error.message };
   }
 
-  return { success: true, session: data.session };
+  return { success: true, user: data.user, session: data.session };
 }
+

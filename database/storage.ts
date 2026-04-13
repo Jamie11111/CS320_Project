@@ -24,7 +24,23 @@ export async function upload(
         return null;
     }
 
-    const {data} = supabase.storage.from('uploads').getPublicUrl(filePath)
+    const {data} = supabase.storage.from('uploads').getPublicUrl(filePath);
 
-    return {filePath: filePath, publicUrl: data.publicUrl}
+    return {filePath: filePath, publicUrl: data.publicUrl};
+}
+
+export async function deleteFromStorage(supabase: SupabaseClient, filePath: string) {
+
+    const {data, error} = await supabase.storage.from('uploads').remove([filePath]);
+
+    if (error) {
+        console.error('Error deleting from storage', error.message);
+        return false;
+    }
+
+    if (!data || data.length === 0) {
+        return false;
+    }
+
+    return true;
 }

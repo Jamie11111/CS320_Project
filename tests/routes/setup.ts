@@ -7,4 +7,4 @@ const supabaseUrl = process.env.SUPABASE_URL || 'your-url';
 const supabaseKey = process.env.SUPABASE_ANON_KEY || 'your-key';
 export const supabase: SupabaseClient = createClient(supabaseUrl, supabaseKey);
 
-export const testApp = initApp(supabase);
+export const testApp = initApp({ supabaseURL: supabaseUrl, supabaseKey: supabaseKey });
