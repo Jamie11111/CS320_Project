@@ -23,9 +23,13 @@ function convertRoutes(conn: {supabaseURL: string, supabaseKey: string}, routes:
             return func(req, supabase);
         }
         const resp = await func(req, supabase);
+        const sessionHeader = { "Session-Tokens": `${session.access_token} ${session.refresh_token}` };
+        const contentType = resp.headers.get("Content-Type") ?? "";
+        if (resp.status === 204 || !contentType.includes("application/json")) {
+            return new Response(resp.body, { status: resp.status, headers: { ...Object.fromEntries(resp.headers), ...sessionHeader } });
+        }
         const body: any = await resp.json();
-        // idk whether to put session tokens in header or body
-        return Response.json(body, {status: resp.status, headers: { ...resp.headers, "Session-Tokens": `${session.access_token} ${session.refresh_token}` }});
+        return Response.json(body, { status: resp.status, headers: { ...Object.fromEntries(resp.headers), ...sessionHeader } });
     }]))]));
 }
 
@@ -42,13 +46,19 @@ export const initApp = (supabaseConn: {supabaseURL: string, supabaseKey: string}
             ...convertRoutes(supabaseConn, chatRoutes),
             // WebSocket upgrade — bypasses convertRoutes since it's not a normal HTTP response
             "/api/chat/ws": async (req: Request) => {
+                // Support tokens via Authorization header (non-browser) or query params (browser WebSocket API)
+                const url = new URL(req.url);
                 const authHeader = req.headers.get("Authorization");
-                if (!authHeader) return new Response("Unauthorized", { status: 401 });
-
-                const [token, refreshToken] = authHeader.split("Bearer ")[1]?.split(" ") || [null, null];
+                let token: string | null = null;
+                let refreshToken: string | null = null;
+                if (authHeader) {
+                    [token, refreshToken] = authHeader.split("Bearer ")[1]?.split(" ") ?? [null, null];
+                } else {
+                    token = url.searchParams.get("token");
+                    refreshToken = url.searchParams.get("refresh_token");
+                }
                 if (!token || !refreshToken) return new Response("Unauthorized", { status: 401 });
 
-                const url = new URL(req.url);
                 const chatId = parseInt(url.searchParams.get("chat_id") ?? "");
                 if (isNaN(chatId)) return new Response("Missing or invalid chat_id", { status: 400 });
 
