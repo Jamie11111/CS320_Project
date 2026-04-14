@@ -39,11 +39,12 @@ export async function getListingsByUserID(supabase: SupabaseClient, userID: stri
 
 /* Get all info about the most recent listings that are still available. 
    Can specify the number of listings desired, default value is 100. */
-export async function getAvailableListings(supabase: SupabaseClient, limit: number = 100) {
+export async function getAvailableListings(supabase: SupabaseClient, userID: string, limit: number = 100) {
     const {data, error} = await supabase
         .from('listings')
         .select('*')
         .eq('sold', false)
+        .neq('user_id', userID)
         .order('date_posted', {ascending: false})
         .limit(limit);
     
@@ -142,35 +143,50 @@ export async function deleteListing(supabase: SupabaseClient, listingID: number)
     return true;
 }
 
-/* Sample filtering function. Need to add more complexity like
-   sorting by price / date / distance / combinations and better
-   query matching - compare to product_desc or use full text search*/
-export async function filterListings(supabase: SupabaseClient, 
+/* Filtering function - takes in set of optional filters, user_id of user 
+   making request required in order to sort by distance. */
+export async function filterListings(supabase: SupabaseClient, user_id: string,
     filters: {
         query?: string;
         priceLimit?: number;
-        condition?: string;
-        sold?: boolean
+        condition?: 'new' | 'good' | 'fair' | 'poor';
+        sold?: boolean;
+        sort_by?: 'price' | 'distance' | 'relevance' | 'date';
+        lmt?: number;
     }) {
-        let query = supabase.from('listings').select('*');
+        
+        const query = filters.query?.trim();
 
-        if (filters.query !== undefined) {
-            query = query.ilike('product_name', `%${filters.query}%`);
+        let lat: number | null = null;
+        let long: number | null = null;
+        
+        if (filters.sort_by === 'distance') {
+            const {data, error} = await supabase
+                .from('users')
+                .select('latitude, longitude')
+                .eq('user_id', user_id)
+                .single();
+            
+            if (error) {
+                console.error('Error getting location info for user', error.message);
+                return [];
+            }
+
+            lat = data.latitude;
+            long = data.longitude;
         }
 
-        if (filters.priceLimit !== undefined) {
-            query = query.lte('price', filters.priceLimit);
-        }
-
-        if (filters.condition !== undefined) {
-            query = query.eq('item_condition', filters.condition);
-        }
-
-        if (filters.sold !== undefined) {
-            query = query.eq('sold', filters.sold);
-        }
-
-        const {data, error} = await query.order('date_posted', {ascending: false});
+        const {data, error} = await supabase.rpc('filter_listings', {
+            viewer_id: user_id,
+            query: query,
+            price_limit: filters.priceLimit,
+            condition: filters.condition,
+            sold: filters.sold,
+            sort_by: filters.sort_by ?? 'date',
+            lmt: filters.lmt ?? 20,
+            lat: lat,
+            long: long, 
+        });
 
         if (error) {
             console.error('Error applying filters', error.message)

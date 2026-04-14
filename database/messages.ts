@@ -32,7 +32,7 @@ export async function getMessagesByChatId(supabase: SupabaseClient, chatID: numb
         .from('messages')
         .select('*')
         .eq('chat_id', chatID)
-        .order('time', {ascending: true});
+        .order('sent_at', {ascending: true});
 
     if (error) {
         console.error('Error getting messages', error.message);
