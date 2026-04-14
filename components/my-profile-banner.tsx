@@ -1,8 +1,9 @@
 import "../global.css"
-import { View, Text, Pressable , TextInput} from "react-native"
+import { View, Text, Pressable , TextInput, Image} from "react-native"
 import { useRouter } from "expo-router"
 import { useState } from "react"
 import React from "react"
+import samplepfp from "../assets/images/samplepfp.png"
 interface MyProfileBannerProps {
     name: string
     location: string
@@ -58,7 +59,7 @@ const MyProfileBanner = ({ name, location, email, onLocationChange }: MyProfileB
 
       <View className="px-4 pt-4 pb-3 bg-white flex-row">
         <View>
-          <View className="bg-gray-200 shadow-sm w-28 h-28 rounded-full ml-2" />
+          <Image source={samplepfp} className={`bg-gray-200 w-20 h-20 rounded-full`}></Image>
           <Pressable className="absolute bottom-0 right-0 bg-blue-500 rounded-full p-2">
             <Text className="text-white text-xs font-bold">Edit</Text>
           </Pressable>

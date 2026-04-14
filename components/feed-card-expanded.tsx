@@ -2,6 +2,7 @@ import "../global.css"
 import { View, Text, ScrollView, Pressable, Image } from "react-native"
 import { useRouter } from "expo-router"
 import React from "react"
+import samplepfp from "../assets/images/samplepfp.png"
 type FeedImageSource = import("react-native").ImageSourcePropType | string
 
 interface FeedCardExpandedProps {
@@ -59,7 +60,7 @@ const FeedCardExpanded = ({ name, location, price, condition, description, image
           })
         }}
       >
-        <View className="bg-gray-200 shadow-sm w-16 h-16 rounded-full ml-2" />
+        <Image source={samplepfp} className={`bg-gray-200 w-16 h-16 rounded-full ml-2`}></Image>
       </Pressable>
       </View>
       <ScrollView

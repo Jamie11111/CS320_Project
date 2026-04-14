@@ -4,6 +4,7 @@ import { useState } from "react"
 import "../global.css"
 import * as SecureStore from 'expo-secure-store';
 import { fetchWithAuth } from "../scripts/authFetch"
+import React from "react";
 const LoginScreen = () => {
   const router = useRouter()
   const [showPass, setShowPass] = useState(false)

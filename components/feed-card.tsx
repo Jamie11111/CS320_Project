@@ -1,9 +1,10 @@
 import "../global.css"
-import { View, Text, Pressable, Modal } from "react-native"
+import { View, Text, Pressable, Modal, Image } from "react-native"
 import { useState } from "react"
 import { useRouter } from "expo-router"
 import FeedCardExpanded from "./feed-card-expanded"
 import React from "react"
+import couch1 from "../assets/images/couch1.jpg"
 type FeedImageSource = import("react-native").ImageSourcePropType | string
 
 
@@ -57,6 +58,7 @@ const FeedCard = ({
   return (
     <>
       <Pressable className="w-[46%] h-[200px] bg-gray-300 rounded-lg shadow-sm m-2 flex-col" onPress={handlePress}>
+        <Image source={couch1} className="w-full h-full rounded-lg" />
         <View className="bg-umass-red absolute bottom-0 w-full h-[25%] rounded-br-lg rounded-bl-lg flex-row flex-grow flex-1 p-1">
           <View className="flex-1 ml-0.5">
             <Text className="text-lg font-bold text-white">{name}</Text>

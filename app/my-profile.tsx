@@ -84,17 +84,7 @@ const MyProfilePage = () => {
   return (
     <View>
       <View className="h-[92%]">
-        <Pressable
-          onPress={() =>
-            router.push({
-              pathname: "/upload-product",
-              params: { isEditing: "false" },
-            })
-          }
-          className="absolute z-10 bottom-12 mt-6 right-4 bg-umass-red rounded-full px-5 py-3 shadow-lg"
-        >
-          <Text className="text-white text-2xl font-bold ">+</Text>
-        </Pressable>
+     
         <MyProfileBanner name={userData?.name || "John Doe"} location={userLocation} email={userData?.email || "johndoe@example.com"} onLocationChange={handleLocationUpdate}/>
         <ScrollView contentContainerStyle={{ flexDirection: "row", flexWrap: "wrap", marginLeft: 3}}>
           {listings.map((listing, index) => (

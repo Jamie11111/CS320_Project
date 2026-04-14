@@ -1,6 +1,7 @@
 import { View, Text, ScrollView, TextInput, Pressable, KeyboardAvoidingView, Platform } from "react-native"
 import { useRouter } from "expo-router"
 import "../global.css"
+import React from "react"
 const ChatDetailScreen = () => {
   const router = useRouter()
 

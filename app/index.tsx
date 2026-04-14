@@ -5,6 +5,7 @@ import {useEffect, useState} from 'react'
 import Navbar from '../components/navbar'
 import FeedCard from '../components/feed-card'
 import { ScrollView } from 'react-native'
+import SearchBar from '../components/search-bar'
 import UploadProductPage from './upload-product'
 import { useRouter } from 'expo-router'
 import couch1 from "../assets/images/couch1.jpg"
@@ -58,18 +59,9 @@ const Home = () => {
   }, [])
   return (
     <View>
+
       <View className="h-[92%]">
-        <Pressable
-            onPress={() =>
-              router.push({
-                pathname: "/upload-product",
-                params: { isEditing: "false" },
-              })
-            }
-            className="absolute z-10 bottom-12 right-4 bg-umass-red rounded-full px-5 py-3 shadow-lg"
-          >
-            <Text className="text-white text-2xl font-bold">+</Text>
-        </Pressable>
+        <SearchBar />
         <ScrollView contentContainerStyle={{ flexDirection: "row", flexWrap: "wrap", marginLeft: 3}}>
           {listings.map((listing, index) => (
             
