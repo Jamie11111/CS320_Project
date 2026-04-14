@@ -58,14 +58,14 @@ export async function fullCleanUp(supabase: SupabaseClient) {
 
     // clear auth.users() - will cascade and delete rest
 
-    const {data: users, error: selectError} = await supabase.from('users').select('user_id');
-    if (selectError) {
-        console.error('Failed to get users', selectError.message);
+    const { data: { users }, error } = await supabase.auth.admin.listUsers()
+    if (error) {
+        console.error('Failed to get users', error.message);
         return false;
     }
 
     for (const u of users) {
-        const {error: deleteError} = await supabase.auth.admin.deleteUser(u.user_id);
+        const {error: deleteError} = await supabase.auth.admin.deleteUser(u.id);
         if (deleteError) {
             console.error('Failed to delete from auth user', deleteError.message);
             return false;
