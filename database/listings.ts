@@ -1,4 +1,5 @@
 import {SupabaseClient} from '@supabase/supabase-js'
+import {getPhotosByListingID} from './photos';
 
 
 /* Get all information about a listing based on the listing's id.
@@ -194,4 +195,21 @@ export async function filterListings(supabase: SupabaseClient, user_id: string,
         }
 
         return data;
+}
+
+/* For a given array of listings, adds a photos property to each listing with 
+   up to photoLimit photos associated with that listing, sorted by display_order */
+export async function attachPhotosToListings(supabase: SupabaseClient, listings: any[], photoLimit?: number) {
+    
+    const result = [];
+
+    for (const listing of listings) {
+        const photos = await getPhotosByListingID(supabase, listing.listing_id);
+        result.push({
+            ...listing, 
+            photos: photoLimit == null ? photos : photos.slice(0, photoLimit),
+        });
+    }
+
+    return result;
 }

@@ -1,4 +1,5 @@
 import {SupabaseClient} from '@supabase/supabase-js'
+import {getAttachmentByMessageID} from './attachments';
 
 // Create a message by passing the message as well as sender and chat
 export async function createMessage(supabase: SupabaseClient, 
@@ -55,4 +56,18 @@ export async function deleteMessageById(supabase: SupabaseClient, message_id: nu
     }
 
     return true;
+}
+
+/* For a given array of messages, adds an attachments property to each message with 
+   attachments associated with the message */
+export async function attachAttachmentsToMessages(supabase: SupabaseClient, messages: any[]) {
+
+    const result = [];
+
+    for (const message of messages) {
+        const attachments = await getAttachmentByMessageID(supabase, message.message_id);
+        result.push({...message, attachments});
+    }
+
+    return result;
 }
