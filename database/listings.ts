@@ -88,30 +88,14 @@ export async function createListing(supabase: SupabaseClient,
         return data;
 }
 
-// Marks a listing as sold and returns all its information
-export async function markListingAsSold(supabase: SupabaseClient, listingID: number) {
-    const {data, error} = await supabase
-        .from('listings')
-        .update({sold: true})
-        .eq('listing_id', listingID)
-        .select()
-        .single();
-
-    if (error) {
-        console.error('Error marking as sold', error.message);
-        return null;
-    }
-
-    return data;
-}
-
 // Updates a listing's primary attributes and returns all its information
 export async function updateListing(supabase: SupabaseClient, listingID: number, 
     updates: {
         product_name?: string;
         product_desc?: string | null;
         item_condition?: string;
-        price?: number
+        price?: number;
+        sold?: boolean;
     }
 ) {
     const {data, error} = await supabase
