@@ -5,6 +5,7 @@ import { listingRoutes } from "./routes/listings";
 import { userRoutes } from "./routes/users";
 import { accountRoutes } from "./routes/account";
 import { chatRoutes } from "./routes/chats";
+import { searchRoutes } from "./routes/search";
 
 // Creates a client for every request and appends session info to the response
 function convertRoutes(conn: {supabaseURL: string, supabaseKey: string}, routes: {[K: string]: {[R: string]: (req: BunRequest<any>, client: SupabaseClient) => Promise<Response>}}) {
@@ -27,6 +28,7 @@ export const initApp = (supabaseConn: {supabaseURL: string, supabaseKey: string}
         ...convertRoutes(supabaseConn, userRoutes),
         ...convertRoutes(supabaseConn, accountRoutes),
         ...convertRoutes(supabaseConn, chatRoutes),
+        ...convertRoutes(supabaseConn, searchRoutes),
         "/*": () => new Response("Not Found", {status: 404})
     }
 });
