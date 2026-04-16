@@ -1,21 +1,19 @@
 import {describe, it, expect, beforeAll, afterAll} from 'vitest';
 import {createClient, SupabaseClient} from '@supabase/supabase-js';
-import {clearTables, fullCleanUp, generateUsers} from './test_helpers';
+import {resetDatabase, generateUsers, fullCleanUp} from './test_helpers';
 import {loginUser} from '../../database/auth';
-import {createListing, updateListing, getAvailableListings,
-    deleteListing, filterListings, getListingByID, getListingsByUserID} 
-    from '../../database/listings';
-import {deletePhotoById, addListingPhoto, getPhotosByListingID} from '../../database/photos';
+import {createOrGetChat, getChatsByUserId, getChatsByUserId2} from '../../database/chats';
+import {createMessage, getMessagesByChatId, deleteMessageById} from '../../database/messages';
+import {addAttachment, getAttachmentByMessageID, deleteAttachmentByID} from '../../database/attachments';
 import {upload} from '../../database/storage';
-import {updateUserProfile} from '../../database/users';
 
-// run using bun test tests/database/listings.test.ts
+// run using bun test tests/database/chats.test.ts
 
 const url: string = process.env.SUPABASE_URL!;
 const key: string = process.env.SUPABASE_ANON_KEY!;
 const service_key: string = process.env.SUPABASE_KEY!;
 
-describe('listing tests', () => {
+describe('chat and messaging tests', () => {
     
     let generalClient: SupabaseClient;
     let user1Client: SupabaseClient;
@@ -29,10 +27,10 @@ describe('listing tests', () => {
         user1Client = createClient(url, key);
         user2Client = createClient(url, key);
         user3Client = createClient(url, key);
-        serviceClient = createClient(url, service_key)
+        serviceClient = createClient(url, service_key);
         const userClients = [user1Client, user2Client, user3Client];
 
-        // can only clear tables with service_key
+        // Wipe the database using the service key
         const cleared = await fullCleanUp(serviceClient);
         expect(cleared).toBeTruthy(); 
 
@@ -43,205 +41,209 @@ describe('listing tests', () => {
         for (let i = 0; i < 3; i++) { 
             const result = await loginUser(userClients[i]!, profiles[i].email, password);
             expect(result.success).toBeTruthy();
-        };        
-    }, 10000);
+        }        
+    }, 15000);
 
-    it('listing flow works', async() => {
+    it('chat and message flow works', async() => {
         
-        // check listings added properly
-        const listing1 = await createListing(user1Client, {
-            user_id: profiles[0].user_id,
-            product_name: 'Bike',
-            product_desc: 'Red bike',
-            item_condition: 'good',
-            price: 50,
+        // 1. Check that a chat can be created between user 1 and user 2
+        const chat = await createOrGetChat(user1Client, profiles[0].user_id, profiles[1].user_id);
+        expect(chat).toBeTruthy();
+        expect(chat.chat_id).toBeDefined();
+
+        // 2. Check that getting the chat again doesn't create a duplicate
+        const duplicateChat = await createOrGetChat(user2Client, profiles[1].user_id, profiles[0].user_id);
+        expect(duplicateChat.chat_id).toBe(chat.chat_id);
+
+        // 3. Verify user's chat list populates correctly
+        const user1Chats = await getChatsByUserId(user1Client, profiles[0].user_id);
+        expect(user1Chats.length).toBe(1);
+        expect(user1Chats[0].chat_id).toBe(chat.chat_id);
+
+        const user3Chats = await getChatsByUserId(user3Client, profiles[2].user_id);
+        expect(user3Chats.length).toBe(0);
+
+        // 4. Send messages
+        const msg1 = await createMessage(user1Client, {
+            message: 'Is this item still available?',
+            sender_id: profiles[0].user_id,
+            chat_id: chat.chat_id
         });
-        expect(listing1).toBeTruthy();
-        expect(listing1.user_id).toBe(profiles[0].user_id);
+        expect(msg1).toBeTruthy();
+        expect(msg1.message).toBe('Is this item still available?');
 
-        const listing2 = await createListing(user2Client, {
-            user_id: profiles[1].user_id,
-            product_name: 'Mattress',
-            product_desc: null,
-            item_condition: 'fair',
-            price: 20,
-        });     
-        expect(listing2).toBeTruthy();
-        expect(listing2.user_id).toBe(profiles[1].user_id);
-    
-        // check user can view someone else's listing
-        const received = await getListingByID(user2Client, listing1.listing_id);
-        expect(received).toBeTruthy();
-        expect(received.listing_id).toBe(listing1.listing_id);
+        const msg2 = await createMessage(user2Client, {
+            message: 'Yes it is!',
+            sender_id: profiles[1].user_id,
+            chat_id: chat.chat_id
+        });
+        expect(msg2).toBeTruthy();
 
-        // check user can see all their listings
-        const user1Listings = await getListingsByUserID(user1Client, profiles[0].user_id);
-        expect(user1Listings.length).toBe(1);
-        expect(user1Listings[0].listing_id).toBe(listing1.listing_id);
+        // 5. Retrieve messages and check order (first sent should be first)
+        const messages = await getMessagesByChatId(user1Client, chat.chat_id);
+        expect(messages.length).toBe(2);
+        expect(messages[0].message_id).toBe(msg1.message_id);
+        expect(messages[1].message_id).toBe(msg2.message_id);
 
-        // check user can update own listing
-        const goodUpdate = await updateListing(user1Client, listing1.listing_id, {price: 40});
-        expect(goodUpdate).toBeTruthy();
-        expect(goodUpdate.price).toBe(40);
+        // 6. Test RPC chat list retrieval
+        const advancedChats = await getChatsByUserId2(user1Client, profiles[0].user_id);
+        expect(advancedChats).toBeDefined();
 
-        // check user can't update other's listing
-        const badUpdate = await updateListing(user2Client, listing1.listing_id, {price: 10});
-        expect(!badUpdate).toBeTruthy();
-        const listing1Info = await getListingByID(user2Client, listing1.listing_id);
-        expect(listing1Info.price).toBe(40);        
-
-        // all available listings displayed properly
-        const allAvailableListings = await getAvailableListings(user3Client, profiles[2].user_id);
-        expect(allAvailableListings.length).toBe(2);
-        
-        // deletion properly removes listing
-        const deleted = await deleteListing(user2Client, listing2.listing_id);
+        // 7. Delete a message
+        const deleted = await deleteMessageById(user1Client, msg1.message_id);
         expect(deleted).toBeTruthy();
-        const updatedListings = await getAvailableListings(user3Client, profiles[2].user_id);
-        expect(updatedListings.length).toBe(1);
-        expect(updatedListings[0].listing_id).toBe(listing1.listing_id);
+        
+        const updatedMessages = await getMessagesByChatId(user1Client, chat.chat_id);
+        expect(updatedMessages.length).toBe(1);
+        expect(updatedMessages[0].message_id).toBe(msg2.message_id);
 
-        // add more useful listings
-
-        const listing3 = await createListing(user2Client, {
-            user_id: profiles[1].user_id,
-            product_name: 'Textbook',
-            product_desc: 'Physics 1 required textbook',
-            item_condition: 'good',
-            price: 25,
-        });
-
-        const listing4 = await createListing(user2Client, {
-            user_id: profiles[1].user_id,
-            product_name: 'Math textbook',
-            product_desc: 'Useful for linear algebra',
-            item_condition: 'fair',
-            price: 20,
-        });
-
-        // check product marked as sold
-        const soldProduct = await updateListing(user2Client, listing3.listing_id, {sold: true});
-        expect(soldProduct).toBeTruthy();
-        expect(soldProduct.sold).toBeTruthy();
-
-        // check change in sold reflected, only unsold product
-        // not belonging to user making request are listed
-        const available = await getAvailableListings(user1Client, profiles[0].user_id);
-        expect(available.length).toBe(1);
-        expect(available[0].listing_id).toBe(listing4.listing_id);
-
-        // check filter works reasonably well
-        const textbooksListed = await filterListings(user3Client, profiles[2].user_id, {
-            query: 'textbook',
-            priceLimit: 50,
-            sort_by: 'relevance',
-            lmt: 5
-        });
-        expect(textbooksListed.length).toBe(2);
-        expect(textbooksListed[0].listing_id).toBe(listing3.listing_id);
-        expect(textbooksListed[1].listing_id).toBe(listing4.listing_id);
-
-        // check sorting by distance. make user 1 closer to user 2 than user 3 
-        const updateUser1 = await updateUserProfile(user1Client, profiles[0].user_id, 
-            {latitude: 45, longitude: -76});
-        expect(updateUser1).toBeTruthy();
-        const updateUser2 = await updateUserProfile(user2Client, profiles[1].user_id, 
-            {latitude: 20, longitude: -90});
-        expect(updateUser2).toBeTruthy();
-
-        const closestListings = await filterListings(user3Client, profiles[2].user_id, 
-            {sort_by: 'distance'});
-        expect(closestListings.length).toBe(3);
-        expect(closestListings[0].listing_id).toBe(listing1.listing_id);
-        expect(closestListings[1].listing_id).toBe(listing4.listing_id); 
-        expect(closestListings[2].listing_id).toBe(listing3.listing_id);
     }, 10000);
 
-    it('photo upload works', async () => {
-        const listing = await createListing(user3Client, {
-            user_id: profiles[2].user_id,
-            product_name: 'Desk lamp',
-            product_desc: null,
-            item_condition: 'new',
-            price: 20,
-        });     
-        expect(listing).toBeTruthy();
+    it('message attachment upload and deletion works', async () => {
+        // Create a new chat and message for attachment testing
+        const chat = await createOrGetChat(user3Client, profiles[2].user_id, profiles[0].user_id);
+        
+        const msg = await createMessage(user3Client, {
+            message: 'Here is a photo of the condition',
+            sender_id: profiles[2].user_id,
+            chat_id: chat.chat_id
+        });
 
-        // upload images to storage and add info to photos
-        // make sure at most 5 images allowed.
+        // 1. Upload an image to storage
+        const response = await fetch("https://picsum.photos/400/400");
+        expect(response.ok).toBeTruthy();
+        const buffer = await response.arrayBuffer();
 
-        for (let i = 0; i < 6; i++) {
-            const response = await fetch("https://picsum.photos/400/400");
-            expect(response.ok).toBeTruthy();
+        const uploaded = await upload(user3Client, 'attachments', buffer, 'test_attachment_1', 'image/jpeg');
+        expect(uploaded).toBeTruthy();
+        if (!uploaded) throw new Error();
 
-            const buffer = await response.arrayBuffer();
+        expect(uploaded.filePath).toBeTruthy();
+        expect(uploaded.publicUrl).toBeTruthy();
 
-            const uploaded = await upload(user3Client, 'listings', buffer, 
-                `${i}`, 'image/jpeg');
-            expect(uploaded).toBeTruthy();
-            if (!uploaded) throw new Error();
+        // 2. Link attachment to the message
+        const attachment = await addAttachment(user3Client, msg.message_id, uploaded.publicUrl, uploaded.filePath);
+        expect(attachment).toBeTruthy();
+        expect(attachment.message_id).toBe(msg.message_id);
 
-            expect(uploaded.filePath).toBeTruthy();
-            expect(uploaded.publicUrl).toBeTruthy();
+        // 3. Retrieve attachments by message ID
+        const attachments = await getAttachmentByMessageID(user1Client, msg.message_id);
+        expect(attachments.length).toBe(1);
+        expect(attachments[0].attachment_id).toBe(attachment.attachment_id);
 
-            const photo = await addListingPhoto(user3Client, listing.listing_id, 
-                uploaded.publicUrl, uploaded.filePath);
-            
-            if (i < 5) {
-                expect(photo).toBeTruthy()
-                expect(photo.listing_id).toBe(listing.listing_id);
-            }
-            else expect(photo).toBeFalsy();
-        }
-
-        // check that other users can see photos in the right order
-        const photos = await getPhotosByListingID(user1Client, listing.listing_id);
-        expect(photos.length).toBe(5);
-
-        for (let i = 0; i < 5; i++) {
-            const path = photos[i].photo_path;
-            const fileOrder = parseInt(path[path.length - 1]);
-            expect(fileOrder).toBe(i);
-        }
-
-        const toDelete = 2; 
-        const url = photos[toDelete].photo_url;
-        const path = photos[toDelete].photo_path;
-
-        // function to check if file exists
+        // 4. Verify the file exists in the storage bucket
         const checkExists = async () => {
-            const {data, error} = await serviceClient.storage.from('uploads').list('listings');
+            const {data, error} = await serviceClient.storage.from('uploads').list('attachments');
             expect(error).toBeNull();
-            const fileName = path.split('/').pop();
+            const fileName = attachment.attachment_path.split('/').pop();
             return data?.some(file => file.name === fileName);
         }
-
-        // check file exists and url works before deletion
-        expect(await checkExists()).toBeTruthy();
-        const response = await fetch(url);
-        expect(response.ok).toBeTruthy();
-
-        // check only owner can delete 
-        const id = photos[toDelete].photo_id;        
-
-        let success = await deletePhotoById(user1Client, id);
-        expect(success).toBeFalsy();
+        
         expect(await checkExists()).toBeTruthy();
 
-        success = await deletePhotoById(user3Client, id);
+        // 5. Delete the attachment and verify storage cleanup
+        const success = await deleteAttachmentByID(user3Client, attachment.attachment_id);
         expect(success).toBeTruthy();
+
+        // Verify it was removed from the database
+        const remaining = await getAttachmentByMessageID(user1Client, msg.message_id);
+        expect(remaining.length).toBe(0);
+
+        // Verify it was actually removed from the Supabase storage bucket
         expect(await checkExists()).toBeFalsy();
 
-        // check display_order updated properly
-        const newPhotos = await getPhotosByListingID(user1Client, listing.listing_id);
-        expect(newPhotos.length).toBe(4);
+    }, 10000);
 
-        for (let i = 0; i < 4; i++) {
-            const displayOrder = newPhotos[i].display_order;
-            expect(displayOrder).toBe(i);
-        }
+    it('enforces RLS policies for chats and messages', async () => {
+        const chat = await createOrGetChat(user1Client, profiles[0].user_id, profiles[1].user_id);
+        expect(chat).toBeTruthy();
 
-    },  10000);
+        // Setup a valid message from User 1
+        const validMsg = await createMessage(user1Client, {
+            message: 'Private message between 1 and 2',
+            sender_id: profiles[0].user_id,
+            chat_id: chat.chat_id
+        });
+        expect(validMsg).toBeTruthy();
+
+        // 1. RLS SELECT: User 3 cannot read messages in User 1 & 2's chat
+        const unauthorizedMessages = await getMessagesByChatId(user3Client, chat.chat_id);
+        expect(unauthorizedMessages.length).toBe(0);
+
+        // 2. RLS INSERT: User 3 cannot send messages to User 1 & 2's chat
+        const outsiderMsg = await createMessage(user3Client, {
+            message: 'Infiltrator message',
+            sender_id: profiles[2].user_id,
+            chat_id: chat.chat_id
+        });
+        expect(outsiderMsg).toBeNull();
+
+        // 3. RLS INSERT: User 1 cannot spoof sender_id to be User 2
+        const spoofedMsg = await createMessage(user1Client, {
+            message: 'I am totally User 2',
+            sender_id: profiles[1].user_id, // Spoofing attempt
+            chat_id: chat.chat_id
+        });
+        expect(spoofedMsg).toBeNull();
+
+        // 4. RLS DELETE: User 2 cannot delete User 1's message
+        // User 2 attempts to delete, wrapper returns true if no hard error is thrown,
+        // but RLS silently blocks the row deletion. We must verify it still exists.
+        await deleteMessageById(user2Client, validMsg.message_id); 
+        
+        const checkMessages = await getMessagesByChatId(user1Client, chat.chat_id);
+        const messageStillExists = checkMessages.some(m => m.message_id === validMsg.message_id);
+        expect(messageStillExists).toBeTruthy(); 
+
+        // Cleanup: Let User 1 actually delete their own message
+        const properDelete = await deleteMessageById(user1Client, validMsg.message_id);
+        expect(properDelete).toBeTruthy();
+        
+        const verifyEmpty = await getMessagesByChatId(user1Client, chat.chat_id);
+        // Instead of checking length === 0, check that our specific message is gone
+        const isActuallyDeleted = verifyEmpty.some(m => m.message_id === validMsg.message_id);
+        expect(isActuallyDeleted).toBeFalsy();
+    }, 10000);
+
+    it('enforces RLS policies for attachments', async () => {
+        const chat = await createOrGetChat(user1Client, profiles[0].user_id, profiles[1].user_id);
+        
+        const msg = await createMessage(user1Client, {
+            message: 'Message with restricted attachment',
+            sender_id: profiles[0].user_id,
+            chat_id: chat.chat_id
+        });
+
+        // 1. RLS INSERT: User 2 cannot add an attachment to User 1's message
+        const badAttachment = await addAttachment(
+            user2Client, 
+            msg.message_id, 
+            'https://fake-url.com/img.jpg', 
+            'attachments/fake.jpg'
+        );
+        expect(badAttachment).toBeNull();
+
+        // 2. RLS INSERT: User 1 correctly adds attachment to their own message
+        const goodAttachment = await addAttachment(
+            user1Client,
+            msg.message_id,
+            'https://fake-url.com/img.jpg', 
+            'attachments/fake.jpg'
+        );
+        expect(goodAttachment).toBeTruthy();
+
+        // 3. RLS SELECT: User 3 cannot see the attachment
+        const unauthorizedAttachments = await getAttachmentByMessageID(user3Client, msg.message_id);
+        expect(unauthorizedAttachments.length).toBe(0);
+
+        // 4. RLS DELETE: User 2 cannot delete User 1's attachment
+        // This expects the wrapper to ultimately fail or the DB row to remain.
+        await deleteAttachmentByID(user2Client, goodAttachment.attachment_id);
+        
+        const verifyAttachments = await getAttachmentByMessageID(user1Client, msg.message_id);
+        const attachmentStillExists = verifyAttachments.some(a => a.attachment_id === goodAttachment.attachment_id);
+        expect(attachmentStillExists).toBeTruthy();
+    }, 10000);
 
     afterAll(async () => {
         const clients = [user1Client, user2Client, user3Client];
