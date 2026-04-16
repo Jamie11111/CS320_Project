@@ -30,42 +30,39 @@ export async function fullCleanUp(supabase: SupabaseClient) {
     
     // clean up storage
 
-    let allFilePaths: string[];
-
-    const {data: photos, error: e1} = await supabase.from('photos').select('photo_path');
-    const {data: attachments, error: e2} = await supabase.from('attachments').select('attachment_path');
-    const {data: profilePics, error: e3} = await supabase.from('users').select('profile_picture_path');
-
-    if (e1 || e2 || e3) {
-        console.error('Error getting paths');
-        return false;
-    }
-
-    // concatenate all file paths into one array, filter out nulls
-    allFilePaths = [
-        ...(photos ?? []).map(p => p.photo_path),
-        ...(attachments ?? []).map(a => a.attachment_path),
-        ...(profilePics ?? []).map(p => p.profile_picture_path)
-    ].filter(Boolean);
-
-    if (allFilePaths.length > 0) {
-        const {error} = await supabase.storage.from('uploads').remove(allFilePaths);
+    async function deleteFolder(supabase: SupabaseClient, folder: string) {
+        const {data, error} = await supabase.storage.from('uploads').list('listings');
         if (error) {
-            console.error('Failed to delete storage files', error.message);
+            console.error("Error getting folders", error.message);
             return false;
         }
+        const files = data.map(file => `${folder}/${file.name}`);
+        if (files.length === 0) return true;
+
+        const {error: deleteError} = await supabase.storage.from('uploads').remove(files);
+        if (deleteError) {
+            console.error("Error deleting files", deleteError.message);
+            return false;
+        } 
+        return true;
     }
+    
+    const del1 = await deleteFolder(supabase, 'listings');
+    const del2 = await deleteFolder(supabase, 'attachments');
+    const del3 = await deleteFolder(supabase, 'profile_photos');
+
+    if (!del1 || !del2 || !del3) return false;
 
     // clear auth.users() - will cascade and delete rest
 
-    const {data: users, error: selectError} = await supabase.from('users').select('user_id');
-    if (selectError) {
-        console.error('Failed to get users', selectError.message);
+    const { data: { users }, error } = await supabase.auth.admin.listUsers()
+    if (error) {
+        console.error('Failed to get users', error.message);
         return false;
     }
 
     for (const u of users) {
-        const {error: deleteError} = await supabase.auth.admin.deleteUser(u.user_id);
+        const {error: deleteError} = await supabase.auth.admin.deleteUser(u.id);
         if (deleteError) {
             console.error('Failed to delete from auth user', deleteError.message);
             return false;

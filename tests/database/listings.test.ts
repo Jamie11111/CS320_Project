@@ -2,7 +2,7 @@ import {describe, it, expect, beforeAll, afterAll} from 'vitest';
 import {createClient, SupabaseClient} from '@supabase/supabase-js';
 import {clearTables, fullCleanUp, generateUsers} from './test_helpers';
 import {loginUser} from '../../database/auth';
-import {createListing, updateListing, getAvailableListings, markListingAsSold,
+import {createListing, updateListing, getAvailableListings,
     deleteListing, filterListings, getListingByID, getListingsByUserID} 
     from '../../database/listings';
 import {deletePhotoById, addListingPhoto, getPhotosByListingID} from '../../database/photos';
@@ -86,7 +86,7 @@ describe('listing tests', () => {
 
         // check user can't update other's listing
         const badUpdate = await updateListing(user2Client, listing1.listing_id, {price: 10});
-        expect(!badUpdate || badUpdate.length === 0).toBeTruthy();
+        expect(!badUpdate).toBeTruthy();
         const listing1Info = await getListingByID(user2Client, listing1.listing_id);
         expect(listing1Info.price).toBe(40);        
 
@@ -120,7 +120,7 @@ describe('listing tests', () => {
         });
 
         // check product marked as sold
-        const soldProduct = await markListingAsSold(user2Client, listing3.listing_id);
+        const soldProduct = await updateListing(user2Client, listing3.listing_id, {sold: true});
         expect(soldProduct).toBeTruthy();
         expect(soldProduct.sold).toBeTruthy();
 
