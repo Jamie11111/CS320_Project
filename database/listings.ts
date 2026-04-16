@@ -1,4 +1,5 @@
 import {SupabaseClient} from '@supabase/supabase-js'
+import {getPhotosByListingID} from './photos';
 
 
 /* Get all information about a listing based on the listing's id.
@@ -87,30 +88,14 @@ export async function createListing(supabase: SupabaseClient,
         return data;
 }
 
-// Marks a listing as sold and returns all its information
-export async function markListingAsSold(supabase: SupabaseClient, listingID: number) {
-    const {data, error} = await supabase
-        .from('listings')
-        .update({sold: true})
-        .eq('listing_id', listingID)
-        .select()
-        .single();
-
-    if (error) {
-        console.error('Error marking as sold', error.message);
-        return null;
-    }
-
-    return data;
-}
-
 // Updates a listing's primary attributes and returns all its information
 export async function updateListing(supabase: SupabaseClient, listingID: number, 
     updates: {
         product_name?: string;
         product_desc?: string | null;
         item_condition?: string;
-        price?: number
+        price?: number;
+        sold?: boolean;
     }
 ) {
     const {data, error} = await supabase
@@ -194,4 +179,21 @@ export async function filterListings(supabase: SupabaseClient, user_id: string,
         }
 
         return data;
+}
+
+/* For a given array of listings, adds a photos property to each listing with 
+   up to photoLimit photos associated with that listing, sorted by display_order */
+export async function attachPhotosToListings(supabase: SupabaseClient, listings: any[], photoLimit?: number) {
+    
+    const result = [];
+
+    for (const listing of listings) {
+        const photos = await getPhotosByListingID(supabase, listing.listing_id);
+        result.push({
+            ...listing, 
+            photos: photoLimit == null ? photos : photos.slice(0, photoLimit),
+        });
+    }
+
+    return result;
 }
