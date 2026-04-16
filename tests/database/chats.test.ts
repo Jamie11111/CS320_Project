@@ -23,6 +23,7 @@ describe('chat and messaging tests', () => {
     let profiles: any[];
 
     beforeAll(async () => {
+        // Create the different clients with different access levels for testing
         generalClient = createClient(url, key);
         user1Client = createClient(url, key);
         user2Client = createClient(url, key);
@@ -152,6 +153,98 @@ describe('chat and messaging tests', () => {
         // Verify it was actually removed from the Supabase storage bucket
         expect(await checkExists()).toBeFalsy();
 
+    }, 10000);
+
+    it('enforces RLS policies for chats and messages', async () => {
+        const chat = await createOrGetChat(user1Client, profiles[0].user_id, profiles[1].user_id);
+        expect(chat).toBeTruthy();
+
+        // Setup a valid message from User 1
+        const validMsg = await createMessage(user1Client, {
+            message: 'Private message between 1 and 2',
+            sender_id: profiles[0].user_id,
+            chat_id: chat.chat_id
+        });
+        expect(validMsg).toBeTruthy();
+
+        // 1. RLS SELECT: User 3 cannot read messages in User 1 & 2's chat
+        const unauthorizedMessages = await getMessagesByChatId(user3Client, chat.chat_id);
+        expect(unauthorizedMessages.length).toBe(0);
+
+        // 2. RLS INSERT: User 3 cannot send messages to User 1 & 2's chat
+        const outsiderMsg = await createMessage(user3Client, {
+            message: 'Infiltrator message',
+            sender_id: profiles[2].user_id,
+            chat_id: chat.chat_id
+        });
+        expect(outsiderMsg).toBeNull();
+
+        // 3. RLS INSERT: User 1 cannot spoof sender_id to be User 2
+        const spoofedMsg = await createMessage(user1Client, {
+            message: 'I am totally User 2',
+            sender_id: profiles[1].user_id, // Spoofing attempt
+            chat_id: chat.chat_id
+        });
+        expect(spoofedMsg).toBeNull();
+
+        // 4. RLS DELETE: User 2 cannot delete User 1's message
+        // User 2 attempts to delete, wrapper returns true if no hard error is thrown,
+        // but RLS silently blocks the row deletion. We must verify it still exists.
+        await deleteMessageById(user2Client, validMsg.message_id); 
+        
+        const checkMessages = await getMessagesByChatId(user1Client, chat.chat_id);
+        const messageStillExists = checkMessages.some(m => m.message_id === validMsg.message_id);
+        expect(messageStillExists).toBeTruthy(); 
+
+        // Cleanup: Let User 1 actually delete their own message
+        const properDelete = await deleteMessageById(user1Client, validMsg.message_id);
+        expect(properDelete).toBeTruthy();
+        
+        const verifyEmpty = await getMessagesByChatId(user1Client, chat.chat_id);
+        // Instead of checking length === 0, check that our specific message is gone
+        const isActuallyDeleted = verifyEmpty.some(m => m.message_id === validMsg.message_id);
+        expect(isActuallyDeleted).toBeFalsy();
+    }, 10000);
+
+    it('enforces RLS policies for attachments', async () => {
+        const chat = await createOrGetChat(user1Client, profiles[0].user_id, profiles[1].user_id);
+        
+        const msg = await createMessage(user1Client, {
+            message: 'Message with restricted attachment',
+            sender_id: profiles[0].user_id,
+            chat_id: chat.chat_id
+        });
+
+        // 1. RLS INSERT: User 2 cannot add an attachment to User 1's message
+        const badAttachment = await addAttachment(
+            user2Client, 
+            msg.message_id, 
+            'https://fake-url.com/img.jpg', 
+            'attachments/fake.jpg'
+        );
+        expect(badAttachment).toBeNull();
+
+        // 2. RLS INSERT: User 1 correctly adds attachment to their own message
+        const goodAttachment = await addAttachment(
+            user1Client,
+            msg.message_id,
+            'https://fake-url.com/img.jpg', 
+            'attachments/fake.jpg'
+        );
+        expect(goodAttachment).toBeTruthy();
+
+        // 3. RLS SELECT: User 3 cannot see the attachment
+        const unauthorizedAttachments = await getAttachmentByMessageID(user3Client, msg.message_id);
+        expect(unauthorizedAttachments.length).toBe(0);
+
+        // 4. RLS DELETE: User 2 cannot delete User 1's attachment
+        // This expects the wrapper to ultimately fail or the DB row to remain.
+        await deleteAttachmentByID(user2Client, goodAttachment.attachment_id);
+        
+        
+        const verifyAttachments = await getAttachmentByMessageID(user1Client, msg.message_id);
+        const attachmentStillExists = verifyAttachments.some(a => a.attachment_id === goodAttachment.attachment_id);
+        expect(attachmentStillExists).toBeTruthy();
     }, 10000);
 
     afterAll(async () => {
