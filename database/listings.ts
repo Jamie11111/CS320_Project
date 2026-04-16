@@ -40,15 +40,21 @@ export async function getListingsByUserID(supabase: SupabaseClient, userID: stri
 
 /* Get all info about the most recent listings that are still available. 
    Can specify the number of listings desired, default value is 100. */
-export async function getAvailableListings(supabase: SupabaseClient, userID: string, limit: number = 100) {
-    const {data, error} = await supabase
+export async function getAvailableListings(supabase: SupabaseClient, userID?: string, limit: number = 100) {
+    
+    let query = supabase
         .from('listings')
         .select('*')
         .eq('sold', false)
-        .neq('user_id', userID)
         .order('date_posted', {ascending: false})
         .limit(limit);
     
+    if (userID !== undefined) {
+        query = query.neq('user_id', userID);
+    }
+    
+    const {data, error} = await query;
+
     if (error) {
         console.error('Error fetching listings', error);
         return [];
@@ -130,7 +136,7 @@ export async function deleteListing(supabase: SupabaseClient, listingID: number)
 
 /* Filtering function - takes in set of optional filters, user_id of user 
    making request required in order to sort by distance. */
-export async function filterListings(supabase: SupabaseClient, user_id: string,
+export async function filterListings(supabase: SupabaseClient,
     filters: {
         query?: string;
         priceLimit?: number;
@@ -138,7 +144,7 @@ export async function filterListings(supabase: SupabaseClient, user_id: string,
         sold?: boolean;
         sort_by?: 'price' | 'distance' | 'relevance' | 'date';
         lmt?: number;
-    }) {
+    }, user_id?: string) {
         
         const query = filters.query?.trim();
 
@@ -146,6 +152,12 @@ export async function filterListings(supabase: SupabaseClient, user_id: string,
         let long: number | null = null;
         
         if (filters.sort_by === 'distance') {
+            
+            if (user_id === undefined) {
+                console.error('Need user info to filter by distance');
+                return [];
+            }
+
             const {data, error} = await supabase
                 .from('users')
                 .select('latitude, longitude')
@@ -162,7 +174,7 @@ export async function filterListings(supabase: SupabaseClient, user_id: string,
         }
 
         const {data, error} = await supabase.rpc('filter_listings', {
-            viewer_id: user_id,
+            viewer_id: user_id ?? null,
             query: query,
             price_limit: filters.priceLimit,
             condition: filters.condition,

@@ -42,7 +42,7 @@ export async function createUserProfile(
 export async function getUserProfileById(supabase: SupabaseClient, userID: string) {
     const {data, error} = await supabase
         .from('users')
-        .select('*')
+        .select('user_id, email, name, address, profile_picture_url')
         .eq('user_id', userID)
         .single();
     
