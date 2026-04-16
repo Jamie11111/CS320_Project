@@ -66,3 +66,19 @@ export async function getChatsByUserId2(supabase: SupabaseClient, userID: string
 
     return data;
 }
+
+// Get a single chat by its ID (used by WebSocket upgrade to verify membership)
+export async function getChatByID(supabase: SupabaseClient, chatId: number) {
+    const {data, error} = await supabase
+        .from('chats')
+        .select('*')
+        .eq('chat_id', chatId)
+        .single();
+
+    if (error) {
+        console.error('Error fetching chat', error.message);
+        return null;
+    }
+
+    return data;
+}
