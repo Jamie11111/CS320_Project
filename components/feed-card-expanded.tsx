@@ -14,9 +14,10 @@ interface FeedCardExpandedProps {
   images?: FeedImageSource[]
   onClose: () => void
   userId: string
+  sellerPfpUrl?: string | null
 }
 
-const FeedCardExpanded = ({ name, location, price, condition, description, images = [], onClose, userId }: FeedCardExpandedProps) => {
+const FeedCardExpanded = ({ name, location, price, condition, description, images = [], onClose, userId, sellerPfpUrl}: FeedCardExpandedProps) => {
   const router = useRouter()
   const displayImages = images.slice(0, 5)
 
@@ -60,7 +61,7 @@ const FeedCardExpanded = ({ name, location, price, condition, description, image
           })
         }}
       >
-        <Image source={samplepfp} className={`bg-gray-200 w-16 h-16 rounded-full ml-2`}></Image>
+        <Image source={sellerPfpUrl ? { uri: sellerPfpUrl } : samplepfp} className={`bg-gray-200 w-16 h-16 rounded-full ml-2`}></Image>
       </Pressable>
       </View>
       <ScrollView
