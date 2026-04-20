@@ -1,15 +1,17 @@
-# 320-test-environment
+# CS320 Project - UMarket
 
-To install dependencies:
+Complete codebase for the project. 
 
-```bash
-bun install
-```
+- See `./backend` for the backend code and instructions for running the backend server. 
+- See `./frontend` for the frontend code and instructions for running the frontend server.
 
-To run:
+## Todo
 
-```bash
-bun run expo-router/entry
-```
-
-This project was created using `bun init` in bun v1.3.10. [Bun](https://bun.com) is a fast all-in-one JavaScript runtime.
+Merge backend and frontend branches into this main branch.\
+This will involve:
+- Cloning the repository again
+- Checkout `main`
+- Copy backend code into `./backend`
+- Copy frontend code into `./frontend`
+- Push changes
+- Delete all other branches since they won't be able to merge into main
