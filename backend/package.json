@@ -1,0 +1,20 @@
+{
+  "name": "cs320_project",
+  "module": "index.ts",
+  "type": "module",
+  "private": true,
+  "devDependencies": {
+    "@types/bun": "latest",
+    "supabase": "^2.84.4",
+    "vitest": "^4.1.4"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  },
+  "dependencies": {
+    "@supabase/ssr": "^0.10.0",
+    "@supabase/supabase-js": "^2.101.1",
+    "dotenv": "^17.4.1",
+    "express": "^5.2.1"
+  }
+}
