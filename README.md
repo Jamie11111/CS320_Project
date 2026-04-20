@@ -11,6 +11,7 @@ Merge backend and frontend branches into this main branch.\
 This will involve:
 - Cloning the repository again
 - Checkout `main`
+- Remove temporary `.gitkeep` files from subdirectories
 - Copy backend code into `./backend`
 - Copy frontend code into `./frontend`
 - Push changes
