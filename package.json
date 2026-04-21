@@ -14,8 +14,10 @@
   "dependencies": {
     "@supabase/ssr": "^0.10.0",
     "@supabase/supabase-js": "^2.101.1",
+    "compromise": "^14.15.0",
     "dotenv": "^17.4.1",
     "express": "^5.2.1",
-    "fuse.js": "^7.3.0"
+    "fuse.js": "^7.3.0",
+    "natural": "^8.1.1"
   }
 }
