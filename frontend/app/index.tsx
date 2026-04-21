@@ -5,10 +5,13 @@ import {useEffect, useState} from 'react'
 import Navbar from '../components/navbar'
 import FeedCard from '../components/feed-card'
 import { ScrollView } from 'react-native'
+import SearchBar from '../components/search-bar'
 import UploadProductPage from './upload-product'
 import { useRouter } from 'expo-router'
 import couch1 from "../assets/images/couch1.jpg"
 import couch2 from "../assets/images/couch2.webp"
+import React from 'react'
+import { fetchWithAuth } from '../scripts/authFetch'
 
 type FeedImageSource = import("react-native").ImageSourcePropType | string
 type Listing = {
@@ -29,10 +32,18 @@ type Listing = {
 const Home = () => {
   const router = useRouter()
   const [listings, setListings] = useState<Listing[]>([])
+  const [currentUser, setCurrentUser] = useState<any>(null)
   useEffect(() => {
     const fetchListings = async () => {
       try {
-        const response = await fetch('http://localhost:3000/api/listings', {
+
+        const userRes = await fetchWithAuth('http://localhost:3000/api/user');
+        if (userRes.ok) {
+          const uData = await userRes.json();
+          setCurrentUser(uData);
+        }
+
+        const response = await fetchWithAuth('http://localhost:3000/api/listings', {
           method: 'GET',
           headers: {
               'Content-Type': 'application/json',
@@ -56,32 +67,26 @@ const Home = () => {
   }, [])
   return (
     <View>
-      <Navbar />
-      <Pressable
-          onPress={() =>
-            router.push({
-              pathname: "/upload-product",
-              params: { isEditing: "false" },
-            })
-          }
-          className="absolute z-10 top-20 right-4 bg-umass-red rounded-full px-5 py-3 shadow-lg"
-        >
-          <Text className="text-white text-2xl font-bold">+</Text>
-      </Pressable>
-      <ScrollView contentContainerStyle={{ flexDirection: "row", flexWrap: "wrap", marginLeft: 3}}>
-        {listings.map((listing, index) => (
-          
-          <FeedCard
-            key={index}
-            name={listing.product_name}
-            price={listing.price}
-            location={"Amherst, MA"}
-            description={listing.product_desc ?? ""}
-            condition={listing.item_condition}
-            images={[couch1, couch2]}
-          />
-        ))}
-      </ScrollView>
+
+      <View className="h-[92%]">
+        <SearchBar />
+        <ScrollView contentContainerStyle={{ flexDirection: "row", flexWrap: "wrap", marginLeft: 3}}>
+          {listings.map((listing, index) => (
+            
+            <FeedCard
+              key={index}
+              name={listing.product_name}
+              price={listing.price}
+              location={"Amherst, MA"}
+              description={listing.product_desc ?? ""}
+              condition={listing.item_condition}
+              userId={listing.user_id}
+              images={[couch1, couch2]}
+            />
+          ))} 
+        </ScrollView>
+      </View>
+      <Navbar userPfp={currentUser?.profile_picture_url || null} />
     </View>
   )
 }

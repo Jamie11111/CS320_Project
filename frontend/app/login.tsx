@@ -2,8 +2,9 @@ import { View, Text, TextInput, Pressable, KeyboardAvoidingView, ScrollView, Act
 import { useRouter } from "expo-router"
 import { useState } from "react"
 import "../global.css"
-import AsyncStorage from "@react-native-async-storage/async-storage"
-
+import * as SecureStore from 'expo-secure-store';
+import { fetchWithAuth } from "../scripts/authFetch"
+import React from "react";
 const LoginScreen = () => {
   const router = useRouter()
   const [showPass, setShowPass] = useState(false)
@@ -32,8 +33,8 @@ const LoginScreen = () => {
       console.log("Response JSON:", responseJson);  
 
       const { session } = responseJson;
-      await AsyncStorage.setItem("access_token", session.accessToken);
-      await AsyncStorage.setItem("refresh_token", session.refreshToken);
+      await SecureStore.setItemAsync("accessToken", session.accessToken);
+      await SecureStore.setItemAsync("refreshToken", session.refreshToken);
       if (session.accessToken) {
         router.push("/")
       }

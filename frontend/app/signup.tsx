@@ -3,6 +3,7 @@ import { useRouter } from "expo-router"
 import { useState } from "react"
 import AsyncStorage from "@react-native-async-storage/async-storage"
 import "../global.css"
+import React from "react"
 
 const SignUpScreen = () => {
   const router = useRouter()
