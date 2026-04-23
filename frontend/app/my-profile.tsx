@@ -7,8 +7,13 @@ import { useRouter } from "expo-router"
 import { useEffect, useState } from "react"
 import React from "react"
 import { fetchWithAuth } from "../scripts/authFetch"
-import couch1 from "../assets/images/couch1.jpg"
-import couch2 from "../assets/images/couch2.webp"
+
+type ListingPhoto = {
+  photoID?: number;
+  photoURL: string;
+  photoPath?: string;
+};
+
 const MyProfilePage = () => {
   type userData = {
     user_id: string
@@ -26,6 +31,8 @@ const MyProfilePage = () => {
   product_desc: string | null
   item_condition: string
   price: string
+  sold: boolean
+  photos: ListingPhoto[]
   // using API Listings (above) but actual listings (below) should have more dataa
   // id: number
   // name: string
@@ -84,7 +91,20 @@ const handlePfpUpdate = async (localUri: string) => {
   setUserData({ ...userData, profile_picture_url: localUri });
 
   try {
-    
+    const photoBlob = await fetch(localUri).then(res => res.blob());
+    const filename = `profile_${userData.user_id}_${Date.now()}.jpg`;
+
+    const uploadResponse = await fetchWithAuth('http://localhost:3000/api/account/photo-upload', {
+      method: 'POST',
+      headers: {
+        'File-Metadata': JSON.stringify({ filename }),
+      },
+      body: photoBlob, 
+    });
+
+    if (!uploadResponse.ok) throw new Error("Storage upload failed");
+
+    const { publicUrl, path } = await uploadResponse.json();
     const response = await fetchWithAuth('http://localhost:3000/api/user', {
       method: 'PATCH',
       headers: {
@@ -94,6 +114,22 @@ const handlePfpUpdate = async (localUri: string) => {
         profile_picture_url: localUri, 
       }),
     });
+
+    const photoTableUpdate = await fetchWithAuth('http://localhost:3000/api/listing/photos', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        listingID: 0, 
+        photoURL: publicUrl,
+        photoPath: path,
+      }),
+    });
+
+    if (!photoTableUpdate.ok) {
+      console.warn("User PFP updated, but photos table entry failed. Check listingID constraints.");
+    }
 
     if (!response.ok) {
       const errorData = await response.json();
@@ -144,10 +180,16 @@ const handlePfpUpdate = async (localUri: string) => {
   
           const data: unknown = await response.json();
           if (!Array.isArray(data)) throw new Error("Invalid response format")
-  
-          setListings(data as Listing[]);
-          console.log("Fetched listings:", data);
-  
+          const normalized = data.map((listing: any) => ({
+            ...listing,
+            photos: listing.photos.map((photo: any) => ({
+                photoID: photo.photo_id,
+                photoURL: photo.photo_url,
+                photoPath: photo.photo_path,
+            }))
+          }));
+          console.log("Normalized photos", normalized[0].photos) // Debugging log
+          setListings(normalized);
         } catch (error) {
           console.error("Error fetching listings", error)
         }
@@ -173,8 +215,9 @@ const handlePfpUpdate = async (localUri: string) => {
               condition={listing.item_condition}
               userId={listing.user_id}
               listingId={listing.listing_id}
-              images={[couch1, couch2]}
+              images={listing.photos}
               isEditing={true}
+              sold={listing.sold}
             />
           ))}
         </ScrollView>

@@ -3,7 +3,11 @@ import { View, Text, ScrollView, Pressable, Image } from "react-native"
 import { useRouter } from "expo-router"
 import React from "react"
 import samplepfp from "../assets/images/samplepfp.png"
-type FeedImageSource = import("react-native").ImageSourcePropType | string
+type ListingPhoto = {
+  photoID?: number;
+  photoURL: string;
+  photoPath?: string;
+};
 
 interface FeedCardExpandedProps {
   name: string
@@ -11,7 +15,7 @@ interface FeedCardExpandedProps {
   price: string
   description: string
   condition: string
-  images?: FeedImageSource[]
+  images?: ListingPhoto[]
   onClose: () => void
   userId: string
   sellerPfpUrl?: string | null
@@ -19,8 +23,16 @@ interface FeedCardExpandedProps {
 
 const FeedCardExpanded = ({ name, location, price, condition, description, images = [], onClose, userId, sellerPfpUrl}: FeedCardExpandedProps) => {
   const router = useRouter()
-  const displayImages = images.slice(0, 5)
+  const formatLocation = (loc: string) => {
+    const parts = loc.split(',');
+    if (parts.length >= 2) {
+      return `${parts[parts.length - 2].trim()}, ${parts[parts.length - 1].trim()}`;
+    }
+    return loc;
+  };
 
+  const displayLocation = formatLocation(location);
+  const displayImages = images.slice(0, 5)
   return (
   <View className="flex-1 pt-16">
     <View className="flex-1 w-full bg-white overflow-hidden">
@@ -35,7 +47,7 @@ const FeedCardExpanded = ({ name, location, price, condition, description, image
       {displayImages.map((image, index) => (
         <Image
           key={index}
-          source={typeof image === "string" ? { uri: image } : image}
+          source={{ uri: image.photoURL }}
           className="rounded-lg w-96 h-96 mr-2"
         />
       ))}
@@ -47,7 +59,7 @@ const FeedCardExpanded = ({ name, location, price, condition, description, image
       <View className="flex-row items-start justify-between">
       <View className="flex-1 pr-3">
         <Text className="text-xl font-bold">{name}</Text>
-        <Text className="text-lg font-medium">{location}</Text>
+        <Text className="text-lg font-medium">{displayLocation}</Text>
         <Text className="text-lg font-medium">{price}</Text>
         <Text className="text-lg font-medium">{condition}</Text>
       </View>
