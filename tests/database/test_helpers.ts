@@ -31,7 +31,7 @@ export async function fullCleanUp(supabase: SupabaseClient) {
     // clean up storage
 
     async function deleteFolder(supabase: SupabaseClient, folder: string) {
-        const {data, error} = await supabase.storage.from('uploads').list('listings');
+        const {data, error} = await supabase.storage.from('uploads').list(folder);
         if (error) {
             console.error("Error getting folders", error.message);
             return false;
