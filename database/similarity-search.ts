@@ -26,6 +26,9 @@ export async function getSearchSuggestion(supabase: SupabaseClient, query: strin
 
     if (results.length > 0 && results[0]!.item !== sanitizedQuery) {
         if(results.length <= 3) return results.map((element: any) => element.item as string);
+        else{
+            return results.slice(0, 3).map((element: any) => element.item as string);
+        }
     }
 
     return null;
