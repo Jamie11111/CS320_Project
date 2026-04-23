@@ -29,7 +29,7 @@ type Listing = {
   // id: number
   // name: string
   // price: number
-  // location: string
+  location: string
   // description: string
   // condition: string
   // images: FeedImageSource[]
@@ -48,7 +48,7 @@ const Home = () => {
           setCurrentUser(uData);
         }
 
-        const response = await fetchWithAuth('http://localhost:3000/api/listings', {
+        const response = await fetchWithAuth('http://localhost:3000/api/listings?query=&sort_by=distance&lmt=40', {
           method: 'GET',
           headers: {
               'Content-Type': 'application/json',
@@ -92,7 +92,7 @@ const Home = () => {
               key={index}
               name={listing.product_name}
               price={listing.price}
-              location={"Amherst, MA"}
+              location={listing.location}
               description={listing.product_desc ?? ""}
               condition={listing.item_condition}
               userId={listing.user_id}

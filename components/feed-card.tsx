@@ -42,6 +42,16 @@ const FeedCard = ({
   const [expanded, setExpanded] = useState(false)
   const router = useRouter()
 
+  const formatLocation = (loc: string) => {
+    const parts = loc.split(',');
+    if (parts.length >= 2) {
+      return `${parts[parts.length - 2].trim()}, ${parts[parts.length - 1].trim()}`;
+    }
+    return loc;
+  };
+
+  const displayLocation = formatLocation(location);
+
   const handlePress = () => {
     if (isEditing) {
       router.push({
@@ -71,7 +81,7 @@ const FeedCard = ({
         <View className="bg-umass-red absolute bottom-0 w-full h-[25%] rounded-br-lg rounded-bl-lg flex-row flex-grow flex-1 p-1">
           <View className="flex-1 ml-0.5">
             <Text className="text-lg font-bold text-white">{name}</Text>
-            <Text className="text-md text-white">{location}</Text>
+            <Text className="text-md text-white">{displayLocation}</Text>
           </View>
           <View className="justify-center absolute right-0 top-[40%] mr-2">
             <Text className="text-sm text-white">{sold? "Sold" : price}</Text>

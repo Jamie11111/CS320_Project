@@ -23,6 +23,15 @@ interface FeedCardExpandedProps {
 
 const FeedCardExpanded = ({ name, location, price, condition, description, images = [], onClose, userId, sellerPfpUrl}: FeedCardExpandedProps) => {
   const router = useRouter()
+  const formatLocation = (loc: string) => {
+    const parts = loc.split(',');
+    if (parts.length >= 2) {
+      return `${parts[parts.length - 2].trim()}, ${parts[parts.length - 1].trim()}`;
+    }
+    return loc;
+  };
+
+  const displayLocation = formatLocation(location);
   const displayImages = images.slice(0, 5)
   return (
   <View className="flex-1 pt-16">
@@ -50,7 +59,7 @@ const FeedCardExpanded = ({ name, location, price, condition, description, image
       <View className="flex-row items-start justify-between">
       <View className="flex-1 pr-3">
         <Text className="text-xl font-bold">{name}</Text>
-        <Text className="text-lg font-medium">{location}</Text>
+        <Text className="text-lg font-medium">{displayLocation}</Text>
         <Text className="text-lg font-medium">{price}</Text>
         <Text className="text-lg font-medium">{condition}</Text>
       </View>

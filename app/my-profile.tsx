@@ -91,7 +91,20 @@ const handlePfpUpdate = async (localUri: string) => {
   setUserData({ ...userData, profile_picture_url: localUri });
 
   try {
-    
+    const photoBlob = await fetch(localUri).then(res => res.blob());
+    const filename = `profile_${userData.user_id}_${Date.now()}.jpg`;
+
+    const uploadResponse = await fetchWithAuth('http://localhost:3000/api/account/photo-upload', {
+      method: 'POST',
+      headers: {
+        'File-Metadata': JSON.stringify({ filename }),
+      },
+      body: photoBlob, 
+    });
+
+    if (!uploadResponse.ok) throw new Error("Storage upload failed");
+
+    const { publicUrl, path } = await uploadResponse.json();
     const response = await fetchWithAuth('http://localhost:3000/api/user', {
       method: 'PATCH',
       headers: {
@@ -101,6 +114,22 @@ const handlePfpUpdate = async (localUri: string) => {
         profile_picture_url: localUri, 
       }),
     });
+
+    const photoTableUpdate = await fetchWithAuth('http://localhost:3000/api/listing/photos', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        listingID: 0, 
+        photoURL: publicUrl,
+        photoPath: path,
+      }),
+    });
+
+    if (!photoTableUpdate.ok) {
+      console.warn("User PFP updated, but photos table entry failed. Check listingID constraints.");
+    }
 
     if (!response.ok) {
       const errorData = await response.json();
