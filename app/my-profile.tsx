@@ -7,8 +7,13 @@ import { useRouter } from "expo-router"
 import { useEffect, useState } from "react"
 import React from "react"
 import { fetchWithAuth } from "../scripts/authFetch"
-import couch1 from "../assets/images/couch1.jpg"
-import couch2 from "../assets/images/couch2.webp"
+
+type ListingPhoto = {
+  photoID?: number;
+  photoURL: string;
+  photoPath?: string;
+};
+
 const MyProfilePage = () => {
   type userData = {
     user_id: string
@@ -23,6 +28,8 @@ const MyProfilePage = () => {
   product_desc: string | null
   item_condition: string
   price: string
+  sold: boolean
+  photos: ListingPhoto[]
   // using API Listings (above) but actual listings (below) should have more dataa
   // id: number
   // name: string
@@ -68,10 +75,16 @@ const MyProfilePage = () => {
   
           const data: unknown = await response.json();
           if (!Array.isArray(data)) throw new Error("Invalid response format")
-  
-          setListings(data as Listing[]);
-          console.log("Fetched listings:", data);
-  
+          const normalized = data.map((listing: any) => ({
+            ...listing,
+            photos: listing.photos.map((photo: any) => ({
+                photoID: photo.photo_id,
+                photoURL: photo.photo_url,
+                photoPath: photo.photo_path,
+            }))
+          }));
+          console.log("Normalized photos", normalized[0].photos) // Debugging log
+          setListings(normalized);
         } catch (error) {
           console.error("Error fetching listings", error)
         }
@@ -97,8 +110,9 @@ const MyProfilePage = () => {
               condition={listing.item_condition}
               userId={listing.user_id}
               listingId={listing.listing_id}
-              images={[couch1, couch2]}
+              images={listing.photos}
               isEditing={true}
+              sold={listing.sold}
             />
           ))}
         </ScrollView>

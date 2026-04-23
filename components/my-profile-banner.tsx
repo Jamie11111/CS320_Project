@@ -57,7 +57,7 @@ const MyProfileBanner = ({ name, location, email, onLocationChange }: MyProfileB
   return (
     <View>
 
-      <View className="px-4 pt-4 pb-3 bg-white flex-row">
+      <View className="px-4 pt-4 pb-3 bg-white flex-row justify-between items-center sticky ml-6">
         <View>
           <Image source={samplepfp} className={`bg-gray-200 w-20 h-20 rounded-full`}></Image>
           <Pressable className="absolute bottom-0 right-0 bg-blue-500 rounded-full p-2">

@@ -8,18 +8,23 @@ import { ScrollView } from 'react-native'
 import SearchBar from '../components/search-bar'
 import UploadProductPage from './upload-product'
 import { useRouter } from 'expo-router'
-import couch1 from "../assets/images/couch1.jpg"
-import couch2 from "../assets/images/couch2.webp"
 import React from 'react'
 import { fetchWithAuth } from '../scripts/authFetch'
 
-type FeedImageSource = import("react-native").ImageSourcePropType | string
+type ListingPhoto = {
+  photoID?: number;
+  photoURL: string;
+  photoPath?: string;
+};
 type Listing = {
   user_id: string
   product_name: string
   product_desc: string | null
   item_condition: string
   price: string
+  sold: boolean
+  listing_id: string
+  photos: ListingPhoto[]
   // using API Listings (above) but actual listings (below) should have more dataa
   // id: number
   // name: string
@@ -41,15 +46,25 @@ const Home = () => {
               'Content-Type': 'application/json',
           }
         });
+        console.log("Fetch response:", response); // Debugging log
         if (!response.ok) {
           throw new Error(`Failed: ${response.status}`);
         }
 
-        const data: unknown = await response.json();
+        const data: Listing[] = await response.json();
+        const normalized = data.map((listing: any) => ({
+          ...listing,
+          photos: listing.photos.map((photo: any) => ({
+              photoID: photo.photo_id,
+              photoURL: photo.photo_url,
+              photoPath: photo.photo_path,
+          }))
+        }));
+
+
         if (!Array.isArray(data)) throw new Error("Invalid response format")
-
-        setListings(data as Listing[]);
-
+        setListings(normalized);
+        console.log("Fetched listings:", normalized[0]); // Debugging log
       } catch (error) {
         console.error("Error fetching listings", error)
       }
@@ -73,7 +88,9 @@ const Home = () => {
               description={listing.product_desc ?? ""}
               condition={listing.item_condition}
               userId={listing.user_id}
-              images={[couch1, couch2]}
+              images={listing.photos}
+              listingId={listing.listing_id}
+              sold={listing.sold}
             />
           ))} 
         </ScrollView>
