@@ -8,9 +8,10 @@ import { useEffect } from "react"
 import samplepfp from "../assets/images/samplepfp.png"
 interface NavbarProps {
   canNavigate?: boolean
+  userPfp?: string | null; 
 }
 
-const Navbar = ({ canNavigate = true }: NavbarProps) => {
+const Navbar = ({ canNavigate = true, userPfp }: NavbarProps) => {
  
   const router = useRouter()
   const handleNavAttempt = (path: string) => {
@@ -47,7 +48,7 @@ const Navbar = ({ canNavigate = true }: NavbarProps) => {
             <Text className="text-umass-red text-2xl font-bold">+</Text>
         </Pressable>
           <Pressable onPress={() => router.push("/my-profile")} className={`${currentPath === "/my-profile" ? "shadow-xl -translate-y-1" : "shadow-sm"}`}>
-            <Image source={samplepfp} className={`bg-gray-200 w-14 h-14 rounded-full`}></Image>
+            <Image source={userPfp ? { uri: userPfp } : samplepfp} className={`bg-gray-200 w-14 h-14 rounded-full`}></Image>
           </Pressable>
           <Pressable
             onPress={(e) => {

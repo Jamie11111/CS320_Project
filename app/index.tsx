@@ -37,9 +37,17 @@ type Listing = {
 const Home = () => {
   const router = useRouter()
   const [listings, setListings] = useState<Listing[]>([])
+  const [currentUser, setCurrentUser] = useState<any>(null)
   useEffect(() => {
     const fetchListings = async () => {
       try {
+
+        const userRes = await fetchWithAuth('http://localhost:3000/api/user');
+        if (userRes.ok) {
+          const uData = await userRes.json();
+          setCurrentUser(uData);
+        }
+
         const response = await fetchWithAuth('http://localhost:3000/api/listings', {
           method: 'GET',
           headers: {
@@ -95,7 +103,7 @@ const Home = () => {
           ))} 
         </ScrollView>
       </View>
-      <Navbar />
+      <Navbar userPfp={currentUser?.profile_picture_url || null} />
     </View>
   )
 }

@@ -22,6 +22,7 @@ interface FeedCardProps {
   userId?: string
   listingId?: string
   sold?: boolean
+  sellerPfpUrl?: string | null
 }
 
 const FeedCard = ({
@@ -34,8 +35,8 @@ const FeedCard = ({
   isEditing = false,
   userId,
   listingId,
-  sold
-
+  sold,
+  sellerPfpUrl
 }: FeedCardProps) => {
   console.log("FeedCard images:", images) // Debugging log
   const [expanded, setExpanded] = useState(false)
@@ -88,6 +89,7 @@ const FeedCard = ({
           images={images}
           userId={userId}
           onClose={() => setExpanded(false)}
+          sellerPfpUrl={sellerPfpUrl}
         />
       </Modal>
     </>

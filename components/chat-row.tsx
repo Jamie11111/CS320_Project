@@ -1,14 +1,16 @@
-import { View, Text } from "react-native"
+import { View, Text, Image } from "react-native"
 import "../global.css"
 import React from "react"
+import samplepfp from "../assets/images/samplepfp.png"
 interface ChatRowProps {
   name: string
   lastMessage: string
   time: string
   isUnread?: boolean
+  pfpUrl?: string | null
 }
 
-const ChatRow = ({ name, lastMessage, time, isUnread }: ChatRowProps) => {
+const ChatRow = ({ name, lastMessage, time, isUnread, pfpUrl }: ChatRowProps) => {
   return (
     <View className="flex-row items-center px-6 py-4 border-b border-gray-100 bg-white">
 
@@ -19,7 +21,10 @@ const ChatRow = ({ name, lastMessage, time, isUnread }: ChatRowProps) => {
      </View>
 
       
-      <View className="w-14 h-14 rounded-full bg-gray-300 shadow-sm mr-4" />
+      <Image 
+        source={pfpUrl ? { uri: pfpUrl } : samplepfp} 
+        className="w-14 h-14 rounded-full bg-gray-300 shadow-sm mr-4" 
+      />
 
       
       <View className="flex-1">

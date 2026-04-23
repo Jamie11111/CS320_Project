@@ -1,9 +1,11 @@
-import { View, Text, ScrollView, TextInput, Pressable, KeyboardAvoidingView, Platform } from "react-native"
+import { View, Text, ScrollView, TextInput, Pressable, KeyboardAvoidingView, Platform, Image } from "react-native"
 import { useRouter } from "expo-router"
+import samplepfp from "../assets/images/samplepfp.png"
 import "../global.css"
 import React from "react"
 const ChatDetailScreen = () => {
   const router = useRouter()
+  const otherUserPfp = null
 
   return (
     <KeyboardAvoidingView 
@@ -21,7 +23,10 @@ const ChatDetailScreen = () => {
           <Pressable onPress={() => router.push("/chats")} className="absolute left-4">
             <Text className="text-white font-bold text-xl">{"<"}</Text>
         </Pressable>
-          <View className="w-10 h-10 rounded-full bg-gray-200 shadow-sm mr-3" />
+          <Image 
+            source={otherUserPfp ? { uri: otherUserPfp } : samplepfp} 
+            className="w-10 h-10 rounded-full bg-gray-200 shadow-sm mr-3" 
+          />
           <Text className="text-2xl text-white">John Doe</Text>
         </Pressable>
       </View>

@@ -3,7 +3,7 @@ import "../global.css"
 import Navbar from "../components/navbar"
 import ProfileFeedBanner from "../components/profile-feed-banner"
 import FeedCard from "../components/feed-card"
-import React, { useEffect } from "react"
+import React, { useEffect, useState } from "react"
 import { fetchWithAuth } from "../scripts/authFetch"
 import { useLocalSearchParams } from "expo-router"
 type ListingPhoto = {
@@ -19,6 +19,7 @@ const ProfileFeedPage = () => {
     name: string
     email: string
     location: string
+    profile_picture_url: string | null
   }
   type Listing = {
     user_id: string
@@ -41,10 +42,17 @@ const ProfileFeedPage = () => {
 
   const [userData, setUserData] = React.useState<userData | null>(null)
   const [listings, setListings] = React.useState<Listing[]>([])
+  const [currentUser, setCurrentUser] = useState<userData | null>(null)
 
   useEffect(() => {
     const fetchListings = async () => {
       try {
+
+        const meRes = await fetchWithAuth(`http://localhost:3000/api/user`);
+        if (meRes.ok) {
+          setCurrentUser(await meRes.json());
+        }
+
         const userResponse = await fetchWithAuth(`http://localhost:3000/api/user/${userId}`, {
           headers: {
             'Content-Type': 'application/json'
@@ -85,7 +93,7 @@ const ProfileFeedPage = () => {
   return (
     <View >
       <View className="h-[92%]">
-        <ProfileFeedBanner authorName={userData?.name || "John Doe"} authorLocation={userData?.location || "Amherst, MA"} />
+        <ProfileFeedBanner authorName={userData?.name || "John Doe"} authorLocation={userData?.location || "Amherst, MA"} authorPfp={userData?.profile_picture_url || null} />
         <ScrollView contentContainerStyle={{ flexDirection: "row", flexWrap: "wrap", marginLeft: 3}}>
             {listings.map((listing, index) => (
               <FeedCard
@@ -99,12 +107,13 @@ const ProfileFeedPage = () => {
                 images={listing.photos}
                 listingId={listing.listing_id}
                 sold={listing.sold}
+                sellerPfpUrl={userData?.profile_picture_url || null}
               />
             ))}
           </ScrollView>
 
       </View>
-      <Navbar />
+      <Navbar userPfp={currentUser?.profile_picture_url || null}/>
     </View>
   )
 }

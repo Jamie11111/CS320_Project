@@ -1,37 +1,73 @@
 import "../global.css"
-import { View, Text, Pressable , TextInput, Image} from "react-native"
+import { View, Text, Pressable , TextInput, Image, Alert} from "react-native"
 import { useRouter } from "expo-router"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import React from "react"
 import samplepfp from "../assets/images/samplepfp.png"
+import * as ImagePicker from 'expo-image-picker';
 interface MyProfileBannerProps {
     name: string
     location: string
     email:string 
-    onLocationChange: (loc: string) => void
+    onLocationChange: (loc: { address?: string | null; 
+                              latitude?: number | null; 
+                              longitude?: number | null; }) => void
+    profilePictureUrl: string | null;
+    onPfpChange: (uri: string) => Promise<void>;
 }
 
-const MyProfileBanner = ({ name, location, email, onLocationChange }: MyProfileBannerProps) => {
+const MyProfileBanner = ({ name, location, email, onLocationChange, profilePictureUrl, onPfpChange }: MyProfileBannerProps) => {
   const [suggestions, setSuggestions] = useState<any[]>([])
   const [inputValue, setInputValue] = useState(location)
   
   const LOCATION_IQ_KEY = "pk.ff54db5bc5b50127d459385769a878a5" 
+  const [isUploading, setIsUploading] = useState(false);
 
-  const handleSuggestionSelect = (selectedName: string) => {
-    setInputValue(selectedName);
+  const handleEditPfp = async () => {
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== 'granted') {
+      Alert.alert('Permission Denied', 'We need access to your photos to change your profile picture.');
+      return;
+    }
+
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.5,
+    });
+
+    if (!result.canceled) {
+      setIsUploading(true);
+      await onPfpChange(result.assets[0].uri);
+      setIsUploading(false);
+    }
+  };
+
+  const handleSuggestionSelect = (item: any) => {
+    const selectedName = item.display_name;
+    const lat = parseFloat(item.lat);
+    const lon = parseFloat(item.lon);
   
+    setInputValue(selectedName);
     setSuggestions([]);
   
-    onLocationChange(selectedName);
+    onLocationChange({
+      address: selectedName,
+      latitude: lat,
+    longitude: lon
+    });
   };
 
   const handleSearch = async (text: string) => {
+    const MA_LAT = 42.3601;
+    const MA_LON = -71.0589;
     setInputValue(text)
     
     if (text.length === 0) {
-      onLocationChange("")
-      setSuggestions([])
-      return
+      onLocationChange({ address: null, latitude: null, longitude: null });
+      setSuggestions([]);
+      return;
     }
 
     if (text.length < 3) {
@@ -39,8 +75,7 @@ const MyProfileBanner = ({ name, location, email, onLocationChange }: MyProfileB
       return
     }
 
-    const url = `https://api.locationiq.com/v1/autocomplete?key=${LOCATION_IQ_KEY}&q=${encodeURIComponent(text)}&limit=5&dedupe=1`
-
+    const url = `https://api.locationiq.com/v1/autocomplete?key=${LOCATION_IQ_KEY}&q=${encodeURIComponent(text)}&limit=5&dedupe=1&lat=${MA_LAT}&lon=${MA_LON}&countrycodes=us`;
     try {
       const response = await fetch(url)
       const data = await response.json()
@@ -54,13 +89,17 @@ const MyProfileBanner = ({ name, location, email, onLocationChange }: MyProfileB
       console.error("LocationIQ Error:", error)
     }
   }
+  useEffect(() => {
+    setInputValue(location);
+  }, [location]);
   return (
     <View>
 
       <View className="px-4 pt-4 pb-3 bg-white flex-row justify-between items-center sticky ml-6">
         <View>
-          <Image source={samplepfp} className={`bg-gray-200 w-20 h-20 rounded-full`}></Image>
-          <Pressable className="absolute bottom-0 right-0 bg-blue-500 rounded-full p-2">
+          <Image source={profilePictureUrl ? { uri: profilePictureUrl } : samplepfp} className={`bg-gray-200 w-20 h-20 rounded-full ${isUploading ? 'opacity-50' : ''}`}></Image>
+          <Pressable className="absolute bottom-0 right-0 bg-blue-500 rounded-full p-2"
+            onPress={handleEditPfp}>
             <Text className="text-white text-xs font-bold">Edit</Text>
           </Pressable>
         </View>
@@ -73,7 +112,7 @@ const MyProfileBanner = ({ name, location, email, onLocationChange }: MyProfileB
               <Text className="text-lg font-medium mt-1">Location: </Text>
               <TextInput 
                 className="bg-gray-300 rounded-lg w-[50%] p-2 overflow-y-scroll" 
-                defaultValue={location}
+                defaultValue={inputValue}
                 placeholder="Enter"
                 maxLength={50}
                 onChangeText={handleSearch}
@@ -86,7 +125,7 @@ const MyProfileBanner = ({ name, location, email, onLocationChange }: MyProfileB
                     key={index}
                     className="p-3 border-b border-gray-100 active:bg-gray-100"
                     onPress={() => {
-                      handleSuggestionSelect(item.display_name)
+                      handleSuggestionSelect(item)
                     }}
                   >
                     <Text numberOfLines={1} className="text-[10px] font-medium text-gray-700">
