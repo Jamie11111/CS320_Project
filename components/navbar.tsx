@@ -53,7 +53,7 @@ const Navbar = ({ canNavigate = true, userPfp }: NavbarProps) => {
           <Pressable
             onPress={(e) => {
               e.stopPropagation()
-              handleNavAttempt("/login")
+              handleNavAttempt("/chats")
             }}
             className={` ${currentPath === "/chats" ? "shadow-xl -translate-y-1" : "shadow-sm"}`}
           >

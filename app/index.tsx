@@ -54,7 +54,7 @@ const Home = () => {
               'Content-Type': 'application/json',
           }
         });
-        console.log("Fetch response:", response); // Debugging log
+        // console.log("Fetch response:", response); // Debugging log
         if (!response.ok) {
           throw new Error(`Failed: ${response.status}`);
         }
@@ -72,7 +72,7 @@ const Home = () => {
 
         if (!Array.isArray(data)) throw new Error("Invalid response format")
         setListings(normalized);
-        console.log("Fetched listings:", normalized[0]); // Debugging log
+        // console.log("Fetched listings:", normalized[0]); // Debugging log
       } catch (error) {
         console.error("Error fetching listings", error)
       }

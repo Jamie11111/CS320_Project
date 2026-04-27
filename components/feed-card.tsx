@@ -38,7 +38,6 @@ const FeedCard = ({
   sold,
   sellerPfpUrl
 }: FeedCardProps) => {
-  console.log("FeedCard images:", images) // Debugging log
   const [expanded, setExpanded] = useState(false)
   const router = useRouter()
 
