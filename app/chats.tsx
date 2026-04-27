@@ -6,25 +6,43 @@ import "../global.css"
 import ChatRow from "../components/chat-row"
 import Navbar from "../components/navbar"
 import React from "react"
-
 const ChatListScreen = () => {
+  type Chat = {
+    chat_id: string
+    seller_id: string
+    customer_id: string
+  }
   const router = useRouter()
   const [currentUser, setCurrentUser] = useState<any>(null)
-
+  const [chats, setChats] = useState<Chat[]>([])
+  
   useEffect(() => {
     const fetchUser = async () => {
       const res = await fetchWithAuth('http://localhost:3000/api/user')
       if (res.ok) setCurrentUser(await res.json())
     }
+
+    const fetchChats = async () => {
+      try {
+        const res = await fetchWithAuth('http://localhost:3000/api/chats')
+        if (!res.ok) throw new Error("Failed to fetch chats")
+        const data = await res.json()
+        setChats(data)
+
+      } catch (error) {
+        console.error("Error fetching chats:", error)
+      }
+    }
+
+    
+    
+    fetchChats()
     fetchUser()
+
+
+
   }, [])
   
-  const chats = Array(8).fill({ 
-    name: "John Doe", 
-    lastMessage: "Is this still available?", 
-    time: "2m ago" ,
-    pfpUrl: null
-  })
 
   return (
     <View>
@@ -38,12 +56,17 @@ const ChatListScreen = () => {
             </View>
           }
           renderItem={({ item, index }) => (
-            <Pressable onPress={() => router.push("/messages")}>
-            <ChatRow
+            // <Pressable onPress={() => router.push({ pathname: "/messages", params: { chatId: item.chat_id } })}>
+            <ChatRow 
+              sellerId={item.seller_id === currentUser?.user_id ? item.customer_id : item.seller_id}
+              chatId={item.chat_id}
+              time={"2:30 PM"} 
+              lastMessage={"Hey, is this still available?"} 
+              pfpUrl={null}
               {...item}
               isUnread={index === 0}
             />
-          </Pressable>
+          // </Pressable>
 
           )}
           keyExtractor={(_, i) => i.toString()}
