@@ -35,5 +35,5 @@ async function searchListings(supabase: SupabaseClient, req: BunRequest){
     } else if (!user) {
         return Response.json({error: "Must be logged in to search listings"}, {status: 401});
     }
-    return Response.json(await filterListings(supabase, user.id, query), {status: 200});
+    return Response.json(await filterListings(supabase, query, user.id), {status: 200});
 }

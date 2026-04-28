@@ -28,16 +28,33 @@ export async function createMessage(supabase: SupabaseClient,
 }
 
 // Returns array of messages from a chat, with first message first
+// Adds associated attachments to each message (with property attachments) 
 export async function getMessagesByChatId(supabase: SupabaseClient, chatID: number) {
     const {data, error} = await supabase
         .from('messages')
-        .select('*')
+        .select('*, attachments(*)')
         .eq('chat_id', chatID)
         .order('sent_at', {ascending: true});
 
     if (error) {
         console.error('Error getting messages', error.message);
         return [];
+    }
+
+    return data;
+}
+
+// Fetch a single message with its attachments (used after insert to get full object for broadcast)
+export async function getMessageById(supabase: SupabaseClient, messageId: number) {
+    const {data, error} = await supabase
+        .from('messages')
+        .select('*, attachments(*)')
+        .eq('message_id', messageId)
+        .single();
+
+    if (error) {
+        console.error('Error getting message', error.message);
+        return null;
     }
 
     return data;
@@ -56,18 +73,4 @@ export async function deleteMessageById(supabase: SupabaseClient, message_id: nu
     }
 
     return true;
-}
-
-/* For a given array of messages, adds an attachments property to each message with 
-   attachments associated with the message */
-export async function attachAttachmentsToMessages(supabase: SupabaseClient, messages: any[]) {
-
-    const result = [];
-
-    for (const message of messages) {
-        const attachments = await getAttachmentByMessageID(supabase, message.message_id);
-        result.push({...message, attachments});
-    }
-
-    return result;
 }

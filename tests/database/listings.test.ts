@@ -131,12 +131,12 @@ describe('listing tests', () => {
         expect(available[0].listing_id).toBe(listing4.listing_id);
 
         // check filter works reasonably well
-        const textbooksListed = await filterListings(user3Client, profiles[2].user_id, {
+        const textbooksListed = await filterListings(user3Client, {
             query: 'textbook',
             priceLimit: 50,
             sort_by: 'relevance',
             lmt: 5
-        });
+        }, profiles[2].user_id);
         expect(textbooksListed.length).toBe(2);
         expect(textbooksListed[0].listing_id).toBe(listing3.listing_id);
         expect(textbooksListed[1].listing_id).toBe(listing4.listing_id);
@@ -149,8 +149,7 @@ describe('listing tests', () => {
             {latitude: 20, longitude: -90});
         expect(updateUser2).toBeTruthy();
 
-        const closestListings = await filterListings(user3Client, profiles[2].user_id, 
-            {sort_by: 'distance'});
+        const closestListings = await filterListings(user3Client, {sort_by: 'distance'}, profiles[2].user_id);
         expect(closestListings.length).toBe(3);
         expect(closestListings[0].listing_id).toBe(listing1.listing_id);
         expect(closestListings[1].listing_id).toBe(listing4.listing_id); 
