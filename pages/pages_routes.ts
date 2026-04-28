@@ -30,7 +30,7 @@ export function generatePagesRoutes(baseDir: string = "./pages/") {
         }
         routes.push({file, route});
 
-        console.log(`Registered route: ${route} -> ${file}`);
+        // console.log(`Registered route: ${route} -> ${file}`);
     }
 
     return Object.fromEntries(routes.map(({route, file}) => [route, { GET: async (req: Request) => new Response(Bun.file(file)) }]));
