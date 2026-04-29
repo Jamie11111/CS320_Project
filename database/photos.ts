@@ -43,12 +43,13 @@ export async function addListingPhoto(supabase: SupabaseClient, listingID: numbe
 }
 
 // get all photo urls associated with a listing ordered properly
-export async function getPhotosByListingID(supabase: SupabaseClient, listingID: number) {
+export async function getPhotosByListingID(supabase: SupabaseClient, listingID: number, quantity: number = 0) {
     const {data, error} = await supabase
         .from('photos')
         .select('*')
         .eq('listing_id', listingID)
-        .order('display_order', {ascending: true});
+        .order('display_order', {ascending: true})
+        .limit(quantity > 0 ? quantity : 10);
     
     if (error) {
         console.error('Error getting photos for a listing', error.message);

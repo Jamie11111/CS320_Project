@@ -195,15 +195,15 @@ export async function filterListings(supabase: SupabaseClient,
 
 /* For a given array of listings, adds a photos property to each listing with 
    up to photoLimit photos associated with that listing, sorted by display_order */
-export async function attachPhotosToListings(supabase: SupabaseClient, listings: any[], photoLimit?: number) {
+export async function attachPhotosToListings(supabase: SupabaseClient, listings: any[], photoLimit: number = 1) {
     
     const result = [];
 
     for (const listing of listings) {
-        const photos = await getPhotosByListingID(supabase, listing.listing_id);
+        const photos = await getPhotosByListingID(supabase, listing.listing_id, photoLimit);
         result.push({
             ...listing, 
-            photos: photoLimit == null ? photos : photos.slice(0, photoLimit),
+            photos: !photoLimit ? photos : photos.slice(0, photoLimit),
         });
     }
 
