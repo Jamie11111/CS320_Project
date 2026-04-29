@@ -161,6 +161,7 @@ export async function filterListings(supabase: SupabaseClient,
         sold?: boolean;
         sort_by?: 'price' | 'distance' | 'relevance' | 'date';
         lmt?: number;
+        offset?: number;
     }, user_id?: string) {
         
         const query = filters.query?.toLowerCase().trim();
@@ -206,6 +207,7 @@ export async function filterListings(supabase: SupabaseClient,
             sold: filters.sold,
             sort_by: filters.sort_by ?? 'date',
             lmt: filters.lmt ?? 20,
+            offset_count: filters.offset ?? 0,
             lat: lat,
             long: long, 
         });
