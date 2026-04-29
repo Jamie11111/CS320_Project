@@ -10,7 +10,7 @@ export const photoRoutes = {
         POST: async (req: BunRequest, supabase: SupabaseClient) => await uploadPhoto(supabase, req, 'attachments'),
     },
     "/api/account/photo-upload": {
-        POST: async (req: BunRequest, supabase: SupabaseClient) => await uploadPhoto(supabase, req, 'profile_photos'),
+        POST: async (req: BunRequest, supabase: SupabaseClient) => await uploadPhoto(supabase, req, 'profile_photos', ['image/jpeg', 'image/png']),
     }
     // delete?
 };
@@ -24,7 +24,7 @@ export const photoRoutes = {
  * @returns 
  * File path and public URL of the image
  */
-async function uploadPhoto(supabase: SupabaseClient, req: BunRequest, folder: 'listings' | 'attachments' | 'profile_photos'){
+async function uploadPhoto(supabase: SupabaseClient, req: BunRequest, folder: 'listings' | 'attachments' | 'profile_photos', allowedTypes: string[] = ['image/jpeg', 'image/png', 'video/mp4']) {
     // Require logged in user for uploading image
     const { data: { user }, error } = await supabase.auth.getUser();
     if (error) {
@@ -44,8 +44,8 @@ async function uploadPhoto(supabase: SupabaseClient, req: BunRequest, folder: 'l
     }
 
     const b: Blob = await req.blob();
-    if (!new Set(['image/jpeg', 'image/png', 'video/mp4']).has(b.type)){
-        return Response.json({error: "Blob type must be one of 'image/jpeg' | 'image/png' | 'video/mp4'"}, {status: 415});
+    if (!new Set(allowedTypes).has(b.type)){
+        return Response.json({error: `Blob type must be one of ${allowedTypes.join(' | ')}`}, {status: 415});
     }
 
     return upload(supabase, folder, await b.arrayBuffer(), filename, b.type as 'image/jpeg' | 'image/png' | 'video/mp4')

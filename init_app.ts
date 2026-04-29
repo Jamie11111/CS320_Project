@@ -8,6 +8,7 @@ import { chatRoutes, wsHandlers } from "./routes/chats";
 import { searchRoutes } from "./routes/search";
 import { photoRoutes } from "./routes/photos";
 import { getChatByID } from "./database/chats"; // used for WebSocket upgrade membership check
+import { generatePagesRoutes } from "./pages/pages_routes";
 
 // Creates a client for every request and appends session info to the response
 function convertRoutes(conn: {supabaseURL: string, supabaseKey: string}, routes: {[K: string]: {[R: string]: (req: BunRequest<any>, client: SupabaseClient) => Promise<Response>}}) {
@@ -29,6 +30,7 @@ export const initApp = (supabaseConn: {supabaseURL: string, supabaseKey: string}
     server = Bun.serve({
         port: 3000,
         routes: {
+            ...generatePagesRoutes("./pages/"),
             ...convertRoutes(supabaseConn, listingRoutes),
             ...convertRoutes(supabaseConn, userRoutes),
             ...convertRoutes(supabaseConn, accountRoutes),
