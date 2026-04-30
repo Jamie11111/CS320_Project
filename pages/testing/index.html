@@ -24,8 +24,10 @@
     <div class="container">
         <h1>Make Request</h1>
         <form id="fetch-form">
-            <label for="url">URL:</label>
-            <input type="text" id="url" name="url" required>
+            <div class="input-line">
+                <label for="url">URL:</label>
+                <input type="text" id="url" name="url" placeholder="/api/listings" required>
+            </div>
             <label for="method">Method:</label>
             <select name="method" id="method">
                 <option value="GET">GET</option>
@@ -41,9 +43,17 @@
                 <option value="file">file</option>
             </select>
 
+            <details>
+                <summary>
+                    Headers
+                </summary>
+                <div id="add-headers-container">
+                    
+                </div>
+                <button type="button" id="add-header-btn">+</button>
+            </details>
+
             <div id="dynamic-input-container">
-                <label for="payload">Body (JSON):</label>
-                <textarea id="payload" name="payload" rows="8"></textarea>
             </div>
 
             <button type="submit">Make Request</button>
@@ -58,5 +68,13 @@
         <div id="photos-container">
             <!-- Photos will be loaded here -->
         </div>
+        <details>
+            <summary>
+                History
+            </summary>
+            <div id="history-container">
+                <!-- History will be loaded here -->
+            </div>
+        </details>
     </div>
 </html>

@@ -7,6 +7,21 @@ import { addListingPhoto } from "../../database/photos";
 import { upload } from "../../database/storage";
 
 
+/**
+ * Shuffles an array in-place using the Fisher-Yates algorithm.
+ * @param array The array to be shuffled.
+ */
+function shuffle<T>(array: T[]): T[] {
+  for (let i = array.length - 1; i > 0; i--) {
+    // Generate a random index between 0 and i
+    const j = Math.floor(Math.random() * (i + 1));
+    
+    // Swap elements using array destructuring
+    [array[i], array[j]] = [array[j]!, array[i]!];
+  }
+  return array;
+}
+
 // Copy pasted from test_helpers.ts, but returns the auth Users instead of profiles because we need session tokens for endpoint testing
 export async function generateUsers(supabaseConn: {supabaseURL: string, supabaseKey: string}, count: number, verbose: boolean = false) {
     const vlog = verbose ? console.log : (..._args: any[]) => {};
@@ -176,7 +191,7 @@ export async function generateListings(supabaseConn: {supabaseURL: string, supab
     });
 
     const categories = Object.keys(categoryMappings);
-    let generatedListings = [];
+    let generatedListings: {[key: string]: any}[] = [];
 
     for (let i = 0; i < categories.length; i++) {
         const category = categories[i]!;
@@ -226,5 +241,6 @@ export async function generateListings(supabaseConn: {supabaseURL: string, supab
             }
         }
     }
-    return generatedListings;
+    
+    return shuffle(generatedListings);
 }

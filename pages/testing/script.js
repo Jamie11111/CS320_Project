@@ -9,6 +9,17 @@ const cookies = document.cookie.split(';').reduce((acc, cookie) => {
 accessToken = cookies.accessToken || null;
 refreshToken = cookies.refreshToken || null;
 
+function getImage(url) {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.style.height = '300px';
+    img.style.width = 'auto';
+    img.onload = () => resolve(img.naturalWidth > 0 ? img : null); // Confirms it has actual dimensions
+    img.onerror = () => resolve(null); // Not a valid image
+    img.src = url;
+  });
+}
+
 /**
  * Makes a fetch request with locally stored authorization tokens.
  * 
@@ -78,7 +89,11 @@ form.addEventListener('submit', async (e) =>{
 }); 
 
 const contentTypeSelect = document.getElementById('content-type');
+const methodSelect = document.getElementById('method');
 const container = document.getElementById('dynamic-input-container');
+// const payloadHeaders = document.getElementById('payload-headers');
+const payloadHeaders = [];
+const headersContainer = document.getElementById('add-headers-container');
 
 contentTypeSelect.addEventListener('change', (e) => {
   const type = e.target.value;
@@ -87,12 +102,15 @@ contentTypeSelect.addEventListener('change', (e) => {
   if (type === 'json' || type === 'plain') {
     const label = document.createElement('label');
     label.textContent = type === 'json' ? 'Body (JSON):' : 'Body (Text):';
-    
+    label.classList.add('payload-label');
+
     const textarea = document.createElement('textarea');
     textarea.id = 'payload';
     textarea.name = 'payload';
     textarea.rows = 8;
-    
+    textarea.value = '{\n\n}';
+    textarea.classList.add('payload-textarea');
+
     container.append(label, textarea);
   } 
   else if (type === 'file') {
@@ -108,7 +126,46 @@ contentTypeSelect.addEventListener('change', (e) => {
   }
 });
 
+methodSelect.addEventListener('change', (e) => {
+    const method = e.target.value;
+    if (method === 'GET') {
+        contentTypeSelect.value = 'plain';
+        container.innerHTML = '';
+    }
+    else if (container.innerHTML.trim() === '') {
+        const type = contentTypeSelect.value;
+        if (type === 'json' || type === 'plain') {
+            const label = document.createElement('label');
+            label.textContent = type === 'json' ? 'Body (JSON):' : 'Body (Text):';
+            label.classList.add('payload-label');
+
+            const textarea = document.createElement('textarea');
+            textarea.id = 'payload';
+            textarea.name = 'payload';
+            textarea.rows = 8;
+            textarea.value = '{\n\n}';
+            textarea.classList.add('payload-textarea');
+
+            container.append(label, textarea);
+        } 
+        else if (type === 'file') {
+            const label = document.createElement('label');
+            label.textContent = 'Upload File:';
+
+            const fileInput = document.createElement('input');
+            fileInput.type = 'file';
+            fileInput.id = 'payload';
+            fileInput.name = 'payload';
+
+            container.append(label, fileInput);
+        }
+    }
+
+    
+});
+
 const fetchForm = document.getElementById('fetch-form');
+const historyContainer = document.getElementById('history-container');
 
 fetchForm.addEventListener('submit', async (e) => {
     const photosContainer = document.getElementById('photos-container');
@@ -117,27 +174,34 @@ fetchForm.addEventListener('submit', async (e) => {
 
     const fetchStatus = document.getElementById('fetch-status');
     const fetchResponse = document.getElementById('fetch-response');
+    historyContainer.innerHTML = fetchResponse.innerHTML + "<hr>" + historyContainer.innerHTML; // Append previous response to history
     fetchResponse.innerHTML = ''; // Clear previous response
     fetchStatus.textContent = `Status: Fetching...`;
 
     const url = document.getElementById('url').value;
-    const method = document.getElementById('method').value;
+    const method = methodSelect.value;
     const contentType = document.getElementById('content-type').value;
     const payloadElement = document.getElementById('payload');
 
     let body;
     let headers = {};
 
-    if (contentType === 'file') {
-        // Files must be sent using FormData; browser sets the boundary header automatically
-        body = new FormData();
-        body.append('file', payloadElement.files[0]);
-    } else if (contentType === 'json') {
-        body = payloadElement.value;
-        headers['Content-Type'] = 'application/json';
-    } else {
-        body = payloadElement.value;
-        headers['Content-Type'] = 'text/plain';
+    if (method !== 'GET'){
+        if (contentType === 'file') {
+            // Files must be sent using FormData; browser sets the boundary header automatically
+            body = payloadElement.files[0]; // Get the first selected file
+            console.log(payloadElement.files[0].type);
+        } else if (contentType === 'json') {
+            body = payloadElement.value;
+            headers['Content-Type'] = 'application/json';
+        } else {
+            body = payloadElement.value;
+            headers['Content-Type'] = 'text/plain';
+        }
+    }
+
+    if (payloadHeaders.length > 0) {
+        headers = { ...headers, ...Object.fromEntries(payloadHeaders.map(h => [h.keyInput.value, h.valueInput.value])) };
     }
 
     try {
@@ -163,24 +227,43 @@ const loadPhotosBtn = document.getElementById('load-photos');
 
 loadPhotosBtn.addEventListener('click', async () => {
     const html = document.getElementById('fetch-response').innerHTML;
-    const imageUrls = html.match(/https?:\/\/[^\s"\'<>]+?\.(?:jpg|jpeg|gif|png|webp|svg|bmp)/gi);
+    const urls = html.match(/https?:\/\/[^"\s<>{}|\\^~[\]` ]+/g);
+    
     const photosContainer = document.getElementById('photos-container');
     photosContainer.innerHTML = ''; // Clear previous photos
     
     photosContainer.innerHTML = '<h3>Extracted Photos:</h3>';
 
-    if (imageUrls) {
-        imageUrls.forEach(url => {
-            const img = document.createElement('img');
-            img.src = url;
-            img.alt = 'Extracted Photo';
-            img.style.maxWidth = '200px';
-            img.style.margin = '10px';
-            photosContainer.appendChild(img);
-        });
+    if (urls) {
+        await Promise.all(urls.map(url => getImage(url).then(img => img ? photosContainer.appendChild(img) : null)));
     } else {
         photosContainer.innerHTML += '<p>No image URLs found in the response.</p>';
     }
+});
+
+const addHeadersBtn = document.getElementById('add-header-btn');
+addHeadersBtn.addEventListener('click', () => {
+    const headerDiv = document.createElement('div');
+    headerDiv.classList.add('header-input-wrapper');
+    const headerKey = document.createElement('input');
+    headerKey.type = 'text';
+    headerKey.placeholder = 'Header Key';
+    const headerValue = document.createElement('input');
+    headerValue.type = 'text';
+    headerValue.placeholder = 'Header Value';
+    const removeBtn = document.createElement('button');
+    removeBtn.type = 'button';
+    removeBtn.textContent = 'X';
+    headerDiv.append(headerKey, headerValue, removeBtn);
+    headersContainer.appendChild(headerDiv);
+
+    const index = payloadHeaders.push({ keyInput: headerKey, valueInput: headerValue }) - 1;
+    removeBtn.addEventListener('click', () => {
+        headersContainer.removeChild(headerDiv);
+        payloadHeaders.splice(index, 1);
+    });
+
+    
 });
 
 
