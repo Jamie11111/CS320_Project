@@ -77,7 +77,7 @@ const ChatDetailScreen = () => {
         return;
       }
 
-      const ws = new WebSocket(`ws://localhost:3000/api/chat/ws?chat_id=${cid}&access_token=${accessToken}&refresh_token=${refreshToken}`);
+      const ws = new WebSocket(`ws://localhost:3000/api/chat/ws?chat_id=${cid}&token=${accessToken}&refresh_token=${refreshToken}`);
       wsRef.current = ws;
       ws.onopen = () => {
           
