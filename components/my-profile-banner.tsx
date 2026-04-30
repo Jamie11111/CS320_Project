@@ -1,10 +1,11 @@
 import "../global.css"
-import { View, Text, Pressable , TextInput, Image, Alert} from "react-native"
+import { View, Text, Pressable , TextInput, Image, Alert, ActivityIndicator} from "react-native"
 import { useRouter } from "expo-router"
 import { useEffect, useState } from "react"
 import React from "react"
 import samplepfp from "../assets/images/samplepfp.png"
 import * as ImagePicker from 'expo-image-picker';
+
 interface MyProfileBannerProps {
     name: string
     location: string
@@ -14,11 +15,13 @@ interface MyProfileBannerProps {
                               longitude?: number | null; }) => void
     profilePictureUrl: string | null;
     onPfpChange: (uri: string) => Promise<void>;
+    onEditPassword: () => void;
 }
 
-const MyProfileBanner = ({ name, location, email, onLocationChange, profilePictureUrl, onPfpChange }: MyProfileBannerProps) => {
+const MyProfileBanner = ({ name, location, email, onLocationChange, profilePictureUrl, onPfpChange, onEditPassword }: MyProfileBannerProps) => {
   const [suggestions, setSuggestions] = useState<any[]>([])
   const [inputValue, setInputValue] = useState(location)
+  const [isEditing, setIsEditing] = useState(false)
   
   const LOCATION_IQ_KEY = "pk.ff54db5bc5b50127d459385769a878a5" 
   const [isUploading, setIsUploading] = useState(false);
@@ -103,7 +106,7 @@ const MyProfileBanner = ({ name, location, email, onLocationChange, profilePictu
             <Text className="text-white text-xs font-bold">Edit</Text>
           </Pressable>
         </View>
-        <View className="ml-5 mt-3 flex-1">
+        <View className="ml-5 mt-3 flex-1 flex-col">
             <Text className="text-xl font-bold">Name: {name}</Text>
             <View className="flex-row">
               <Text className="text-lg font-medium">Email: {email}</Text>
@@ -136,6 +139,12 @@ const MyProfileBanner = ({ name, location, email, onLocationChange, profilePictu
               </View>
             )}
             </View>
+            <Pressable 
+              onPress={onEditPassword}
+              className="mt-3 bg-white border border-gray-200 py-2 px-4 rounded-xl self-start active:bg-gray-50"
+            >
+              <Text className="text-gray-600 text-xs font-bold uppercase">Change Password</Text>
+            </Pressable>
         </View>
       </View>
     <Text className="text-black text-3xl font-bold m-4 mb-1">Your Products</Text>

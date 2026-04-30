@@ -61,7 +61,7 @@ const SignUpScreen = () => {
       await AsyncStorage.setItem("access_token", session.accessToken);
       await AsyncStorage.setItem("refresh_token", session.refreshToken);
       if (session.accessToken) {
-        router.push("/")
+        router.push("/login")
       }
       else {
         console.error("Login failed:", responseJson.message)
