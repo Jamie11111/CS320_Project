@@ -49,7 +49,7 @@ export async function getPhotosByListingID(supabase: SupabaseClient, listingID: 
         .select('*')
         .eq('listing_id', listingID)
         .order('display_order', {ascending: true})
-        .limit(quantity > 0 ? quantity : 10);
+        .limit(quantity > 0 ? quantity : 100);
     
     if (error) {
         console.error('Error getting photos for a listing', error.message);
