@@ -3,7 +3,7 @@ import { Glob } from "bun";
 export function generatePagesRoutes(baseDir: string = "./pages/") {
     // The "**/*" pattern matches all files in the "pages" directory and its subdirectories
     const glob = new Glob("**/*");
-    const routes: {file: string, route: string}[] = [];
+    const routes: {file: string, route: string, redirect?: boolean}[] = [];
     baseDir = baseDir.replace(/\\/g, "/"); // Normalize Windows paths to use forward slashes
     if (!baseDir.endsWith("/")) {
         baseDir += "/";
@@ -30,8 +30,15 @@ export function generatePagesRoutes(baseDir: string = "./pages/") {
         }
         routes.push({file, route});
 
+        if (file.endsWith("index.html")) {
+            const indexRoute = route.replace(/\/index\.html$/, "");
+            if (indexRoute !== route) {
+                routes.push({file, route: indexRoute + "/"});
+                routes.push({file: indexRoute + "/", route: indexRoute, redirect: true});
+            }
+        }
         // console.log(`Registered route: ${route} -> ${file}`);
     }
 
-    return Object.fromEntries(routes.map(({route, file}) => [route, { GET: async (req: Request) => new Response(Bun.file(file)) }]));
+    return Object.fromEntries(routes.map(({route, file, redirect}) => [route, { GET: async (req: Request) => redirect ? Response.redirect(file, 301) : new Response(Bun.file(file)) }]));
 }

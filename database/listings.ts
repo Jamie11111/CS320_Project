@@ -40,14 +40,14 @@ export async function getListingsByUserID(supabase: SupabaseClient, userID: stri
 
 /* Get all info about the most recent listings that are still available. 
    Can specify the number of listings desired, default value is 100. */
-export async function getAvailableListings(supabase: SupabaseClient, userID?: string, limit: number = 100) {
+export async function getAvailableListings(supabase: SupabaseClient, userID?: string, limit: number = 100, offset: number = 0) {
     
     let query = supabase
         .from('listings')
         .select('*')
         .eq('sold', false)
         .order('date_posted', {ascending: false})
-        .limit(limit);
+        .range(offset, offset + limit);
     
     if (userID !== undefined) {
         query = query.neq('user_id', userID);
@@ -136,19 +136,12 @@ export async function deleteListing(supabase: SupabaseClient, listingID: number)
 
 /* For a given array of listings, adds a photos property to each listing with 
    up to photoLimit photos associated with that listing, sorted by display_order */
-export async function attachPhotosToListings(supabase: SupabaseClient, listings: any[], photoLimit?: number) {
-    
-    const result = [];
-
-    for (const listing of listings) {
-        const photos = await getPhotosByListingID(supabase, listing.listing_id);
-        result.push({
-            ...listing, 
-            photos: photoLimit == null ? photos : photos.slice(0, photoLimit),
-        });
-    }
-
-    return result;
+export async function attachPhotosToListings(supabase: SupabaseClient, listings: any[], photoLimit: number = 1) {
+    return Promise.all(listings.map(listing => 
+        getPhotosByListingID(supabase, listing.listing_id, photoLimit).then(photos => ({
+            ...listing, photos: !photoLimit ? photos : photos.slice(0, photoLimit)
+        })).catch(_err => ({...listing, photos: []}))
+    ));
 }
 
 /* Filtering function - takes in set of optional filters, user_id of user 
