@@ -12,6 +12,7 @@ import "../global.css";
 import Navbar from "../components/navbar";
 import ProfileFeedBanner from "../components/profile-feed-banner";
 import FeedCard from "../components/feed-card";
+import RedButton from "../components/red-button";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import DropDownPicker from "react-native-dropdown-picker";
 import { useState, useEffect } from "react";
@@ -521,13 +522,8 @@ const UploadProductPage = ({
         />
       </View>
       <View className="flex-row justify-around">
-        <Pressable
-          onPress={() => router.push("/my-profile")}
-          className="mb-4 mt-auto w-52 bg-umass-red rounded-xl p-3 items-center"
-        >
-          <Text className="text-white font-bold">Cancel</Text>
-        </Pressable>
-        <Pressable
+        <RedButton text="Cancel" onPressFunction={() => router.push("/my-profile")} />
+        {/* <Pressable
           onPress={handleSubmit}
           disabled={isLoading}
           className="mb-4 mt-auto w-52 bg-umass-red rounded-xl p-3 items-center"
@@ -535,16 +531,18 @@ const UploadProductPage = ({
           <Text className="text-white font-bold">
             {isLoading ? "Loading..." : resolvedIsEditing ? "Update" : "Upload"}
           </Text>
-        </Pressable>
+        </Pressable> */}
+        <RedButton disabled={isLoading} onPressFunction={handleSubmit} text={isLoading ? "Loading..." : resolvedIsEditing ? "Update" : "Upload"} />
       </View>
       <View className="flex-row justify-around">
         {resolvedIsEditing && (
-          <Pressable
-            onPress={() => handleDelete()}
-            className="mb-4 mt-auto w-52 bg-umass-red rounded-xl p-3 items-center"
-          >
-            <Text className="text-white font-bold">Delete</Text>
-          </Pressable>
+          // <Pressable
+          //   onPress={() => handleDelete()}
+          //   className="mb-4 mt-auto w-52 bg-umass-red rounded-xl p-3 items-center"
+          // >
+          //   <Text className="text-white font-bold">Delete</Text>
+          // </Pressable>
+          <RedButton onPressFunction={handleDelete} text="Delete" />
         )}
       </View>
     </ScrollView>

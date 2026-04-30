@@ -4,6 +4,7 @@ import { useRouter } from "expo-router"
 import React, { useEffect } from "react"
 import samplepfp from "../assets/images/samplepfp.png"
 import { fetchWithAuth } from "../scripts/authFetch"
+import RedButton from "./red-button"
 type ListingPhoto = {
   photoID?: number;
   photoURL: string;
@@ -74,7 +75,7 @@ const FeedCardExpanded = ({ name, location, price, condition, description, image
           }
           const data = await response.json()
           setName(data.name)
-          console.log("Fetched seller name:", data.name) // Debugging log
+          console.log("Fetched seller name:", data.name) 
         } catch (error) {
           console.error("Error fetching seller name:", error)
         }
@@ -156,16 +157,20 @@ const FeedCardExpanded = ({ name, location, price, condition, description, image
       </ScrollView>
     </View>
     <View className="flex-row justify-around">
-      <Pressable onPress={onClose} className="mb-4 mt-auto w-52 bg-umass-red rounded-xl p-3 items-center">
+      {/* <Pressable onPress={onClose} className="mb-4 mt-auto w-52 bg-umass-red rounded-xl p-3 items-center">
       <Text className="text-white font-bold">Close</Text>
-      </Pressable>
-      <Pressable onPress={async () => {
+      </Pressable> */}
+      <RedButton onPressFunction={onClose} text="Close" />
+      {/* <Pressable onPress={async () => {
         onClose()
         router.push({ pathname: "/messages", params: { chatId: await createOrGetChat() , sellerName: sellerName} })
       }} className="mb-4 mt-auto w-52 bg-umass-red rounded-xl p-3 items-center">
         <Text className="text-white font-bold">Message this Seller</Text>
-      </Pressable>
-      
+      </Pressable> */}
+      <RedButton onPressFunction={async () => {
+        onClose()
+        router.push({ pathname: "/messages", params: { chatId: await createOrGetChat() , sellerName: sellerName} })
+      }} text="Message this Seller" />
     </View>
     </View>
   </View>
