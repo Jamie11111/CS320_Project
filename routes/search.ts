@@ -1,7 +1,7 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { BunRequest } from "bun";
 import { getJsonOrQuery } from "./helpers";
-import { attachPhotosToListings, filterListings } from "../database/listings";
+import { attachPhotosAndLocationToListings, attachPhotosToListings, filterListings } from "../database/listings";
 
 export const searchRoutes = {
     "/api/listings/search": {
@@ -37,6 +37,6 @@ async function searchListings(supabase: SupabaseClient, req: BunRequest){
         return Response.json({error: "Must be logged in to search listings"}, {status: 401});
     }
     const res = await filterListings(supabase, query, user.id);
-    const listingsWithPhotos = await attachPhotosToListings(supabase, res, 1);
+    const listingsWithPhotos = await attachPhotosAndLocationToListings(supabase, res, 1);
     return Response.json(listingsWithPhotos, {status: 200});
 }

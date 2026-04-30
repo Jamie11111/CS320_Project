@@ -144,6 +144,16 @@ export async function attachPhotosToListings(supabase: SupabaseClient, listings:
     ));
 }
 
+export async function attachPhotosAndLocationToListings(supabase: SupabaseClient, listings: any[], photoLimit: number = 1) {
+    return Promise.all(listings.map(listing => Promise.all([
+        getPhotosByListingID(supabase, listing.listing_id, photoLimit),
+        supabase.from('users').select('address').eq('user_id', listing.user_id).single()
+    ]).then(([photos, locationData]) => ({
+            ...listing, photos: !photoLimit ? photos : photos.slice(0, photoLimit), location: locationData.data?.address
+        })).catch(_err => ({...listing, photos: []}))
+    ));
+}
+
 /* Filtering function - takes in set of optional filters, user_id of user 
    making request required in order to sort by distance. */
 export async function filterListings(supabase: SupabaseClient,
