@@ -31,5 +31,5 @@ export async function getSearchSuggestion(supabase: SupabaseClient, query: strin
         }
     }
 
-    return null;
+    return [];
 }
