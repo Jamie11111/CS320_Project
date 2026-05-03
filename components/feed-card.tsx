@@ -44,7 +44,12 @@ const FeedCard = ({
   // console.log("FeedCard props:", { name, location, price, description, condition, images, isEditing, userId, listingId, sold, sellerPfpUrl })
   const formatLocation = (loc: string) => {
     if (!loc) return "Location not available";
+    console.log("Original location:", loc);
     const parts = loc.split(',');
+    console.log("Parts:", parts);
+    if (parts.length >= 5) {
+      return `${parts[parts.length - 5].trim()}, ${parts[parts.length - 3].trim()}`;
+    }
     if (parts.length >= 2) {
       return `${parts[parts.length - 2].trim()}, ${parts[parts.length - 1].trim()}`;
     }
@@ -52,7 +57,7 @@ const FeedCard = ({
   };
 
   const displayLocation = formatLocation(location);
-
+  console.log("Display Location:", displayLocation);
   const handlePress = () => {
     if (isEditing) {
       router.push({
@@ -81,11 +86,11 @@ const FeedCard = ({
         <Image source={{ uri: images[0]?.photoURL }} className="w-full h-full rounded-lg" />
         <View className="bg-umass-red absolute bottom-0 w-full h-[25%] rounded-br-lg rounded-bl-lg flex-row flex-grow flex-1 p-1">
           <View className="flex-1 ml-0.5 max-w-[80%]">
-            <Text className="flex-1 text-lg font-bold text-white">{name}</Text>
-            <Text className="text-md text-white">{displayLocation}</Text>
+            <Text numberOfLines={1} className="flex-1 text-lg font-bold whitespace-nowrap text-ellipsis overflow-hidden text-white">{name}</Text>
+            <Text numberOfLines={1} className="text-md whitespace-nowrap text-ellipsis overflow-hidden text-white">{displayLocation}</Text>
           </View>
           <View className="justify-center absolute right-0 top-[40%] mr-2">
-            <Text className="text-sm text-white">${sold? "Sold" : price}</Text>
+            <Text className="text-sm text-white">{sold? "Sold" : `$${price}`}</Text>
           </View>
         </View>
       </Pressable>

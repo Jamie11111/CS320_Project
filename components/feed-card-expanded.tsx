@@ -30,12 +30,18 @@ const FeedCardExpanded = ({ name, location, price, condition, description, image
   const router = useRouter()
   const formatLocation = (loc: string) => {
     if (!loc) return "Location not available";
+    console.log("Original location:", loc);
     const parts = loc.split(',');
+    console.log("Parts:", parts);
+    if (parts.length >= 5) {
+      return `${parts[parts.length - 5].trim()}, ${parts[parts.length - 3].trim()}`;
+    }
     if (parts.length >= 2) {
       return `${parts[parts.length - 2].trim()}, ${parts[parts.length - 1].trim()}`;
     }
     return loc;
   };
+
 
   const displayLocation = formatLocation(location);
   const displayImages = images.slice(0, 5)
