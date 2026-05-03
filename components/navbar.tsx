@@ -33,7 +33,7 @@ const Navbar = ({ canNavigate = true, userPfp }: NavbarProps) => {
     
     <View className="w-full h-24 bg-umass-red  px-6">
       <View className="flex-row items-center justify-between mt-3">
-        <Pressable onPress={() => handleNavAttempt("/")} className={`mt-2 flex-row items-center justify-around w-12 h-12 rounded-lg ${currentPath === "/" ? "shadow-xl -translate-y-1" :"shadow-sm"}`}>
+        <Pressable onPress={() => handleNavAttempt("/main-feed")} className={`mt-2 flex-row items-center justify-around w-12 h-12 rounded-lg ${currentPath === "/" ? "shadow-xl -translate-y-1" :"shadow-sm"}`}>
           <Image source={Logo} className={`w-12 h-16`} />
         </Pressable>
         <Pressable

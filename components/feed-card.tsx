@@ -85,7 +85,7 @@ const FeedCard = ({
             <Text className="text-md text-white">{displayLocation}</Text>
           </View>
           <View className="justify-center absolute right-0 top-[40%] mr-2">
-            <Text className="text-sm text-white">{sold? "Sold" : price}</Text>
+            <Text className="text-sm text-white">${sold? "Sold" : price}</Text>
           </View>
         </View>
       </Pressable>
