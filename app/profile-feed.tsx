@@ -18,7 +18,7 @@ const ProfileFeedPage = () => {
     user_id: string
     name: string
     email: string
-    location: string
+    address: string
     profile_picture_url: string | null
   }
   type Listing = {
@@ -93,14 +93,14 @@ const ProfileFeedPage = () => {
   return (
     <View >
       <View className="h-[92%]">
-        <ProfileFeedBanner authorName={userData?.name || "John Doe"} authorLocation={userData?.location || "Amherst, MA"} authorPfp={userData?.profile_picture_url || null} />
+        <ProfileFeedBanner authorName={userData?.name || "John Doe"} authorLocation={userData?.address || "Location not available"} authorPfp={userData?.profile_picture_url || null} />
         <ScrollView contentContainerStyle={{ flexDirection: "row", flexWrap: "wrap", marginLeft: 3}}>
             {listings.map((listing, index) => (
               <FeedCard
                 key={index}
                 name={listing.product_name}
                 price={listing.price}
-                location={userData?.location || "Amherst, MA"}
+                location={userData?.address || "Location not available"}
                 description={listing.product_desc ?? ""}
                 condition={listing.item_condition}
                 userId={listing.user_id}
