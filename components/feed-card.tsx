@@ -40,7 +40,7 @@ const FeedCard = ({
 }: FeedCardProps) => {
   const [expanded, setExpanded] = useState(false)
   const router = useRouter()
-
+  console.log("FeedCard props:", { name, location, price, description, condition, images, isEditing, userId, listingId, sold, sellerPfpUrl })
   const formatLocation = (loc: string) => {
     const parts = loc.split(',');
     if (parts.length >= 2) {
@@ -96,6 +96,7 @@ const FeedCard = ({
           condition={condition}
           description={description}
           images={images}
+          listingId={listingId}
           userId={userId}
           onClose={() => setExpanded(false)}
           sellerPfpUrl={sellerPfpUrl}

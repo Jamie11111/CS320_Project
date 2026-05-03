@@ -20,12 +20,13 @@ interface FeedCardExpandedProps {
   images?: ListingPhoto[]
   onClose: () => void
   userId: string
+  listingId: string
   sellerPfpUrl?: string | null
 }
 
 
 
-const FeedCardExpanded = ({ name, location, price, condition, description, images = [], onClose, userId, sellerPfpUrl}: FeedCardExpandedProps) => {
+const FeedCardExpanded = ({ name, location, price, condition, description, images = [], onClose, userId, listingId, sellerPfpUrl}: FeedCardExpandedProps) => {
   const router = useRouter()
   const formatLocation = (loc: string) => {
     const parts = loc.split(',');
@@ -83,7 +84,7 @@ const FeedCardExpanded = ({ name, location, price, condition, description, image
 
       const fetchImages = async () => {
         try {
-          const response = await fetch(`http://localhost:3000/api/listings/${userId}/photos`, {
+          const response = await fetch(`http://localhost:3000/api/listing/${listingId}/photos`, {
             method: "GET",
             headers: {
               "Content-Type": "application/json"
@@ -100,7 +101,7 @@ const FeedCardExpanded = ({ name, location, price, condition, description, image
       }
       fetchSellerName()
       fetchImages()
-    }, [userId])
+    }, [userId, listingId])
   return (
   <View className="flex-1 pt-16">
     <View className="flex-1 w-full bg-white overflow-hidden">
