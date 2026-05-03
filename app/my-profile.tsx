@@ -220,6 +220,11 @@ const handlePasswordUpdate = async () => {
   
           const data: unknown = await response.json();
           if (!Array.isArray(data)) throw new Error("Invalid response format")
+                    console.log("Fetched listings data:", data);
+          if(data.length === 0) {
+            setListings([]);
+            return;
+          }
           const normalized = data.map((listing: any) => ({
             ...listing,
             photos: listing.photos.map((photo: any) => ({
@@ -228,7 +233,6 @@ const handlePasswordUpdate = async () => {
                 photoPath: photo.photo_path,
             }))
           }));
-          console.log("Normalized photos", normalized[0].photos) // Debugging log
           setListings(normalized);
         } catch (error) {
           console.error("Error fetching listings", error)
