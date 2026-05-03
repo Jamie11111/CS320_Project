@@ -5,6 +5,7 @@ import "../global.css"
 import * as SecureStore from 'expo-secure-store';
 import { fetchWithAuth } from "../scripts/authFetch"
 import React from "react";
+import Home from "./main-feed";
 const LoginScreen = () => {
   const router = useRouter()
   const [showPass, setShowPass] = useState(false)
@@ -36,7 +37,7 @@ const LoginScreen = () => {
       await SecureStore.setItemAsync("accessToken", session.accessToken);
       await SecureStore.setItemAsync("refreshToken", session.refreshToken);
       if (session.accessToken) {
-        router.push("/")
+        router.push("/main-feed")
       }
       else {
         console.error("Login failed:", responseJson.message)

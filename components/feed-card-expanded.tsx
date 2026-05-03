@@ -29,6 +29,7 @@ interface FeedCardExpandedProps {
 const FeedCardExpanded = ({ name, location, price, condition, description, images = [], onClose, userId, listingId, sellerPfpUrl}: FeedCardExpandedProps) => {
   const router = useRouter()
   const formatLocation = (loc: string) => {
+    if (!loc) return "Location not available";
     const parts = loc.split(',');
     if (parts.length >= 2) {
       return `${parts[parts.length - 2].trim()}, ${parts[parts.length - 1].trim()}`;

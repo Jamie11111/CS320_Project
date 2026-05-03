@@ -40,8 +40,10 @@ const FeedCard = ({
 }: FeedCardProps) => {
   const [expanded, setExpanded] = useState(false)
   const router = useRouter()
-  console.log("FeedCard props:", { name, location, price, description, condition, images, isEditing, userId, listingId, sold, sellerPfpUrl })
+  
+  // console.log("FeedCard props:", { name, location, price, description, condition, images, isEditing, userId, listingId, sold, sellerPfpUrl })
   const formatLocation = (loc: string) => {
+    if (!loc) return "Location not available";
     const parts = loc.split(',');
     if (parts.length >= 2) {
       return `${parts[parts.length - 2].trim()}, ${parts[parts.length - 1].trim()}`;
