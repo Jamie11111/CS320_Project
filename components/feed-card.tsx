@@ -80,8 +80,8 @@ const FeedCard = ({
       <Pressable className="w-[46%] h-[200px] bg-gray-300 rounded-lg shadow-sm m-2 flex-col" onPress={handlePress}>
         <Image source={{ uri: images[0]?.photoURL }} className="w-full h-full rounded-lg" />
         <View className="bg-umass-red absolute bottom-0 w-full h-[25%] rounded-br-lg rounded-bl-lg flex-row flex-grow flex-1 p-1">
-          <View className="flex-1 ml-0.5">
-            <Text className="text-lg font-bold text-white">{name}</Text>
+          <View className="flex-1 ml-0.5 max-w-[80%]">
+            <Text className="flex-1 text-lg font-bold text-white">{name}</Text>
             <Text className="text-md text-white">{displayLocation}</Text>
           </View>
           <View className="justify-center absolute right-0 top-[40%] mr-2">
