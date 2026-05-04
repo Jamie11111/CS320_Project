@@ -3,7 +3,7 @@ import { useRouter } from "expo-router"
 import { useState } from "react"
 import "../global.css"
 import * as SecureStore from 'expo-secure-store';
-import { fetchWithAuth } from "../scripts/authFetch"
+import { fetchFromBackend } from "../scripts/authFetch"
 import React from "react";
 import Home from "./main-feed";
 import Logo from "../assets/images/Logo.png"

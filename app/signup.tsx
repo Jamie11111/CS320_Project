@@ -5,7 +5,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage"
 import * as SecureStore from 'expo-secure-store';
 import "../global.css"
 import React from "react"
-import { fetchWithAuth } from "../scripts/authFetch"
+import { fetchFromBackend } from "../scripts/authFetch"
 import Logo from "../assets/images/Logo.png"
 
 const SignUpScreen = () => {
@@ -115,7 +115,7 @@ const SignUpScreen = () => {
 
 
      // Update User Location
-     const locationResponse = await fetchWithAuth('http://localhost:3000/api/user', {
+     const locationResponse = await fetchFromBackend('/api/user', {
        method: 'PATCH',
        headers: {
          'Content-Type': 'application/json',

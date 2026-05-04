@@ -3,7 +3,7 @@ import { View, Text, ScrollView, Pressable, Image } from "react-native"
 import { useRouter } from "expo-router"
 import React, { useEffect } from "react"
 import samplepfp from "../assets/images/samplepfp.png"
-import { fetchWithAuth } from "../scripts/authFetch"
+import { fetchFromBackend } from "../scripts/authFetch"
 import RedButton from "./red-button"
 type ListingPhoto = {
   photoID?: number;
@@ -49,7 +49,7 @@ const FeedCardExpanded = ({ name, location, price, condition, description, image
   const [listingImages, setImages] = React.useState<ListingPhoto[]>([])
   const createOrGetChat = async () => {
     try {
-      const response = await fetchWithAuth(`http://localhost:3000/api/chats`, {
+      const response = await fetchFromBackend(`/api/chats`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

@@ -3,7 +3,7 @@ import "../global.css"
 import React, { useEffect } from "react"
 import samplepfp from "../assets/images/samplepfp.png"
 import { useRouter } from "expo-router"
-import { fetchWithAuth } from "../scripts/authFetch"
+import { fetchFromBackend } from "../scripts/authFetch"
 interface ChatRowProps {
   sellerId: string
   chatId: string
@@ -19,7 +19,7 @@ const ChatRow = ({ sellerId, chatId, lastMessage, lastMessageTime, isUnread, pfp
   useEffect(() => {
     const fetchSellerName = async () => {
       try {
-        const response = await fetchWithAuth(`http://localhost:3000/api/user/${sellerId}`, {
+        const response = await fetchFromBackend(`/api/user/${sellerId}`, {
           method: "GET",
           headers: {
             "Content-Type": "application/json"

@@ -6,7 +6,7 @@ import FeedCard from '../components/feed-card'
 import { ScrollView } from 'react-native'
 import SearchBar from '../components/search-bar'
 import React from 'react'
-import { fetchWithAuth } from '../scripts/authFetch'
+import { fetchFromBackend } from "../scripts/authFetch"
 
 type ListingPhoto = {
   photoID?: number;
@@ -39,7 +39,7 @@ const Home = () => {
   const fetchListings = async (query: string) => {
     try {
       const encodedQuery = encodeURIComponent(query.trim())
-      const response = await fetchWithAuth(`http://localhost:3000/api/listings?query=${encodedQuery}&sort_by=distance&lmt=40`, {
+      const response = await fetchFromBackend(`/api/listings?query=${encodedQuery}&sort_by=distance&lmt=40`, {
         method: 'GET',
         headers: {
             'Content-Type': 'application/json',
@@ -75,7 +75,7 @@ const Home = () => {
   useEffect(() => {
     const bootstrap = async () => {
       try {
-        const userRes = await fetchWithAuth('http://localhost:3000/api/user');
+        const userRes = await fetchFromBackend('/api/user');
         if (userRes.ok) {
           const uData = await userRes.json();
           setCurrentUser(uData);

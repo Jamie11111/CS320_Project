@@ -1,7 +1,7 @@
 import { Pressable, Text } from "react-native"
 import React from "react"
 import { useRouter } from "expo-router"
-import { fetchWithAuth } from "../scripts/authFetch"
+import { fetchFromBackend } from "../scripts/authFetch"
 
 interface RedButtonProps {
     text: string,

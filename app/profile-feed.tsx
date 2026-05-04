@@ -4,7 +4,7 @@ import Navbar from "../components/navbar"
 import ProfileFeedBanner from "../components/profile-feed-banner"
 import FeedCard from "../components/feed-card"
 import React, { useEffect, useState } from "react"
-import { fetchWithAuth } from "../scripts/authFetch"
+import { fetchFromBackend } from "../scripts/authFetch"
 import { useLocalSearchParams } from "expo-router"
 type ListingPhoto = {
   photoID?: number;
@@ -48,19 +48,19 @@ const ProfileFeedPage = () => {
     const fetchListings = async () => {
       try {
 
-        const meRes = await fetchWithAuth(`http://localhost:3000/api/user`);
+        const meRes = await fetchFromBackend(`/api/user`);
         if (meRes.ok) {
           setCurrentUser(await meRes.json());
         }
 
-        const userResponse = await fetchWithAuth(`http://localhost:3000/api/user/${userId}`, {
+        const userResponse = await fetchFromBackend(`/api/user/${userId}`, {
           headers: {
             'Content-Type': 'application/json'
           }
         });
         const userData = await userResponse.json();
         setUserData(userData);
-        const response = await fetchWithAuth(`http://localhost:3000/api/listings/user/${userId}`, {
+        const response = await fetchFromBackend(`/api/listings/user/${userId}`, {
           method: 'GET',
           headers: {
               'Content-Type': 'application/json',

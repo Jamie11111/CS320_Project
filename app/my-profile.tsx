@@ -6,7 +6,7 @@ import FeedCard from "../components/feed-card"
 import { useRouter } from "expo-router"
 import { useEffect, useState } from "react"
 import React from "react"
-import { fetchWithAuth } from "../scripts/authFetch"
+import { fetchFromBackend } from "../scripts/authFetch"
 import RedButton from "../components/red-button"
 
 type ListingPhoto = {
@@ -71,7 +71,7 @@ const MyProfilePage = () => {
   }
 
   try {
-    const response = await fetchWithAuth('http://localhost:3000/api/user', {
+    const response = await fetchFromBackend('/api/user', {
       method: 'PATCH',
       headers: {
         'Content-Type': 'application/json',
@@ -109,7 +109,7 @@ const handlePfpUpdate = async (localUri: string) => {
     const filename = `profile_${userData.user_id}_${Date.now()}.jpg`;
 
     //Upload to Supabase Storage 
-    const uploadResponse = await fetchWithAuth('http://localhost:3000/api/account/photo-upload', {
+    const uploadResponse = await fetchFromBackend('/api/account/photo-upload', {
       method: 'POST',
       headers: {
         'File-Metadata': JSON.stringify({ filename }),
@@ -121,7 +121,7 @@ const handlePfpUpdate = async (localUri: string) => {
 
     const { publicUrl, path } = await uploadResponse.json();
     //Update the users table with the permanent URL
-    const response = await fetchWithAuth('http://localhost:3000/api/user', {
+    const response = await fetchFromBackend('/api/user', {
       method: 'PATCH',
       headers: {
         'Content-Type': 'application/json',
@@ -163,7 +163,7 @@ const handlePasswordUpdate = async () => {
 
     setPasswordLoading(true);
     try {
-     const response = await fetchWithAuth('http://localhost:3000/api/account', {
+     const response = await fetchFromBackend('/api/account', {
        method: 'PATCH',
        headers: { 'Content-Type': 'application/json' },
        body: JSON.stringify({
@@ -191,7 +191,7 @@ const handlePasswordUpdate = async () => {
 {/* Obtain listings*/}
       const fetchListings = async () => {
         try {
-          const userResponse = await fetchWithAuth('http://localhost:3000/api/user', {
+          const userResponse = await fetchFromBackend('/api/user', {
             headers: {
               'Content-Type': 'application/json'
             }
@@ -209,7 +209,7 @@ const handlePasswordUpdate = async () => {
             setUserLocation(userData.address);
           }
 
-          const response = await fetchWithAuth(`http://localhost:3000/api/listings/user/${userData.user_id}`, {
+          const response = await fetchFromBackend(`/api/listings/user/${userData.user_id}`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
