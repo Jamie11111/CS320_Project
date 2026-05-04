@@ -100,8 +100,12 @@ const FeedCardExpanded = ({ name, location, price, condition, description, image
           if (!response.ok) {
             throw new Error("Failed to fetch listing photos")
           }
-          const data = await response.json()
-          setImages(data)
+          const data = await response.json();
+          setImages(data.map((photo: any) => ({
+            photoID: photo.photo_id,
+            photoURL: photo.photo_url,
+            photoPath: photo.photo_path,
+          })))
         } catch (error) {
           console.error("Error fetching listing photos:", error)
         }
@@ -120,7 +124,7 @@ const FeedCardExpanded = ({ name, location, price, condition, description, image
       contentContainerStyle={{ paddingHorizontal: 16, alignItems: "center" }}
       showsHorizontalScrollIndicator={false}
       >
-      {displayImages.map((image, index) => (
+      {listingImages.map((image, index) => (
         <Image
           key={index}
           source={{ uri: image.photoURL }}

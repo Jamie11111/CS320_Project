@@ -3,7 +3,7 @@ import "../global.css"
 import {useEffect, useState} from 'react'
 import Navbar from '../components/navbar'
 import FeedCard from '../components/feed-card'
-import { ScrollView } from 'react-native'
+import { ScrollView, FlatList, ActivityIndicator } from 'react-native'
 import SearchBar from '../components/search-bar'
 import React from 'react'
 import { fetchFromBackend } from "../scripts/authFetch"
@@ -33,7 +33,10 @@ type Listing = {
   // images: FeedImageSource[]
 }
 const Home = () => {
-  const [listings, setListings] = useState<Listing[]>([])
+  const [listings, setListings] = useState<Listing[]>([]);
+  const [offset, setOffset] = useState(0);
+  const [loading, setLoading] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
   const [currentUser, setCurrentUser] = useState<any>(null)
   const [searchQuery, setSearchQuery] = useState("")
 
@@ -44,6 +47,9 @@ const Home = () => {
   const [showFilters, setShowFilters] = useState(false)
 
   const fetchListings = async (query: string) => {
+    if (loading || !hasMore) return;
+    setLoading(true);
+
     try {
 
       const params = new URLSearchParams();
@@ -53,18 +59,19 @@ const Home = () => {
       if (condition) params.append("condition", condition);
       if (priceLimit.trim()) params.append("priceLimit", priceLimit.trim());
       if (sold !== undefined) params.append("sold", String(sold));
+      params.append("lmt", "10");
+      params.append("offset", String(offset));
 
-      const response = await fetchFromBackend(`/api/listings?${params.toString()}`, {
-        method: 'GET',
-        headers: {
-            'Content-Type': 'application/json',
-        }
-      });
+      const response = await fetchFromBackend(`/api/listings/search?${params.toString()}`);
       if (!response.ok) {
         throw new Error(`Failed: ${response.status}`);
       }
 
       const data: Listing[] = await response.json();
+      if (data.length === 0){
+        setHasMore(false);
+      }
+      setOffset(offset + data.length);
       const normalized = data.map((listing: any) => ({
         ...listing,
         photos: listing.photos.map((photo: any) => ({
@@ -75,9 +82,11 @@ const Home = () => {
       }));
 
       if (!Array.isArray(data)) throw new Error("Invalid response format")
-      setListings(normalized);
+      setListings([...listings, ...normalized]);
     } catch (error) {
       console.error("Error fetching listings", error)
+    } finally {
+      setLoading(false);
     }
   }
 
@@ -203,23 +212,28 @@ const Home = () => {
             </Pressable>
           </View>
         )}        
-        <ScrollView contentContainerStyle={{ flexDirection: "row", flexWrap: "wrap", marginLeft: 3}}>
-          {listings.map((listing, index) => (
-            <React.Fragment key={listing.listing_id || String(index)}>
-              <FeedCard
-                name={listing.product_name}
-                price={listing.price}
-                location={listing.location}
-                description={listing.product_desc ?? ""}
-                condition={listing.item_condition}
-                userId={listing.user_id}
-                images={listing.photos}
-                listingId={listing.listing_id}
-                sold={listing.sold}
-              />
-            </React.Fragment>
-          ))} 
-        </ScrollView>
+        <FlatList
+          data = {listings}
+          key={2}
+          numColumns={2} 
+          contentContainerStyle={{ paddingHorizontal: 3 }}
+          keyExtractor={(item) => item.listing_id.toString()}
+          renderItem={({ item }) => (<React.Fragment key={item.listing_id}><FeedCard
+            name={item.product_name}
+            price={item.price}
+            location={item.location}
+            description={item.product_desc ?? ""}
+            condition={item.item_condition}
+            userId={item.user_id}
+            images={item.photos}
+            listingId={item.listing_id}
+            sold={item.sold}
+          /> </React.Fragment>)}
+          onEndReached={() => fetchListings(searchQuery)}
+          onEndReachedThreshold={0.5}
+          ListFooterComponent={loading ? <ActivityIndicator size="large" /> : null}
+        />
+
       </View>
       <Navbar userPfp={currentUser?.profile_picture_url || null} />
     </View>

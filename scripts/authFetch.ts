@@ -13,7 +13,6 @@ export const backendURL = "http://localhost:3000"
  * @returns Response of the fetch request
  */
 export async function fetchWithAuth(input: RequestInfo | URL, init?: RequestInit, useSession: boolean = true) {
-    console.log(input);
     // Define init and get headers
     if (init === undefined){
         init = {};
