@@ -46,32 +46,24 @@ const Home = () => {
   const [sold, setSold] = useState<boolean | undefined>(false)
   const [showFilters, setShowFilters] = useState(false)
 
-  const fetchListings = async (query: string) => {
-    if (loading || !hasMore) return;
-    setLoading(true);
+  const fetchNextListings = async (limit: number = 10, offset: number = 0) => {
+    const params = new URLSearchParams();
+    if (searchQuery.trim().length > 0) params.append("query", searchQuery.trim());
+    if (sortBy) params.append("sort_by", sortBy);
+    if (condition) params.append("condition", condition);
+    if (priceLimit.trim()) params.append("priceLimit", priceLimit.trim());
+    if (sold !== undefined) params.append("sold", String(sold));
 
-    try {
+    params.set("limit", String(limit));
+    params.set("offset", String(offset));
 
-      const params = new URLSearchParams();
-
-      if (query.trim()) params.append("query", query.trim());
-      if (sortBy) params.append("sort_by", sortBy);
-      if (condition) params.append("condition", condition);
-      if (priceLimit.trim()) params.append("priceLimit", priceLimit.trim());
-      if (sold !== undefined) params.append("sold", String(sold));
-      params.append("lmt", "10");
-      params.append("offset", String(offset));
-
-      const response = await fetchFromBackend(`/api/listings/search?${params.toString()}`);
+    const response = await fetchFromBackend(`/api/listings?${params.toString()}`);
       if (!response.ok) {
         throw new Error(`Failed: ${response.status}`);
       }
 
       const data: Listing[] = await response.json();
-      if (data.length === 0){
-        setHasMore(false);
-      }
-      setOffset(offset + data.length);
+
       const normalized = data.map((listing: any) => ({
         ...listing,
         photos: listing.photos.map((photo: any) => ({
@@ -81,8 +73,34 @@ const Home = () => {
         }))
       }));
 
-      if (!Array.isArray(data)) throw new Error("Invalid response format")
-      setListings([...listings, ...normalized]);
+      return normalized;
+  }
+
+  const fetchListings = async (query: string) => {
+    setOffset(0);
+    setHasMore(true);
+    setLoading(true);
+    setListings([]);
+
+    try{
+      const listings = await fetchNextListings(10, 0);
+      setListings(listings);
+      setOffset(listings.length);
+    } catch (error) {
+      console.error("Error fetching listings", error)
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchMoreListings = async () => {
+    if (loading || !hasMore) return;
+    setLoading(true);
+
+    try {
+      const listings = await fetchNextListings(10, offset);
+      setListings(prev => [...prev, ...listings]);
+      setOffset(prev => prev + listings.length);
     } catch (error) {
       console.error("Error fetching listings", error)
     } finally {
@@ -229,7 +247,7 @@ const Home = () => {
             listingId={item.listing_id}
             sold={item.sold}
           />)}
-          onEndReached={() => fetchListings(searchQuery)}
+          onEndReached={() => fetchMoreListings()}
           onEndReachedThreshold={0.5}
           ListFooterComponent={loading ? <ActivityIndicator size="large" /> : null}
         />
