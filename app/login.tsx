@@ -47,7 +47,7 @@ const LoginScreen = () => {
             // if (session && session.accessToken) {
             //   await SecureStore.setItemAsync("accessToken", session.accessToken);
             //   await SecureStore.setItemAsync("refreshToken", session.refreshToken);
-            //   router.push("main-feed");
+            router.push("main-feed");
             // } else {
             //   Alert.alert("Login Error", "Session data was missing from server.");
             // }

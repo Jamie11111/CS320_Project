@@ -44,7 +44,7 @@ const MyProfilePage = () => {
   // images: FeedImageSource[]
 }
   const router = useRouter()
-  const [userLocation, setUserLocation] = useState("Amherst, MA")
+  const [userLocation, setUserLocation] = useState("Loading...")
   const [listings, setListings] = useState<Listing[]>([])
   const [userData, setUserData] = useState<userData | null>(null)
   const [isPasswordModalVisible, setPasswordModalVisible] = useState(false)
