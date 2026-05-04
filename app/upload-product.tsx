@@ -8,7 +8,7 @@ import {
   Alert,
   Modal,
 } from "react-native";
-import "../global.css";
+// import "../global.css";
 import Navbar from "../components/navbar";
 import ProfileFeedBanner from "../components/profile-feed-banner";
 import FeedCard from "../components/feed-card";
@@ -18,7 +18,7 @@ import DropDownPicker from "react-native-dropdown-picker";
 import { useState, useEffect } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import React from "react";
-import { fetchWithAuth } from "../scripts/authFetch";
+import { fetchFromBackend } from "../scripts/authFetch";
 import * as ImagePicker from "expo-image-picker";
 import CheckBox from "expo-checkbox";
 import { get } from "react-native/Libraries/NativeComponent/NativeComponentRegistry";
@@ -96,7 +96,7 @@ const UploadProductPage = ({
   const resolvedSold = params.initialSold === "true";
   const getListingPhotos = async () => {
       const existingPhotos: ExistingPhoto[] = [];
-      const response = await fetchWithAuth(`http://localhost:3000/api/listing/photos?listingID=${parseFloat(params.listingId)}`, {
+      const response = await fetchFromBackend(`/api/listing/photos?listingID=${parseFloat(params.listingId)}`, {
         method: "GET",
       });
       const data = await response.json();
@@ -166,7 +166,7 @@ const UploadProductPage = ({
           throw new Error(`Failed to fetch photo for upload: ${errorText}`);
         }
         const blob = await res.blob();
-        const uploadRes = await fetchWithAuth("http://localhost:3000/api/listings/photo-upload", {
+        const uploadRes = await fetchFromBackend("/api/listings/photo-upload", {
                 method: "POST",
                 headers: {
                         "Content-Type": "image/jpeg",
@@ -182,7 +182,7 @@ const UploadProductPage = ({
         
         const { filePath, publicUrl } = await uploadRes.json();
         console.log("Photo url", publicUrl);
-        return fetchWithAuth("http://localhost:3000/api/listing/photos", {
+        return fetchFromBackend("/api/listing/photos", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -210,7 +210,7 @@ const UploadProductPage = ({
     }
     const responses = await Promise.all(
       photoIds.map((photoID) =>
-        fetchWithAuth("http://localhost:3000/api/listing/photos", {
+        fetchFromBackend("/api/listing/photos", {
           method: "DELETE",
           headers: {
             "Content-Type": "application/json",
@@ -254,8 +254,8 @@ const UploadProductPage = ({
           return;
         }
 
-        const response = await fetchWithAuth(
-          `http://localhost:3000/api/listing/${listingId}`,
+        const response = await fetchFromBackend(
+          `/api/listing/${listingId}`,
           {
             method: "PATCH",
             headers: { "Content-Type": "application/json" },
@@ -275,7 +275,7 @@ const UploadProductPage = ({
 
         alert("Listing updated successfully");
       } else {
-        const userResponse = await fetchWithAuth(
+        const userResponse = await fetchFromBackend(
           "http://localhost:3000/api/user",
           {
             headers: {
@@ -288,7 +288,7 @@ const UploadProductPage = ({
           return;
         }
         const userData = await userResponse.json();
-        const response = await fetchWithAuth(
+        const response = await fetchFromBackend(
           "http://localhost:3000/api/listing",
           {
             method: "POST",
@@ -343,8 +343,8 @@ const UploadProductPage = ({
     }
     setIsLoading(true);
     try {
-      const response = await fetchWithAuth(
-        `http://localhost:3000/api/listing/${listingId}`,
+      const response = await fetchFromBackend(
+        `/api/listing/${listingId}`,
         {
           method: "DELETE",
           headers: { "Content-Type": "application/json" },

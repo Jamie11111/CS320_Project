@@ -1,11 +1,12 @@
-import { View, Text, TextInput, Pressable, KeyboardAvoidingView, ScrollView, ActivityIndicator } from "react-native"
+import { View, Text, TextInput, Pressable, KeyboardAvoidingView, ScrollView, ActivityIndicator, Alert, Image, Platform } from "react-native"
 import { useRouter } from "expo-router"
 import { useState } from "react"
 import "../global.css"
 import * as SecureStore from 'expo-secure-store';
-import { fetchWithAuth } from "../scripts/authFetch"
+import { fetchFromBackend } from "../scripts/authFetch"
 import React from "react";
 import Home from "./main-feed";
+import Logo from "../assets/images/Logo.png"
 const LoginScreen = () => {
   const router = useRouter()
   const [showPass, setShowPass] = useState(false)
@@ -15,7 +16,14 @@ const LoginScreen = () => {
 
   const handleLogin = async () => {
     try {
-      const response = await fetch('http://localhost:3000/api/account/login', {
+      if (!email || !password) {
+       Alert.alert("Error", "Please enter both email and password.");
+       return;
+      }
+
+
+      setLoading(true);      
+      const response = await fetchFromBackend('/api/account/login', {
       method: 'POST',
       headers: {
           'Content-Type': 'application/json',
@@ -25,7 +33,7 @@ const LoginScreen = () => {
           email: email,
           password: password,
       })
-      });
+      }, false);
 
       console.log("Response status:", response.status)
 
@@ -33,18 +41,26 @@ const LoginScreen = () => {
       
       console.log("Response JSON:", responseJson);  
 
-      const { session } = responseJson;
-      await SecureStore.setItemAsync("accessToken", session.accessToken);
-      await SecureStore.setItemAsync("refreshToken", session.refreshToken);
-      if (session.accessToken) {
-        router.push("/main-feed")
-      }
-      else {
-        console.error("Login failed:", responseJson.message)
-      }
-    } catch (error) {
-      console.error("Login error", error)
-    }
+      if (response.ok) {
+            // const { session } = responseJson;
+            // //stores tokens
+            // if (session && session.accessToken) {
+            //   await SecureStore.setItemAsync("accessToken", session.accessToken);
+            //   await SecureStore.setItemAsync("refreshToken", session.refreshToken);
+            router.push("main-feed");
+            // } else {
+            //   Alert.alert("Login Error", "Session data was missing from server.");
+            // }
+          } else { //error check password and email
+            Alert.alert("Login Failed", responseJson.error || "Invalid email or password.");
+            setLoading(false); // Stop loading so user can try again
+          }
+
+        } catch (error) {
+          console.error("Login error", error);
+          Alert.alert("Error", "A network error occurred. Please try again.");
+          setLoading(false); 
+        }
 //     Once logged in, you should include the following line in all your fetch request headers:
 // 'Authorization': `Bearer ${accessToken} ${refreshToken}`
 
@@ -57,13 +73,49 @@ const LoginScreen = () => {
       <KeyboardAvoidingView className="bg-umass-red flex-1">
         <ScrollView
           contentContainerStyle={{ flexGrow: 1, justifyContent: "center" }}
-          className="px-8 py-12"
+          className="px-8 pb-12"
           scrollEnabled={false}
         >
-          <View className="bg-white w-full py-4 rounded-xl mb-12">
-            <Text className="text-center text-4xl font-black text-umass-red uppercase">UMarket</Text>
-          </View>
+        {/* Logo */}
+         <View className="flex-row items-center justify-center mb-10">
+           <Text
+             className="text-white font-black uppercase"
+             style={{
+               fontSize: 48,
+               textShadowColor: '#000',
+               textShadowOffset: { width: 1, height: 1 },
+               textShadowRadius: 1,
+               fontFamily: Platform.OS === 'ios' ? 'Georgia-Bold' : 'serif'
+             }}
+           >
+             U
+           </Text>
 
+
+           <View className="mx-1">
+             <Image
+               source={Logo}
+               className="w-16 h-16"
+               resizeMode="contain"
+             />
+           </View>
+
+
+           <Text
+             className="text-white font-black uppercase"
+             style={{
+               fontSize: 48,
+               textShadowColor: '#000',
+               textShadowOffset: { width: 1, height: 1 },
+               textShadowRadius: 1,
+               fontFamily: Platform.OS === 'ios' ? 'Georgia-Bold' : 'serif'
+             }}
+           >
+             ARKET
+           </Text>
+         </View>
+
+{/* Email */}
           <View className="mb-6">
             <Text className="text-white font-bold text-2xl mb-2">UMass Email Address</Text>
             <TextInput
@@ -77,6 +129,7 @@ const LoginScreen = () => {
             />
           </View>
 
+{/*Password */}
           <View className="mb-12">
             <Text className="text-white font-bold text-2xl mb-2">Password</Text>
             <View className="bg-white h-16 rounded-2xl px-4 flex-row items-center">
@@ -86,6 +139,7 @@ const LoginScreen = () => {
                 placeholder=""
                 value={password}
                 onChangeText={setPassword}
+                textContentType="oneTimeCode"
               />
               <Pressable onPress={() => setShowPass(!showPass)}>
                 <Text className="text-gray-600 font-bold">{showPass ? "Hide" : "Show"}</Text>

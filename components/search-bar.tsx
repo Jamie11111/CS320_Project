@@ -23,7 +23,6 @@ const SearchBar = ({ value, onChangeText, onSubmitSearch }: SearchBarProps) => {
 
   const submitSearch = async (rawQuery: string) => {
     const query = rawQuery.trim()
-    if (!query) return
 
     await SearchHistoryManager.addSearch(query)
     await onSubmitSearch(query)

@@ -3,7 +3,7 @@ import { View, Text, ScrollView, Pressable, Image } from "react-native"
 import { useRouter } from "expo-router"
 import React, { useEffect } from "react"
 import samplepfp from "../assets/images/samplepfp.png"
-import { fetchWithAuth } from "../scripts/authFetch"
+import { fetchFromBackend } from "../scripts/authFetch"
 import RedButton from "./red-button"
 type ListingPhoto = {
   photoID?: number;
@@ -49,7 +49,7 @@ const FeedCardExpanded = ({ name, location, price, condition, description, image
   const [listingImages, setImages] = React.useState<ListingPhoto[]>([])
   const createOrGetChat = async () => {
     try {
-      const response = await fetchWithAuth(`http://localhost:3000/api/chats`, {
+      const response = await fetchFromBackend(`/api/chats`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -72,7 +72,7 @@ const FeedCardExpanded = ({ name, location, price, condition, description, image
   useEffect(() => {
       const fetchSellerName = async () => {
         try {
-          const response = await fetch(`http://localhost:3000/api/user/${userId}`, {
+          const response = await fetchFromBackend(`/api/user/${userId}`, {
             method: "GET",
             headers: {
               "Content-Type": "application/json"
@@ -91,7 +91,7 @@ const FeedCardExpanded = ({ name, location, price, condition, description, image
 
       const fetchImages = async () => {
         try {
-          const response = await fetch(`http://localhost:3000/api/listing/${listingId}/photos`, {
+          const response = await fetchFromBackend(`/api/listing/${listingId}/photos`, {
             method: "GET",
             headers: {
               "Content-Type": "application/json"
@@ -100,8 +100,12 @@ const FeedCardExpanded = ({ name, location, price, condition, description, image
           if (!response.ok) {
             throw new Error("Failed to fetch listing photos")
           }
-          const data = await response.json()
-          setImages(data)
+          const data = await response.json();
+          setImages(data.map((photo: any) => ({
+            photoID: photo.photo_id,
+            photoURL: photo.photo_url,
+            photoPath: photo.photo_path,
+          })))
         } catch (error) {
           console.error("Error fetching listing photos:", error)
         }
@@ -120,7 +124,7 @@ const FeedCardExpanded = ({ name, location, price, condition, description, image
       contentContainerStyle={{ paddingHorizontal: 16, alignItems: "center" }}
       showsHorizontalScrollIndicator={false}
       >
-      {displayImages.map((image, index) => (
+      {listingImages.map((image, index) => (
         <Image
           key={index}
           source={{ uri: image.photoURL }}

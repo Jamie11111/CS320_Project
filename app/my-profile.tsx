@@ -6,7 +6,8 @@ import FeedCard from "../components/feed-card"
 import { useRouter } from "expo-router"
 import { useEffect, useState } from "react"
 import React from "react"
-import { fetchWithAuth } from "../scripts/authFetch"
+import { fetchFromBackend, isSignedIn } from "../scripts/authFetch"
+import RedButton from "../components/red-button"
 
 type ListingPhoto = {
   photoID?: number;
@@ -43,7 +44,7 @@ const MyProfilePage = () => {
   // images: FeedImageSource[]
 }
   const router = useRouter()
-  const [userLocation, setUserLocation] = useState("Amherst, MA")
+  const [userLocation, setUserLocation] = useState("Loading...")
   const [listings, setListings] = useState<Listing[]>([])
   const [userData, setUserData] = useState<userData | null>(null)
   const [isPasswordModalVisible, setPasswordModalVisible] = useState(false)
@@ -70,7 +71,7 @@ const MyProfilePage = () => {
   }
 
   try {
-    const response = await fetchWithAuth('http://localhost:3000/api/user', {
+    const response = await fetchFromBackend('/api/user', {
       method: 'PATCH',
       headers: {
         'Content-Type': 'application/json',
@@ -108,7 +109,7 @@ const handlePfpUpdate = async (localUri: string) => {
     const filename = `profile_${userData.user_id}_${Date.now()}.jpg`;
 
     //Upload to Supabase Storage 
-    const uploadResponse = await fetchWithAuth('http://localhost:3000/api/account/photo-upload', {
+    const uploadResponse = await fetchFromBackend('/api/account/photo-upload', {
       method: 'POST',
       headers: {
         'File-Metadata': JSON.stringify({ filename }),
@@ -120,7 +121,7 @@ const handlePfpUpdate = async (localUri: string) => {
 
     const { publicUrl, path } = await uploadResponse.json();
     //Update the users table with the permanent URL
-    const response = await fetchWithAuth('http://localhost:3000/api/user', {
+    const response = await fetchFromBackend('/api/user', {
       method: 'PATCH',
       headers: {
         'Content-Type': 'application/json',
@@ -162,14 +163,14 @@ const handlePasswordUpdate = async () => {
 
     setPasswordLoading(true);
     try {
-      const response = await fetchWithAuth('http://localhost:3000/api/user/password-update', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          currentPassword: passwords.current,
-          newPassword: passwords.new
-        }),
-      });
+     const response = await fetchFromBackend('/api/account', {
+       method: 'PATCH',
+       headers: { 'Content-Type': 'application/json' },
+       body: JSON.stringify({
+         password: passwords.new
+       }),
+     });
+
 
       if (response.ok) {
         Alert.alert("Success", "Password updated successfully.");
@@ -190,7 +191,11 @@ const handlePasswordUpdate = async () => {
 {/* Obtain listings*/}
       const fetchListings = async () => {
         try {
-          const userResponse = await fetchWithAuth('http://localhost:3000/api/user', {
+          if(!await isSignedIn()){
+            router.push("/login")
+          }
+
+          const userResponse = await fetchFromBackend('/api/user', {
             headers: {
               'Content-Type': 'application/json'
             }
@@ -208,7 +213,7 @@ const handlePasswordUpdate = async () => {
             setUserLocation(userData.address);
           }
 
-          const response = await fetchWithAuth(`http://localhost:3000/api/listings/user/${userData.user_id}`, {
+          const response = await fetchFromBackend(`/api/listings/user/${userData.user_id}`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
@@ -267,104 +272,76 @@ const handlePasswordUpdate = async () => {
         </ScrollView>
       </View>
       {/* Change password */}
-      <Modal visible={isPasswordModalVisible} animationType="slide" transparent>
-        <View className="flex-1 justify-end bg-black/50"> 
-          <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
-            <View className="bg-white rounded-t-[40px] p-8 pb-12 shadow-2xl">
-              
-              <View className="w-12 h-1.5 bg-gray-200 rounded-full self-center mb-6" />
+     <Modal visible={isPasswordModalVisible} animationType="slide" transparent>
+       <View className="flex-1 justify-end bg-black/50">
+         <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+           <View className="bg-white rounded-t-[40px] p-8 pb-12 shadow-2xl">
+            
+             <View className="w-12 h-1.5 bg-gray-200 rounded-full self-center mb-6" />
 
-              <Text className="text-3xl font-black text-umass-red mb-2 uppercase tracking-tighter">
-                Update Security
-              </Text>
-              <Text className="text-gray-500 font-medium mb-8">
-                Ensure your new password is  8+ chars with uppercase, lowercase, number, and special character.
-              </Text>
-              
-              {/* Current Password */}
-              <View className="mb-5">
-                <Text className="text-[10px] font-black text-gray-400 uppercase ml-1 mb-1.5 tracking-widest">Current Password</Text>
-                <View className="flex-row items-center bg-gray-50 border border-gray-100 h-16 rounded-2xl px-5 focus:border-umass-red">
-                  <TextInput 
-                    className="flex-1 h-full text-gray-800 font-semibold"
-                    secureTextEntry={!showCurrent}
-                    placeholder="••••••••"
-                    placeholderTextColor="#9ca3af"
-                    value={passwords.current}
-                    onChangeText={(t) => setPasswords({...passwords, current: t})}
-                  />
-                  <Pressable onPress={() => setShowCurrent(!showCurrent)} className="ml-2 py-2 px-1">
-                    <Text className="text-umass-red font-bold text-[10px] uppercase tracking-tighter">
-                      {showCurrent ? "Hide" : "Show"}
-                    </Text>
-                  </Pressable>
-                </View>
-              </View>
 
-              {/* New Password */}
-              <View className="mb-5">
-                <Text className="text-[10px] font-black text-gray-400 uppercase ml-1 mb-1.5 tracking-widest">New Password</Text>
-                <View className="flex-row items-center bg-gray-50 border border-gray-100 h-16 rounded-2xl px-5">
-                  <TextInput 
-                    className="flex-1 h-full text-gray-800 font-semibold"
-                    secureTextEntry={!showNew}
-                    placeholder="••••••••"
-                    placeholderTextColor="#9ca3af"
-                    value={passwords.new}
-                    onChangeText={(t) => setPasswords({...passwords, new: t})}
-                  />
-                  <Pressable onPress={() => setShowNew(!showNew)} className="ml-2 py-2 px-1">
-                    <Text className="text-umass-red font-bold text-[10px] uppercase tracking-tighter">
-                      {showNew ? "Hide" : "Show"}
-                    </Text>
-                  </Pressable>
-                </View>
-              </View>
+             <Text className="text-3xl font-black text-umass-red mb-2 uppercase tracking-tighter">
+               Update Security
+             </Text>
+             <Text className="text-gray-500 font-medium mb-8">
+               Ensure your new password is 8+ chars with uppercase, lowercase, number, and special character.
+             </Text>
+            
+             {/* Input Fields */}
+             <View className="space-y-5">
+               {[
+                 { label: "Current Password", key: "current", show: showCurrent, setShow: setShowCurrent },
+                 { label: "New Password", key: "new", show: showNew, setShow: setShowNew },
+                 { label: "Confirm Password", key: "confirm", show: showConfirm, setShow: setShowConfirm }
+               ].map((item) => (
+                 <View key={item.key} className="mb-4">
+                   <Text className="text-[10px] font-black text-gray-400 uppercase ml-1 mb-1.5 tracking-widest">
+                     {item.label}
+                   </Text>
+                   <View className="flex-row items-center bg-gray-50 border border-gray-100 h-16 rounded-2xl px-5 focus:border-umass-red">
+                     <TextInput
+                       className="flex-1 h-full text-gray-800 font-semibold"
+                       secureTextEntry={!item.show}
+                       placeholder="••••••••"
+                       placeholderTextColor="#9ca3af"
+                       value={passwords[item.key as keyof typeof passwords]}
+                       onChangeText={(t) => setPasswords({...passwords, [item.key]: t})}
+                     />
+                     <Pressable onPress={() => item.setShow(!item.show)} className="ml-2 py-2 px-1">
+                       <Text className="text-umass-red font-bold text-[10px] uppercase tracking-tighter">
+                         {item.show ? "Hide" : "Show"}
+                       </Text>
+                     </Pressable>
+                   </View>
+                 </View>
+               ))}
+             </View>
 
-              {/* Confirm Password */}
-              <View className="mb-8">
-                <Text className="text-[10px] font-black text-gray-400 uppercase ml-1 mb-1.5 tracking-widest">Confirm Password</Text>
-                <View className="flex-row items-center bg-gray-50 border border-gray-100 h-16 rounded-2xl px-5">
-                  <TextInput 
-                    className="flex-1 h-full text-gray-800 font-semibold"
-                    secureTextEntry={!showConfirm}
-                    placeholder="Repeat new password"
-                    placeholderTextColor="#9ca3af"
-                    value={passwords.confirm}
-                    onChangeText={(t) => setPasswords({...passwords, confirm: t})}
-                  />
-                  <Pressable onPress={() => setShowConfirm(!showConfirm)} className="ml-2 py-2 px-1">
-                    <Text className="text-umass-red font-bold text-[10px] uppercase tracking-tighter">
-                      {showConfirm ? "Hide" : "Show"}
-                    </Text>
-                  </Pressable>
-                </View>
-              </View>
-
-              {/* Action Buttons */}
-              <View className="flex-row space-x-4">
-                <Pressable 
-                  onPress={() => setPasswordModalVisible(false)}
-                  className="flex-1 h-16 bg-gray-100 rounded-2xl justify-center items-center active:bg-gray-200"
-                >
-                  <Text className="font-black text-gray-500 uppercase tracking-widest text-xs">Cancel</Text>
-                </Pressable>
-                <Pressable 
-                  onPress={handlePasswordUpdate}
-                  disabled={passwordLoading}
-                  className="flex-[2] h-16 bg-umass-red rounded-2xl justify-center items-center shadow-lg shadow-red-200 active:opacity-90"
-                >
-                  {passwordLoading ? (
-                    <ActivityIndicator color="white" />
-                  ) : (
-                    <Text className="font-black text-white uppercase tracking-widest text-xs">Update Password</Text>
-                  )}
-                </Pressable>
-              </View>
-            </View>
-          </KeyboardAvoidingView>
-        </View>
-      </Modal>
+             <View className="items-center mt-4">
+               {passwordLoading ? (
+                 <ActivityIndicator color="#881c1c" className="mb-8" />
+               ) : (
+                 <>
+                   <RedButton
+                     text="Update Password"
+                     onPressFunction={handlePasswordUpdate}
+                   />
+                  
+                   <Pressable
+                     onPress={() => setPasswordModalVisible(false)}
+                     className="mt-2"
+                   >
+                     <Text className="font-black text-gray-400 uppercase tracking-widest text-[10px]">
+                       Cancel
+                     </Text>
+                   </Pressable>
+                 </>
+               )}
+             </View>
+           </View>
+         </KeyboardAvoidingView>
+       </View>
+     </Modal>
 
       <Navbar canNavigate={userLocation.trim() !== ""} userPfp={userData?.profile_picture_url || null} />
     </View>

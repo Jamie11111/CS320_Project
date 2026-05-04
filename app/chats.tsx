@@ -1,7 +1,7 @@
 import { View, Text, FlatList, TextInput, Pressable } from "react-native"
 import { useRouter } from "expo-router"
 import { useEffect, useState } from "react"
-import { fetchWithAuth } from "../scripts/authFetch"
+import { fetchFromBackend } from "../scripts/authFetch"
 import "../global.css"
 import ChatRow from "../components/chat-row"
 import Navbar from "../components/navbar"
@@ -21,7 +21,7 @@ const ChatListScreen = () => {
   
   useEffect(() => {
     const fetchUser = async () => {
-      const res = await fetchWithAuth('http://localhost:3000/api/user', {
+      const res = await fetchFromBackend('/api/user', {
         method: "GET",
         headers: {
           "Content-Type": "application/json"
@@ -33,7 +33,7 @@ const ChatListScreen = () => {
 
     const fetchChats = async () => {
       try {
-        const res = await fetchWithAuth('http://localhost:3000/api/chats', {
+        const res = await fetchFromBackend('/api/chats', {
           method: "GET",
           headers: {
             "Content-Type": "application/json"
@@ -84,7 +84,7 @@ const ChatListScreen = () => {
             <ChatRow 
               sellerId={item.seller_id === currentUser?.user_id ? item.customer_id : item.seller_id}
               chatId={item.chat_id}
-              lastMessageTime={new Date(item.sent_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} 
+              lastMessageTime={new Date(item.sent_at + 'Z').toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} 
               lastMessage={item.message} 
               pfpUrl={null}
               {...item}

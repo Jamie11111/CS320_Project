@@ -6,7 +6,7 @@ import React from "react"
 import { useEffect, useRef, useState } from "react";
 import { useLocalSearchParams } from "expo-router";
 import * as SecureStore from "expo-secure-store";
-import { fetchWithAuth } from "../scripts/authFetch";
+import { fetchFromBackend } from "../scripts/authFetch"
 
 const ChatDetailScreen = () => {
   
@@ -29,7 +29,7 @@ const ChatDetailScreen = () => {
   const [senderId, setSenderId] = useState<string | null>(null)
   const flatListRef = useRef<FlatList<ChatMessage>>(null)
 
-  fetchWithAuth("http://localhost:3000/api/user", {
+  fetchFromBackend("/api/user", {
       headers: {
         "Content-Type": "application/json"
       }
@@ -55,7 +55,7 @@ const ChatDetailScreen = () => {
         return;
       }
 
-      const historyRes = await fetchWithAuth(`http://localhost:3000/api/chats/${cid}/messages`, {
+      const historyRes = await fetchFromBackend(`/api/chats/${cid}/messages`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json"
@@ -165,7 +165,7 @@ const ChatDetailScreen = () => {
                 <Text className="text-white font-bold text-xl">{item.message}</Text>
               </View>
               <Text className={`text-black text-sm mt-1 ${isSentByCurrentUser ? "mr-1" : "ml-1"}`}>
-                {new Date(item.sent_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                {new Date(item.sent_at + 'Z').toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
               </Text>
           </View>
         
