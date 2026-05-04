@@ -74,6 +74,8 @@ const UploadProductPage = ({
   const [removedPhotoIds, setRemovedPhotoIds] = useState<number[]>([]);
 
   const router = useRouter();
+
+  // 
   const params = useLocalSearchParams<{
     isEditing?: string;
     initialName?: string;
@@ -428,6 +430,7 @@ const UploadProductPage = ({
         <TextInput
           className="bg-gray-300 rounded-lg w-[50%] p-3 overflow-y-scroll"
           placeholder="Enter"
+          placeholderTextColor={"#6a6b6b"}
           value={productName}
           onChangeText={setProductName}
           maxLength={50}
