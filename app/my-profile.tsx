@@ -6,7 +6,7 @@ import FeedCard from "../components/feed-card"
 import { useRouter } from "expo-router"
 import { useEffect, useState } from "react"
 import React from "react"
-import { fetchFromBackend } from "../scripts/authFetch"
+import { fetchFromBackend, isSignedIn } from "../scripts/authFetch"
 import RedButton from "../components/red-button"
 
 type ListingPhoto = {
@@ -191,6 +191,10 @@ const handlePasswordUpdate = async () => {
 {/* Obtain listings*/}
       const fetchListings = async () => {
         try {
+          if(!await isSignedIn()){
+            router.push("/login")
+          }
+
           const userResponse = await fetchFromBackend('/api/user', {
             headers: {
               'Content-Type': 'application/json'

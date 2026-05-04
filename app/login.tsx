@@ -23,7 +23,7 @@ const LoginScreen = () => {
 
 
       setLoading(true);      
-      const response = await fetch('http://localhost:3000/api/account/login', {
+      const response = await fetchFromBackend('/api/account/login', {
       method: 'POST',
       headers: {
           'Content-Type': 'application/json',
@@ -33,7 +33,7 @@ const LoginScreen = () => {
           email: email,
           password: password,
       })
-      });
+      }, false);
 
       console.log("Response status:", response.status)
 
@@ -42,15 +42,15 @@ const LoginScreen = () => {
       console.log("Response JSON:", responseJson);  
 
       if (response.ok) {
-            const { session } = responseJson;
-            //stores tokens
-            if (session && session.accessToken) {
-              await SecureStore.setItemAsync("accessToken", session.accessToken);
-              await SecureStore.setItemAsync("refreshToken", session.refreshToken);
-              router.push("main-feed");
-            } else {
-              Alert.alert("Login Error", "Session data was missing from server.");
-            }
+            // const { session } = responseJson;
+            // //stores tokens
+            // if (session && session.accessToken) {
+            //   await SecureStore.setItemAsync("accessToken", session.accessToken);
+            //   await SecureStore.setItemAsync("refreshToken", session.refreshToken);
+            //   router.push("main-feed");
+            // } else {
+            //   Alert.alert("Login Error", "Session data was missing from server.");
+            // }
           } else { //error check password and email
             Alert.alert("Login Failed", responseJson.error || "Invalid email or password.");
             setLoading(false); // Stop loading so user can try again

@@ -79,7 +79,7 @@ const SignUpScreen = () => {
       return
     }
     try {
-      const response = await fetch('http://localhost:3000/api/account/signup', {
+      const response = await fetchFromBackend('/api/account/signup', {
       method: 'POST',
       headers: {
           'Content-Type': 'application/json',
@@ -90,7 +90,7 @@ const SignUpScreen = () => {
           password: password,
           name: name,
       })
-      });
+      }, false);
 
    const responseJson: any = await response.json();
    console.log("Signup Response status:", response.status);

@@ -8,7 +8,7 @@ import {
   Alert,
   Modal,
 } from "react-native";
-import "../global.css";
+// import "../global.css";
 import Navbar from "../components/navbar";
 import ProfileFeedBanner from "../components/profile-feed-banner";
 import FeedCard from "../components/feed-card";
@@ -252,8 +252,8 @@ const UploadProductPage = ({
           return;
         }
 
-        const response = await fetchWithAuth(
-          `http://localhost:3000/api/listing/${listingId}`,
+        const response = await fetchFromBackend(
+          `/api/listing/${listingId}`,
           {
             method: "PATCH",
             headers: { "Content-Type": "application/json" },
@@ -273,7 +273,7 @@ const UploadProductPage = ({
 
         alert("Listing updated successfully");
       } else {
-        const userResponse = await fetchWithAuth(
+        const userResponse = await fetchFromBackend(
           "http://localhost:3000/api/user",
           {
             headers: {
@@ -286,7 +286,7 @@ const UploadProductPage = ({
           return;
         }
         const userData = await userResponse.json();
-        const response = await fetchWithAuth(
+        const response = await fetchFromBackend(
           "http://localhost:3000/api/listing",
           {
             method: "POST",
@@ -341,8 +341,8 @@ const UploadProductPage = ({
     }
     setIsLoading(true);
     try {
-      const response = await fetchWithAuth(
-        `http://localhost:3000/api/listing/${listingId}`,
+      const response = await fetchFromBackend(
+        `/api/listing/${listingId}`,
         {
           method: "DELETE",
           headers: { "Content-Type": "application/json" },
