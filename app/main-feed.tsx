@@ -39,7 +39,7 @@ const Home = () => {
   const fetchListings = async (query: string) => {
     try {
       const encodedQuery = encodeURIComponent(query.trim())
-      const response = await fetchFromBackend(`/api/listings?query=${encodedQuery}&sort_by=distance&lmt=40`, {
+      const response = await fetchFromBackend(`/api/listings?query=${encodedQuery}&sort_by=distance&lmt=20`, {
         method: 'GET',
         headers: {
             'Content-Type': 'application/json',

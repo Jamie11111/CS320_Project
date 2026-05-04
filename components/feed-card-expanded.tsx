@@ -72,7 +72,7 @@ const FeedCardExpanded = ({ name, location, price, condition, description, image
   useEffect(() => {
       const fetchSellerName = async () => {
         try {
-          const response = await fetch(`/api/user/${userId}`, {
+          const response = await fetchFromBackend(`/api/user/${userId}`, {
             method: "GET",
             headers: {
               "Content-Type": "application/json"
@@ -91,7 +91,7 @@ const FeedCardExpanded = ({ name, location, price, condition, description, image
 
       const fetchImages = async () => {
         try {
-          const response = await fetch(`/api/listing/${listingId}/photos`, {
+          const response = await fetchFromBackend(`/api/listing/${listingId}/photos`, {
             method: "GET",
             headers: {
               "Content-Type": "application/json"
