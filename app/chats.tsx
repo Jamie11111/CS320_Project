@@ -1,4 +1,4 @@
-import { View, Text, FlatList, TextInput, Pressable } from "react-native"
+import { View, Text, FlatList, TextInput, Pressable, ActivityIndicator } from "react-native"
 import { useRouter } from "expo-router"
 import { useEffect, useState } from "react"
 import { fetchFromBackend } from "../scripts/authFetch"
@@ -18,6 +18,7 @@ const ChatListScreen = () => {
   const router = useRouter()
   const [currentUser, setCurrentUser] = useState<any>(null)
   const [chats, setChats] = useState<Chat[]>([])
+  const [loadingChats, setLoadingChats] = useState<boolean>(true);
   
   useEffect(() => {
     const fetchUser = async () => {
@@ -54,10 +55,12 @@ const ChatListScreen = () => {
 
       } catch (error) {
         console.error("Error fetching chats:", error)
+      } finally {
+        setLoadingChats(false);
       }
     }
 
-    
+    fetchChats();
     setInterval(() => {
       fetchChats()
     }, 5000) // Poll every 5 seconds
@@ -66,14 +69,13 @@ const ChatListScreen = () => {
 
 
   }, [])
-  
 
   return (
     <View>
       <View className="h-[92%]">
         <FlatList
           data={chats}
-          ListEmptyComponent={
+          ListEmptyComponent={ loadingChats ? <ActivityIndicator size="large" /> :
             <View className="items-center justify-center pt-32 px-10">
               <Text className="text-6xl mb-4 text-center">💬</Text>
               <Text className="text-gray-500 text-xl font-bold text-center">No chats yet!</Text>
