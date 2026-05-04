@@ -165,7 +165,7 @@ const ChatDetailScreen = () => {
                 <Text className="text-white font-bold text-xl">{item.message}</Text>
               </View>
               <Text className={`text-black text-sm mt-1 ${isSentByCurrentUser ? "mr-1" : "ml-1"}`}>
-                {new Date(item.sent_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                {new Date(item.sent_at + 'Z').toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
               </Text>
           </View>
         
