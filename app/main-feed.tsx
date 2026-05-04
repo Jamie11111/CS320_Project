@@ -99,6 +99,7 @@ const Home = () => {
 
     try {
       const listings = await fetchNextListings(10, offset);
+      if(listings.length === 0) setHasMore(false);
       setListings(prev => [...prev, ...listings]);
       setOffset(prev => prev + listings.length);
     } catch (error) {
