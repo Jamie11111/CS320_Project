@@ -1,0 +1,19 @@
+.payload-label {
+    display: block;
+    margin-bottom: 1px;
+    font-weight: bold;
+}
+
+.payload-textarea {
+    width: 500px;
+    height: 150px;
+    resize: vertical;
+}
+
+#url {
+    width: 500px;
+}
+
+.input-line {
+    display: block;
+}
