@@ -106,7 +106,7 @@ const SignUpScreen = () => {
    const { session } = responseJson;
 
 
-   if (session && session.accessToken) {
+   if (session) {
      //Save tokens 
     //  await SecureStore.setItemAsync("accessToken", session.accessToken);
     //  await SecureStore.setItemAsync("refreshToken", session.refreshToken);
