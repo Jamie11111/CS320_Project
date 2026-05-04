@@ -54,7 +54,7 @@ const Home = () => {
       if (priceLimit.trim()) params.append("priceLimit", priceLimit.trim());
       if (sold !== undefined) params.append("sold", String(sold));
 
-      const response = await fetchFromBackend(`http://localhost:3000/api/listings?${params.toString()}`, {
+      const response = await fetchFromBackend(`/api/listings?${params.toString()}`, {
         method: 'GET',
         headers: {
             'Content-Type': 'application/json',
