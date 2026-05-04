@@ -20,6 +20,8 @@ const ChatListScreen = () => {
   const [chats, setChats] = useState<Chat[]>([])
   const [loadingChats, setLoadingChats] = useState<boolean>(true);
   
+  let timeoutLoop: NodeJS.Timeout | null = null;
+
   useEffect(() => {
     const fetchUser = async () => {
       const res = await fetchFromBackend('/api/user', {
@@ -61,12 +63,14 @@ const ChatListScreen = () => {
     }
 
     fetchChats();
-    setInterval(() => {
-      fetchChats()
-    }, 5000) // Poll every 5 seconds
+    if (timeoutLoop === null){
+      timeoutLoop = setInterval(() => {
+        fetchChats()
+      }, 5000) // Poll every 5 seconds
+    }
     fetchUser()
 
-
+    return () => { if(timeoutLoop) clearInterval(timeoutLoop); timeoutLoop = null; }
 
   }, [])
 
