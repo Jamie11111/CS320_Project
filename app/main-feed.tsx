@@ -218,7 +218,7 @@ const Home = () => {
           numColumns={2} 
           contentContainerStyle={{ paddingHorizontal: 3 }}
           keyExtractor={(item) => item.listing_id.toString()}
-          renderItem={({ item }) => (<React.Fragment key={item.listing_id}><FeedCard
+          renderItem={({ item }) => (<FeedCard
             name={item.product_name}
             price={item.price}
             location={item.location}
@@ -228,7 +228,7 @@ const Home = () => {
             images={item.photos}
             listingId={item.listing_id}
             sold={item.sold}
-          /> </React.Fragment>)}
+          />)}
           onEndReached={() => fetchListings(searchQuery)}
           onEndReachedThreshold={0.5}
           ListFooterComponent={loading ? <ActivityIndicator size="large" /> : null}
