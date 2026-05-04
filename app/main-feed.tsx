@@ -27,7 +27,7 @@ type Listing = {
   // name: string
   // price: number
   location: string
-  distance: number // automatically returned whenever filterListings is called
+  distance: number | null // automatically returned whenever filterListings is called
   // description: string
   // condition: string
   // images: FeedImageSource[]
@@ -241,6 +241,7 @@ const Home = () => {
             name={item.product_name}
             price={item.price}
             location={item.location}
+            distance={item.distance}
             description={item.product_desc ?? ""}
             condition={item.item_condition}
             userId={item.user_id}

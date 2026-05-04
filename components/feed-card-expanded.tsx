@@ -22,12 +22,17 @@ interface FeedCardExpandedProps {
   userId: string
   listingId: string
   sellerPfpUrl?: string | null
+  distance?: number | null
 }
 
 
 
-const FeedCardExpanded = ({ name, location, price, condition, description, images = [], onClose, userId, listingId, sellerPfpUrl}: FeedCardExpandedProps) => {
+const FeedCardExpanded = ({ name, location, price, condition, description, images = [], onClose, userId, listingId, sellerPfpUrl, distance}: FeedCardExpandedProps) => {
   const router = useRouter()
+  const formatDistance = (distance?: number | null) => {
+    if(distance === null || distance === undefined) return "";
+    return `${distance.toFixed(1)} mi`;
+  }
   const formatLocation = (loc: string) => {
     if (!loc) return "Location not available";
     console.log("Original location:", loc);
@@ -139,7 +144,14 @@ const FeedCardExpanded = ({ name, location, price, condition, description, image
       <View className="flex-row items-start justify-between">
       <View className="flex-1 pr-3">
         <Text className="text-xl font-bold max-w[25%] truncate">{name}</Text>
-        <Text className="text-lg font-medium">{displayLocation}</Text>
+        <View className="flex-row items-center justify-between">
+          <Text className="text-lg font-medium flex-1">{displayLocation}</Text>
+          {distance !== null && distance !== undefined && (
+            <Text className="text-lg font-medium text-gray-600 ml-2">
+              {formatDistance(distance)}
+            </Text>
+          )}
+        </View>        
         <Text className="text-lg font-medium">${price}</Text>
         <Text className="text-lg font-medium">{condition}</Text>
       </View>
