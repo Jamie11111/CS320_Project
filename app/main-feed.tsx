@@ -58,22 +58,22 @@ const Home = () => {
     params.set("offset", String(offset));
 
     const response = await fetchFromBackend(`/api/listings?${params.toString()}`);
-      if (!response.ok) {
-        throw new Error(`Failed: ${response.status}`);
-      }
+    if (!response.ok) {
+      throw new Error(`Failed: ${response.status}`);
+    }
 
-      const data: Listing[] = await response.json();
+    const data: Listing[] = await response.json();
 
-      const normalized = data.map((listing: any) => ({
-        ...listing,
-        photos: listing.photos.map((photo: any) => ({
-            photoID: photo.photo_id,
-            photoURL: photo.photo_url,
-            photoPath: photo.photo_path,
-        }))
-      }));
+    const normalized = data.map((listing: any) => ({
+      ...listing,
+      photos: listing.photos.map((photo: any) => ({
+          photoID: photo.photo_id,
+          photoURL: photo.photo_url,
+          photoPath: photo.photo_path,
+      }))
+    }));
 
-      return normalized;
+    return normalized;
   }
 
   const fetchListings = async (query: string) => {
