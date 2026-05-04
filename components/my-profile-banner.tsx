@@ -117,6 +117,7 @@ const MyProfileBanner = ({ name, location, email, onLocationChange, profilePictu
                 className="bg-gray-300 rounded-lg w-[50%] p-2 overflow-y-scroll" 
                 defaultValue={inputValue}
                 placeholder="Enter"
+                placeholderTextColor={"#6a6b6b"}
                 maxLength={50}
                 onChangeText={handleSearch}
               />

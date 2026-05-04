@@ -50,8 +50,11 @@ const FeedCard = ({
     if (parts.length >= 5) {
       return `${parts[parts.length - 5].trim()}, ${parts[parts.length - 3].trim()}`;
     }
-    if (parts.length >= 2) {
+    if (parts.length >= 4) {
       return `${parts[parts.length - 2].trim()}, ${parts[parts.length - 1].trim()}`;
+    }
+    if (parts.length >= 3) {
+      return `${parts[parts.length - 3].trim()}, ${parts[parts.length - 2].trim()}`;
     }
     return loc;
   };
