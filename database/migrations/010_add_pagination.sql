@@ -1,4 +1,4 @@
--- added offset for pagination
+-- added offset for pagination, put nulls last, fixed name collision
 
 create or replace function filter_listings(
     viewer_id uuid default null,
@@ -6,7 +6,7 @@ create or replace function filter_listings(
     expanded_query text default null,
     price_limit numeric default null,
     condition text default null,
-    sold boolean default null,
+    sold_filter boolean default null,
     sort_by text default 'date',
     lmt integer default 20,
     offset_count integer default 0,
@@ -91,7 +91,7 @@ as $$
             where 
                 (price_limit is null or l.price <= price_limit)
                 and (condition is null or l.item_condition = condition)
-                and (sold is null or l.sold = sold)
+                and (sold_filter is null or l.sold = sold_filter)
                 and (viewer_id is null or l.user_id != viewer_id)
                 and (
                     query is null 
@@ -107,10 +107,10 @@ as $$
 
     -- order as desired, date_posted is always tiebreaker
     order by 
-        case when sort_by = 'price' then price end asc,
-        case when sort_by = 'date' then date_posted end desc,
-        case when sort_by = 'relevance' then relevance_score end desc,
-        case when sort_by = 'distance' then distance end asc,
+        case when sort_by = 'price' then price end asc nulls last,
+        case when sort_by = 'date' then date_posted end desc nulls last,
+        case when sort_by = 'relevance' then relevance_score end desc nulls last,
+        case when sort_by = 'distance' then distance end asc nulls last,
         date_posted desc
 
     limit lmt
