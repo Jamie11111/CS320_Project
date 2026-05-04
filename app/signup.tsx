@@ -108,10 +108,10 @@ const SignUpScreen = () => {
 
    if (session && session.accessToken) {
      //Save tokens 
-     await SecureStore.setItemAsync("accessToken", session.accessToken);
-     await SecureStore.setItemAsync("refreshToken", session.refreshToken);
+    //  await SecureStore.setItemAsync("accessToken", session.accessToken);
+    //  await SecureStore.setItemAsync("refreshToken", session.refreshToken);
     
-     console.log("Tokens saved. Attempting location update...");
+    //  console.log("Tokens saved. Attempting location update...");
 
 
      // Update User Location
