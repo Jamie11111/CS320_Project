@@ -1,4 +1,4 @@
-import { View, Text, ScrollView, FlatList, TextInput, Pressable, KeyboardAvoidingView, Platform, Image } from "react-native"
+import { View, Text, ScrollView, FlatList, TextInput, Pressable, KeyboardAvoidingView, Platform, Image, StyleSheet, Alert } from "react-native"
 import { useRouter } from "expo-router"
 import samplepfp from "../assets/images/samplepfp.png"
 import "../global.css"
@@ -6,12 +6,66 @@ import React from "react"
 import { useEffect, useRef, useState } from "react";
 import { useLocalSearchParams } from "expo-router";
 import * as SecureStore from "expo-secure-store";
-import { fetchFromBackend } from "../scripts/authFetch"
+import * as ImagePicker from "expo-image-picker";
+import { fetchFromBackend } from "../scripts/authFetch";
+
+const LISTING_CARD_PREFIX = "LISTING_CARD:";
+
+type ListingCard = {
+  id: string
+  name: string
+  price: string
+  condition: string
+  imageUrl: string | null
+}
+
+function ListingCardBubble({ message }: { message: string }) {
+  let card: ListingCard
+  try {
+    card = JSON.parse(message.slice(LISTING_CARD_PREFIX.length))
+  } catch {
+    return <Text style={{ color: "#111827" }}>{message}</Text>
+  }
+  return (
+    <View style={cardStyles.wrapper}>
+      <Text style={cardStyles.header}>I am messaging about this product</Text>
+      <View style={cardStyles.container}>
+        {card.imageUrl ? (
+          <Image source={{ uri: card.imageUrl }} style={cardStyles.image} resizeMode="cover" />
+        ) : (
+          <View style={[cardStyles.image, { backgroundColor: "#d1d5db" }]} />
+        )}
+        <View style={cardStyles.bar}>
+          <View style={{ flex: 1 }}>
+            <Text style={cardStyles.name} numberOfLines={1}>{card.name}</Text>
+            <Text style={cardStyles.condition} numberOfLines={1}>{card.condition}</Text>
+          </View>
+          <Text style={cardStyles.price}>{card.price}</Text>
+        </View>
+      </View>
+    </View>
+  )
+}
+
+const cardStyles = StyleSheet.create({
+  wrapper: { width: 240 },
+  header: { fontSize: 12, color: "#6b7280", marginBottom: 6, fontStyle: "italic" },
+  container: { width: 240, borderRadius: 12, overflow: "hidden", backgroundColor: "#d1d5db" },
+  image: { width: "100%", height: 180 },
+  bar: { backgroundColor: "#881C1C", paddingHorizontal: 10, paddingVertical: 8, flexDirection: "row", alignItems: "center" },
+  name: { color: "white", fontWeight: "bold", fontSize: 14 },
+  condition: { color: "#fecaca", fontSize: 12, marginTop: 1 },
+  price: { color: "white", fontSize: 13, fontWeight: "600", marginLeft: 8 },
+})
 
 const ChatDetailScreen = () => {
   
   const router = useRouter()
   const otherUserPfp = null
+
+  type Attachment = {
+    attachment_url: string
+  }
 
   type ChatMessage = {
     message_id: string
@@ -19,7 +73,7 @@ const ChatDetailScreen = () => {
     sent_at: string
     chat_id: string
     sender_id: string
-
+    attachments?: Attachment[]
   }
   const {chatId} = useLocalSearchParams<{chatId?: string}>()
   let {sellerName} = useLocalSearchParams<{sellerName?: string}>()  
@@ -128,7 +182,40 @@ const ChatDetailScreen = () => {
     }
     ws.send(JSON.stringify({ message: text }));
     setDraft("");
+  }
 
+  async function pickAndUploadImage() {
+    const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (!permission.granted) {
+      Alert.alert("Permission required", "Please allow photo library access to send images.");
+      return;
+    }
+
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ["images"],
+      quality: 0.8,
+    });
+
+    if (result.canceled || !result.assets?.[0]) return;
+
+    const asset = result.assets[0];
+    const cid = chatId ? parseInt(chatId, 10) : NaN;
+    if (isNaN(cid)) return;
+
+    const filename = asset.fileName ?? `photo_${Date.now()}.jpg`;
+    const mimeType = asset.mimeType ?? "image/jpeg";
+
+    const form = new FormData();
+    form.append("file", { uri: asset.uri, name: filename, type: mimeType } as any);
+
+    const uploadRes = await fetchFromBackend(`/api/chats/${cid}/attachments`, {
+      method: "POST",
+      body: form as any,
+    });
+
+    if (!uploadRes.ok) {
+      Alert.alert("Upload failed", "Could not send the image. Please try again.");
+    }
   }
 
 
@@ -156,21 +243,33 @@ const ChatDetailScreen = () => {
 
       <FlatList data={messages} ref={flatListRef} onContentSizeChange={() => flatListRef.current?.scrollToEnd()} className="flex-1 px-4 pt-4" renderItem={({ item }) => {
         const isSentByCurrentUser = item.sender_id === senderId;
+        const isCard = item.message?.startsWith(LISTING_CARD_PREFIX);
         return (
           <View key={item.message_id} className={`mb-4 ${isSentByCurrentUser ? "items-end" : "items-start"}`}>
-            <View 
+            {isCard ? (
+              <ListingCardBubble message={item.message} />
+            ) : (
+              <View
                 style={{ borderBottomLeftRadius: isSentByCurrentUser ? 20 : 4, borderBottomRightRadius: isSentByCurrentUser ? 4 : 20 }}
-                className={`${isSentByCurrentUser ? "bg-umass-red" : "bg-gray-600"} px-5 py-3 rounded-[20px] `}
+                className={`${isSentByCurrentUser ? "bg-umass-red" : "bg-gray-600"} px-5 py-3 rounded-[20px]`}
               >
-                <Text className="text-white font-bold text-xl">{item.message}</Text>
+                {item.attachments?.map((att: Attachment, i: number) => (
+                  <Image
+                    key={i}
+                    source={{ uri: att.attachment_url }}
+                    style={{ width: 200, height: 200, borderRadius: 10, marginBottom: 4 }}
+                    resizeMode="cover"
+                  />
+                ))}
+                {item.message ? <Text className="text-white font-bold text-xl">{item.message}</Text> : null}
               </View>
-              <Text className={`text-black text-sm mt-1 ${isSentByCurrentUser ? "mr-1" : "ml-1"}`}>
-                {new Date(item.sent_at + 'Z').toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-              </Text>
+            )}
+            <Text className={`text-black text-sm mt-1 ${isSentByCurrentUser ? "mr-1" : "ml-1"}`}>
+              {new Date(item.sent_at + 'Z').toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+            </Text>
           </View>
-        
-          )
-        }      } />
+        )
+      }} />
 
 
       <View className="bg-umass-red p-6 flex-row items-center bottom-[-40]">
@@ -182,7 +281,7 @@ const ChatDetailScreen = () => {
             value={draft}
             onChangeText={setDraft}
           />
-          <Pressable className="bg-gray-600 w-10 h-10 rounded-full items-center justify-center">
+          <Pressable onPress={pickAndUploadImage} className="bg-gray-600 w-10 h-10 rounded-full items-center justify-center">
             <Text className="text-white text-3xl mb-1">+</Text>
           </Pressable>
         </View>
