@@ -1,11 +1,12 @@
 import { View, Text, FlatList, TextInput, Pressable, ActivityIndicator } from "react-native"
 import { useRouter } from "expo-router"
-import { useEffect, useState } from "react"
+import { useContext, useEffect, useState } from "react"
 import { fetchFromBackend } from "../scripts/authFetch"
 import "../global.css"
 import ChatRow from "../components/chat-row"
 import Navbar from "../components/navbar"
 import React from "react"
+import { DataContext } from "../components/data-context"
 const ChatListScreen = () => {
   type Chat = {
     chat_id: string
@@ -16,7 +17,13 @@ const ChatListScreen = () => {
     is_unread: boolean
   }
   const router = useRouter()
-  const [currentUser, setCurrentUser] = useState<any>(null)
+  const {cachedData, updateCache} = useContext(DataContext);
+  const { profileData } = cachedData;
+  const [currentUser, setCurrentUserFn] = useState<any>(profileData);
+  const setCurrentUser = (value: React.SetStateAction<any>) => {
+    setCurrentUserFn(value);
+    updateCache("profileData", value);
+  }
   const [chats, setChats] = useState<Chat[]>([])
   const [loadingChats, setLoadingChats] = useState<boolean>(true);
   

@@ -4,9 +4,10 @@ import Navbar from "../components/navbar"
 import MyProfileBanner from "../components/my-profile-banner"
 import FeedCard from "../components/feed-card"
 import { useRouter } from "expo-router"
-import { useEffect, useState } from "react"
+import { useContext, useEffect, useState } from "react"
 import React from "react"
 import { fetchFromBackend, isSignedIn } from "../scripts/authFetch"
+import { DataContext } from "../components/data-context";
 import RedButton from "../components/red-button"
 
 type ListingPhoto = {
@@ -44,9 +45,15 @@ const MyProfilePage = () => {
   // images: FeedImageSource[]
 }
   const router = useRouter()
+  const {cachedData, updateCache} = useContext(DataContext);
+  const { profileData } = cachedData;
   const [userLocation, setUserLocation] = useState("Loading...")
   const [listings, setListings] = useState<Listing[]>([])
-  const [userData, setUserData] = useState<userData | null>(null)
+  const [userData, setUserDataFn] = useState<userData | null>(profileData);
+  const setUserData = (value: React.SetStateAction<userData | null>) => {
+    setUserDataFn(value);
+    updateCache("profileData", value);
+  }
   const [isPasswordModalVisible, setPasswordModalVisible] = useState(false)
   const [passwordLoading, setPasswordLoading] = useState(false)
   const [passwords, setPasswords] = useState({
@@ -252,7 +259,7 @@ const handlePasswordUpdate = async () => {
     <View>
       <View className="h-[92%]">
      
-        <MyProfileBanner name={userData?.name || "John Doe"} location={userLocation} email={userData?.email || "johndoe@example.com"} onLocationChange={handleLocationUpdate} profilePictureUrl={userData?.profile_picture_url || null} onPfpChange={handlePfpUpdate} onEditPassword={() => setPasswordModalVisible(true)}/>
+        <MyProfileBanner name={userData?.name || "Loading..."} location={userLocation} email={userData?.email || "johndoe@example.com"} onLocationChange={handleLocationUpdate} profilePictureUrl={userData?.profile_picture_url || null} onPfpChange={handlePfpUpdate} onEditPassword={() => setPasswordModalVisible(true)}/>
         <ScrollView contentContainerStyle={{ flexDirection: "row", flexWrap: "wrap", marginLeft: 3}}>
           {listings.map((listing, index) => (
             <FeedCard

@@ -1,12 +1,13 @@
 import { View, Switch, Text, TextInput, Pressable } from 'react-native'
 import "../global.css"
-import {useEffect, useState} from 'react'
+import {useContext, useEffect, useState} from 'react'
 import Navbar from '../components/navbar'
 import FeedCard from '../components/feed-card'
 import { ScrollView, FlatList, ActivityIndicator } from 'react-native'
 import SearchBar from '../components/search-bar'
 import React from 'react'
 import { fetchFromBackend } from "../scripts/authFetch"
+import { DataContext } from '../components/data-context'
 
 type ListingPhoto = {
   photoID?: number;
@@ -37,7 +38,15 @@ const Home = () => {
   const [offset, setOffset] = useState(0);
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
-  const [currentUser, setCurrentUser] = useState<any>(null)
+
+  const {cachedData, updateCache} = useContext(DataContext);
+  const { profileData } = cachedData;
+  const [currentUser, setCurrentUserFn] = useState<any>(profileData);
+  const setCurrentUser = (value: React.SetStateAction<any>) => {
+    setCurrentUserFn(value);
+    updateCache("profileData", value);
+  }
+  
   const [searchQuery, setSearchQuery] = useState("")
 
   const [sortBy, setSortBy] = useState<'price' | 'distance' | 'relevance' | 'date'>('distance')
