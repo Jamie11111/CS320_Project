@@ -84,7 +84,7 @@ const ChatListScreen = () => {
             <ChatRow 
               sellerId={item.seller_id === currentUser?.user_id ? item.customer_id : item.seller_id}
               chatId={item.chat_id}
-              lastMessageTime={new Date(item.sent_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} 
+              lastMessageTime={new Date(item.sent_at + 'Z').toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} 
               lastMessage={item.message} 
               pfpUrl={null}
               {...item}
