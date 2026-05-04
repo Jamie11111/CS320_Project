@@ -6,6 +6,7 @@ import { userRoutes } from "./routes/users";
 import { accountRoutes } from "./routes/account";
 import { chatRoutes, wsHandlers } from "./routes/chats";
 import { searchRoutes } from "./routes/search";
+import { similaritySearchRoutes } from "./routes/similarity-search";
 import { photoRoutes } from "./routes/photos";
 import { getChatByID } from "./database/chats"; // used for WebSocket upgrade membership check
 import { generatePagesRoutes } from "./pages/page_router";
