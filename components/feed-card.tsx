@@ -45,11 +45,11 @@ const FeedCard = ({
 
   const formatDistance = (distance?: number | null) => {
     if (distance === null || distance === undefined) return "";
-    return `${distance.toFixed(1)} mi`;
+    return `${distance.toFixed(2)} mi`;
   }
   
   // console.log("FeedCard props:", { name, location, price, description, condition, images, isEditing, userId, listingId, sold, sellerPfpUrl })
-  const formatLocation = (loc: string) => {
+  /*const formatLocation = (loc: string) => {
     if (!loc) return "Location not available";
     console.log("Original location:", loc);
     const parts = loc.split(',');
@@ -64,7 +64,21 @@ const FeedCard = ({
       return `${parts[parts.length - 3].trim()}, ${parts[parts.length - 2].trim()}`;
     }
     return loc;
+  };*/
+    const formatLocation = (loc: string) => {
+    if (!loc) return "Location not available";
+    console.log("Original location:", loc);
+    const parts = loc.split(',');
+    console.log("Parts:", parts);
+    if (parts.length >= 5) {
+      return `${parts[parts.length - 5].trim()}, ${parts[parts.length - 3].trim()}`;
+    }
+    if (parts.length >= 2) {
+      return `${parts[parts.length - 2].trim()}, ${parts[parts.length - 1].trim()}`;
+    }
+    return loc;
   };
+
 
   const displayLocation = formatLocation(location);
   console.log("Display Location:", displayLocation);
@@ -76,7 +90,7 @@ const FeedCard = ({
           isEditing: "true",
           initialName: name,
           initialPrice: price,
-          initialLocation: location,
+          initialLocation: displayLocation,
           initialCondition: condition,
           initialDescription: description,
           userId, 

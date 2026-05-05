@@ -31,7 +31,7 @@ const FeedCardExpanded = ({ name, location, price, condition, description, image
   const router = useRouter()
   const formatDistance = (distance?: number | null) => {
     if(distance === null || distance === undefined) return "";
-    return `${distance.toFixed(1)} mi`;
+    return `${distance.toFixed(2)} mi`;
   }
   const formatLocation = (loc: string) => {
     if (!loc) return "Location not available";
@@ -152,7 +152,7 @@ const FeedCardExpanded = ({ name, location, price, condition, description, image
             </Text>
           )}
         </View>        
-        <Text className="text-lg font-medium">${price}</Text>
+        <Text className="text-lg font-medium">{price === "Sold" ? price : `$${price}`}</Text>
         <Text className="text-lg font-medium">{condition}</Text>
       </View>
       <View className="flex-col">
