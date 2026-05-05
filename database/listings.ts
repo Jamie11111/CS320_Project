@@ -180,25 +180,26 @@ export async function filterListings(supabase: SupabaseClient,
         let long: number | null = null;
         
         if (filters.sort_by === 'distance') {
-            
             if (user_id === undefined) {
                 console.error('Need user info to filter by distance');
                 return [];
             }
-
-            const {data, error} = await supabase
+        }
+        
+        if (user_id) {
+            const {data: data1, error: error1} = await supabase
                 .from('users')
                 .select('latitude, longitude')
                 .eq('user_id', user_id)
                 .single();
-            
-            if (error) {
-                console.error('Error getting location info for user', error.message);
+                
+            if (error1) {
+                console.error('Error getting location info for user', error1.message);
                 return [];
             }
 
-            lat = data.latitude;
-            long = data.longitude;
+            lat = data1.latitude;
+            long = data1.longitude;
         }
 
         const {data, error} = await supabase.rpc('filter_listings', {

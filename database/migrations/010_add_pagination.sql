@@ -1,4 +1,4 @@
--- added offset for pagination, put nulls last, fixed name collision
+-- added offset for pagination, put nulls last, fixed name collision, fix distance calculation
 
 create or replace function filter_listings(
     viewer_id uuid default null,
@@ -76,7 +76,11 @@ as $$
             case 
                 when lat is not null and long is not null
                     and u.latitude is not null and u.longitude is not null
-                then sqrt(power(lat - u.latitude, 2) + power(long - u.longitude, 2))
+                then 6371 * acos(
+                        cos(radians(lat)) * cos(radians(u.latitude)) *
+                        cos(radians(u.longitude) - radians(long)) +
+                        sin(radians(lat)) * sin(radians(u.latitude))
+                        ) * 0.621371
                 else null
             end as distance
             
