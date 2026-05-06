@@ -54,10 +54,36 @@ const Home = () => {
   const [priceLimit, setPriceLimit] = useState<string>("")
   const [sold, setSold] = useState<boolean | undefined>(false)
   const [showFilters, setShowFilters] = useState(false)
+  const [suggestedQueries, setSuggestedQueries] = useState<string[]>([])
 
-  const fetchNextListings = async (limit: number = 10, offset: number = 0) => {
-    const params = new URLSearchParams();
-    if (searchQuery.trim().length > 0) params.append("query", searchQuery.trim());
+  const normalizeSuggestions = (raw: unknown): string[] => {
+    if (!Array.isArray(raw)) return []
+    return raw
+      .map((item) => {
+        if (typeof item === "string") return item
+        if (item && typeof item === "object") {
+          const o = item as Record<string, unknown>
+          const candidate =
+            o.suggestion ?? o.query ?? o.product_name ?? o.name
+          if (typeof candidate === "string") return candidate
+        }
+        return null
+      })
+      .filter((value): value is string => Boolean(value))
+      .slice(0, 5)
+  }
+
+  const fetchNextListings = async (
+    limit: number = 10,
+    offset: number = 0,
+    queryForRequest?: string,
+  ) => {
+    const params = new URLSearchParams()
+    const q =
+      queryForRequest !== undefined
+        ? queryForRequest.trim()
+        : searchQuery.trim()
+    if (q.length > 0) params.append("query", q)
     if (sortBy) params.append("sort_by", sortBy);
     if (condition) params.append("condition", condition);
     if (priceLimit.trim()) params.append("priceLimit", priceLimit.trim());
@@ -85,22 +111,39 @@ const Home = () => {
     return normalized;
   }
 
-  const fetchListings = async (query: string) => {
-    setOffset(0);
-    setHasMore(true);
-    setLoading(true);
-    setListings([]);
+  const fetchListings = async (activeQuery: string) => {
+    const trimmed = activeQuery.trim()
+    setOffset(0)
+    setHasMore(true)
+    setLoading(true)
+    setListings([])
+    setSuggestedQueries([])
 
-    try{
-      const listings = await fetchNextListings(10, 0);
-      setListings(listings);
-      setOffset(listings.length);
+    try {
+      const page = await fetchNextListings(10, 0, trimmed)
+      setListings(page)
+      setOffset(page.length)
+      setHasMore(page.length >= 10)
+
+      if (trimmed.length > 0 && page.length === 0) {
+        try {
+          const suggestionRes = await fetchFromBackend(
+            `/api/listings/search-suggestions?query=${encodeURIComponent(trimmed)}`,
+          )
+          if (suggestionRes.ok) {
+            const payload = await suggestionRes.json()
+            setSuggestedQueries(normalizeSuggestions(payload?.suggestions))
+          }
+        } catch (suggestionError) {
+          console.error("Error fetching search suggestions", suggestionError)
+        }
+      }
     } catch (error) {
       console.error("Error fetching listings", error)
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
   const fetchMoreListings = async () => {
     if (loading || !hasMore) return;
@@ -246,6 +289,46 @@ const Home = () => {
           numColumns={2} 
           contentContainerStyle={{ paddingHorizontal: 3 }}
           keyExtractor={(item) => item.listing_id.toString()}
+          ListEmptyComponent={
+            !loading && searchQuery.trim().length > 0 ? (
+              <View style={{ paddingHorizontal: 12, paddingVertical: 16 }}>
+                {suggestedQueries.length > 0 ? (
+                  <View>
+                    <Text>
+                      We couldn't find anything for "{searchQuery}". Try
+                      searching for:
+                    </Text>
+                    <View
+                      style={{
+                        flexDirection: "row",
+                        flexWrap: "wrap",
+                        marginTop: 8,
+                      }}
+                    >
+                      {suggestedQueries.map((suggestion) => (
+                        <Pressable
+                          key={suggestion}
+                          onPress={() => runSearch(suggestion)}
+                          style={{
+                            borderWidth: 1,
+                            borderRadius: 999,
+                            paddingHorizontal: 10,
+                            paddingVertical: 6,
+                            marginRight: 8,
+                            marginBottom: 8,
+                          }}
+                        >
+                          <Text>{suggestion}</Text>
+                        </Pressable>
+                      ))}
+                    </View>
+                  </View>
+                ) : (
+                  <Text>No results found for "{searchQuery}"</Text>
+                )}
+              </View>
+            ) : null
+          }
           renderItem={({ item }) => (<FeedCard
             name={item.product_name}
             price={item.price}
