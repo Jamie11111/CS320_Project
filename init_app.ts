@@ -37,6 +37,7 @@ export const initApp = (supabaseConn: {supabaseURL: string, supabaseKey: string}
             ...convertRoutes(supabaseConn, accountRoutes),
             ...convertRoutes(supabaseConn, chatRoutes),
             ...convertRoutes(supabaseConn, searchRoutes),
+            ...convertRoutes(supabaseConn, similaritySearchRoutes),
             ...convertRoutes(supabaseConn, photoRoutes),
 
             // WebSocket upgrade — bypasses convertRoutes since it's not a normal HTTP response

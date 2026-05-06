@@ -21,6 +21,7 @@ async function searchSuggestions(supabase: SupabaseClient, req: BunRequest) {
             { status: 401 },
         );
     }
+    console.log("----");
     const raw = await getSearchSuggestion(
         supabase,
         String(params.query ?? ""),

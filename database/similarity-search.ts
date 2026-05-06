@@ -1,4 +1,5 @@
 import { SupabaseClient } from '@supabase/supabase-js';
+import { readableStreamToArray } from 'bun';
 import Fuse from 'fuse.js';
 
 export async function getSearchSuggestion(supabase: SupabaseClient, query: string): Promise<string[] | null> {
@@ -19,10 +20,11 @@ export async function getSearchSuggestion(supabase: SupabaseClient, query: strin
     const uniqueCorpus = Array.from(new Set(words));
 
     const fuse = new Fuse(uniqueCorpus, {
-        threshold: 0.4
+        threshold: 0.6
     });
 
     const results = fuse.search(sanitizedQuery);
+    console.log(results);
 
     if (results.length > 0 && results[0]!.item !== sanitizedQuery) {
         if(results.length <= 3) return results.map((element: any) => element.item as string);
