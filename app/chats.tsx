@@ -69,11 +69,12 @@ const ChatListScreen = () => {
       }
     }
 
+    
     fetchChats();
     if (timeoutLoop === null){
       timeoutLoop = setInterval(() => {
         fetchChats()
-      }, 5000) // Poll every 5 seconds
+      }, 5000) 
     }
     fetchUser()
 

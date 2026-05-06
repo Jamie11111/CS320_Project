@@ -259,6 +259,7 @@ const ChatDetailScreen = () => {
                     source={{ uri: att.attachment_url }}
                     style={{ width: 200, height: 200, borderRadius: 10, marginBottom: 4 }}
                     resizeMode="cover"
+                    onLoad={() => flatListRef.current?.scrollToEnd() }
                   />
                 ))}
                 {item.message ? <Text className="text-white font-bold text-xl">{item.message}</Text> : null}
