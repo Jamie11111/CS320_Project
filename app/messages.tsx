@@ -49,7 +49,7 @@ function ListingCardBubble({ message }: { message: string }) {
 
 const cardStyles = StyleSheet.create({
   wrapper: { width: 240 },
-  header: { fontSize: 12, color: "#6b7280", marginBottom: 6, fontStyle: "italic" },
+  header: { fontSize: 12, color: "#6b7280", marginBottom: 6, fontStyle: "italic", fontWeight: "600" },
   container: { width: 240, borderRadius: 12, overflow: "hidden", backgroundColor: "#d1d5db" },
   image: { width: "100%", height: 180 },
   bar: { backgroundColor: "#881C1C", paddingHorizontal: 10, paddingVertical: 8, flexDirection: "row", alignItems: "center" },
