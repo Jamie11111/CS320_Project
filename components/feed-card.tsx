@@ -51,9 +51,7 @@ const FeedCard = ({
   // console.log("FeedCard props:", { name, location, price, description, condition, images, isEditing, userId, listingId, sold, sellerPfpUrl })
   /*const formatLocation = (loc: string) => {
     if (!loc) return "Location not available";
-    console.log("Original location:", loc);
     const parts = loc.split(',');
-    console.log("Parts:", parts);
     if (parts.length >= 5) {
       return `${parts[parts.length - 5].trim()}, ${parts[parts.length - 3].trim()}`;
     }
@@ -81,7 +79,6 @@ const FeedCard = ({
 
 
   const displayLocation = formatLocation(location);
-  console.log("Display Location:", displayLocation);
   const handlePress = () => {
     if (isEditing) {
       router.push({

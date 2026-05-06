@@ -13,7 +13,6 @@ const ProfileFeedBanner = ({ authorName, authorLocation, authorPfp }: ProfileFee
   {/*Displays only city, state */}
   const formatLocation = (loc: string) => {
     if (!loc) return "Location not available";
-    console.log("Original location:", loc);
     const parts = loc.split(',');
     console.log("Parts:", parts);
     if (parts.length >= 5) {

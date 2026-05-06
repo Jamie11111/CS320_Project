@@ -35,9 +35,7 @@ const FeedCardExpanded = ({ name, location, price, condition, description, image
   }
   const formatLocation = (loc: string) => {
     if (!loc) return "Location not available";
-    console.log("Original location:", loc);
     const parts = loc.split(',');
-    console.log("Parts:", parts);
     if (parts.length >= 5) {
       return `${parts[parts.length - 5].trim()}, ${parts[parts.length - 3].trim()}`;
     }
