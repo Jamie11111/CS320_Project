@@ -180,8 +180,35 @@ const FeedCardExpanded = ({ name, location, price, condition, description, image
         <Text className="text-white font-bold">Message this Seller</Text>
       </Pressable> */}
       <RedButton onPressFunction={async () => {
+        const chatId = await createOrGetChat()
+        const prefix = `LISTING_CARD:{"id":"${listingId}"`
+        try {
+          const historyRes = await fetchFromBackend(`/api/chats/${chatId}/messages`, {
+            method: "GET",
+            headers: { "Content-Type": "application/json" },
+          })
+          const history = historyRes.ok ? await historyRes.json() : []
+          const alreadySent = Array.isArray(history) &&
+            history.some((msg: { message?: string }) => msg.message?.startsWith(prefix))
+          if (!alreadySent) {
+            const cardPayload = JSON.stringify({
+              id: listingId,
+              name,
+              price,
+              condition,
+              imageUrl: listingImages[0]?.photoURL ?? null,
+            })
+            await fetchFromBackend(`/api/chats/${chatId}/messages`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ message: `LISTING_CARD:${cardPayload}` }),
+            })
+          }
+        } catch (err) {
+          console.error("Error sending listing intro:", err)
+        }
         onClose()
-        router.push({ pathname: "/messages", params: { chatId: await createOrGetChat() , sellerName: sellerName} })
+        router.push({ pathname: "/messages", params: { chatId, sellerName } })
       }} text="Message this Seller" />
     </View>
     </View>
