@@ -1,4 +1,5 @@
 -- added offset for pagination, put nulls last, fixed name collision, fix distance calculation
+-- made searching more lenient, name-focused
 
 create or replace function filter_listings(
     viewer_id uuid default null,
@@ -65,8 +66,8 @@ as $$
                 case 
                     when query is not null
                     then 0.2 * greatest(
-                        1 * similarity(lower(coalesce(l.product_name, '')), lower(query)),
-                        0.5 * similarity(lower(coalesce(l.product_desc, '')), lower(query))
+                        2 * word_similarity(lower(query), lower(coalesce(l.product_name, ''))),
+                        0.3 * word_similarity(lower(query), lower(coalesce(l.product_desc, '')))
                     )
                     else 0
                 end          
@@ -77,10 +78,10 @@ as $$
                 when lat is not null and long is not null
                     and u.latitude is not null and u.longitude is not null
                 then 6371 * acos(
-                        cos(radians(lat)) * cos(radians(u.latitude)) *
-                        cos(radians(u.longitude) - radians(long)) +
-                        sin(radians(lat)) * sin(radians(u.latitude))
-                        ) * 0.621371
+                    cos(radians(lat)) * cos(radians(u.latitude)) *
+                    cos(radians(u.longitude) - radians(long)) +
+                    sin(radians(lat)) * sin(radians(u.latitude))
+                    ) * 0.621371
                 else null
             end as distance
             
@@ -104,8 +105,8 @@ as $$
                         expanded_query is not null
                         and l.search_vector @@ to_tsquery('english', expanded_query)
                     )
-                    or lower(coalesce(l.product_name, '')) % lower(query)
-                    or lower(coalesce(l.product_desc, '')) % lower(query)
+                    or word_similarity(lower(query), lower(coalesce(l.product_name, ''))) > 0.4
+                    or word_similarity(lower(query), lower(coalesce(l.product_desc, ''))) > 0.6
                 )
     ) filtered
 
