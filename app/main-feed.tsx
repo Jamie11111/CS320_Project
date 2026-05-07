@@ -169,6 +169,10 @@ const Home = () => {
   const runSearch = async (query: string) => {
     const trimmed = query.trim()
     setSearchQuery(trimmed)
+
+    // automatically sort by relevance whenever nonempty query submitted
+    if (trimmed.length > 0) setSortBy("relevance") 
+
     await fetchListings(trimmed)
   }
 
