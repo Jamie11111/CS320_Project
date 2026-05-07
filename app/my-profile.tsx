@@ -9,6 +9,7 @@ import React from "react"
 import { fetchFromBackend, isSignedIn } from "../scripts/authFetch"
 import { DataContext } from "../components/data-context";
 import RedButton from "../components/red-button"
+import * as SecureStore from 'expo-secure-store';
 
 type ListingPhoto = {
   photoID?: number;
@@ -47,13 +48,13 @@ const MyProfilePage = () => {
   const router = useRouter()
   const {cachedData, updateCache} = useContext(DataContext);
   const { profileData } = cachedData;
-  const [userLocation, setUserLocation] = useState("Loading...")
   const [listings, setListings] = useState<Listing[]>([])
   const [userData, setUserDataFn] = useState<userData | null>(profileData);
   const setUserData = (value: React.SetStateAction<userData | null>) => {
     setUserDataFn(value);
     updateCache("profileData", value);
   }
+  const [userLocation, setUserLocation] = useState(userData?.address)
   const [isPasswordModalVisible, setPasswordModalVisible] = useState(false)
   const [passwordLoading, setPasswordLoading] = useState(false)
   const [passwords, setPasswords] = useState({
@@ -194,6 +195,25 @@ const handlePasswordUpdate = async () => {
     }
   };
 
+  //signout logic
+ const handleSignOut = async () => {
+  Alert.alert("Sign Out", "Are you sure you want to log out?", [
+    { text: "Cancel", style: "cancel" },
+    {
+      text: "Log Out",
+      style: "destructive",
+      onPress: async () => {
+        await Promise.all([
+          SecureStore.deleteItemAsync('accessToken'),
+          SecureStore.deleteItemAsync('refreshToken')
+        ]);
+        router.replace("/login");
+      }
+    }
+  ]);
+ };
+
+
   useEffect(() => {
 {/* Obtain listings*/}
       const fetchListings = async () => {
@@ -259,7 +279,7 @@ const handlePasswordUpdate = async () => {
     <View>
       <View className="h-[92%]">
      
-        <MyProfileBanner name={userData?.name || "Loading..."} location={userLocation} email={userData?.email || "johndoe@example.com"} onLocationChange={handleLocationUpdate} profilePictureUrl={userData?.profile_picture_url || null} onPfpChange={handlePfpUpdate} onEditPassword={() => setPasswordModalVisible(true)}/>
+        <MyProfileBanner name={userData?.name || "Loading..."} location={userLocation} email={userData?.email || "johndoe@example.com"} onLocationChange={handleLocationUpdate} profilePictureUrl={userData?.profile_picture_url || null} onPfpChange={handlePfpUpdate} onEditPassword={() => setPasswordModalVisible(true)} onSignOut={handleSignOut}/>
         <ScrollView contentContainerStyle={{ flexDirection: "row", flexWrap: "wrap", marginLeft: 3}}>
           {listings.map((listing, index) => (
             <FeedCard
@@ -279,76 +299,73 @@ const handlePasswordUpdate = async () => {
         </ScrollView>
       </View>
       {/* Change password */}
-     <Modal visible={isPasswordModalVisible} animationType="slide" transparent>
-       <View className="flex-1 justify-end bg-black/50">
-         <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
-           <View className="bg-white rounded-t-[40px] p-8 pb-12 shadow-2xl">
-            
-             <View className="w-12 h-1.5 bg-gray-200 rounded-full self-center mb-6" />
+     <Modal visible={isPasswordModalVisible} animationType="fade" transparent>
+      <View className="flex-1 justify-center items-center bg-black/60 px-4">
+        <KeyboardAvoidingView 
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          className="w-full"
+        >
+          <View className="bg-white rounded-3xl p-6 shadow-2xl">
+            <Text className="text-black font-bold text-3xl mb-6">
+              Change Password
+            </Text>
 
+            <View className="space-y-4">
+              {[
+                { label: "Current Password:", key: "current", show: showCurrent, setShow: setShowCurrent },
+                { label: "New Password:", key: "new", show: showNew, setShow: setShowNew },
+                { label: "Confirm New:", key: "confirm", show: showConfirm, setShow: setShowConfirm }
+              ].map((item) => (
+                <View key={item.key} className="flex-row justify-between items-center mb-4">
+                  <Text className="text-lg font-medium w-[40%] text-gray-800">
+                    {item.label}
+                  </Text>
+                  <View className="bg-gray-300 rounded-lg w-[60%] flex-row items-center px-3">
+                    <TextInput
+                      className="flex-1 p-3 text-black"
+                      secureTextEntry={!item.show}
+                      placeholder="••••••••"
+                      placeholderTextColor="#6a6b6b"
+                      value={passwords[item.key as keyof typeof passwords]}
+                      onChangeText={(t) => setPasswords({...passwords, [item.key]: t})}
+                    />
+                    <Pressable onPress={() => item.setShow(!item.show)}>
+                      <Text className="text-umass-red font-bold text-[10px] uppercase">
+                        {item.show ? "Hide" : "Show"}
+                      </Text>
+                    </Pressable>
+                  </View>
+                </View>
+              ))}
+            </View>
 
-             <Text className="text-3xl font-black text-umass-red mb-2 uppercase tracking-tighter">
-               Update Security
-             </Text>
-             <Text className="text-gray-500 font-medium mb-8">
-               Ensure your new password is 8+ chars with uppercase, lowercase, number, and special character.
-             </Text>
-            
-             {/* Input Fields */}
-             <View className="space-y-5">
-               {[
-                 { label: "Current Password", key: "current", show: showCurrent, setShow: setShowCurrent },
-                 { label: "New Password", key: "new", show: showNew, setShow: setShowNew },
-                 { label: "Confirm Password", key: "confirm", show: showConfirm, setShow: setShowConfirm }
-               ].map((item) => (
-                 <View key={item.key} className="mb-4">
-                   <Text className="text-[10px] font-black text-gray-400 uppercase ml-1 mb-1.5 tracking-widest">
-                     {item.label}
-                   </Text>
-                   <View className="flex-row items-center bg-gray-50 border border-gray-100 h-16 rounded-2xl px-5 focus:border-umass-red">
-                     <TextInput
-                       className="flex-1 h-full text-gray-800 font-semibold"
-                       secureTextEntry={!item.show}
-                       placeholder="••••••••"
-                       placeholderTextColor="#9ca3af"
-                       value={passwords[item.key as keyof typeof passwords]}
-                       onChangeText={(t) => setPasswords({...passwords, [item.key]: t})}
-                     />
-                     <Pressable onPress={() => item.setShow(!item.show)} className="ml-2 py-2 px-1">
-                       <Text className="text-umass-red font-bold text-[10px] uppercase tracking-tighter">
-                         {item.show ? "Hide" : "Show"}
-                       </Text>
-                     </Pressable>
-                   </View>
-                 </View>
-               ))}
-             </View>
-
-             <View className="items-center mt-4">
-               {passwordLoading ? (
-                 <ActivityIndicator color="#881c1c" className="mb-8" />
-               ) : (
-                 <>
-                   <RedButton
-                     text="Update Password"
-                     onPressFunction={handlePasswordUpdate}
-                   />
-                  
-                   <Pressable
-                     onPress={() => setPasswordModalVisible(false)}
-                     className="mt-2"
-                   >
-                     <Text className="font-black text-gray-400 uppercase tracking-widest text-[10px]">
-                       Cancel
-                     </Text>
-                   </Pressable>
-                 </>
-               )}
-             </View>
-           </View>
-         </KeyboardAvoidingView>
-       </View>
-     </Modal>
+          <View className="items-center mt-8 w-full">
+          {
+          }
+          <View className="items-center w-full">
+            <RedButton 
+              disabled={passwordLoading} 
+              onPressFunction={handlePasswordUpdate} 
+              text={passwordLoading ? "Loading..." : "Update Password"} 
+            />
+          </View>
+          
+          <Pressable 
+            onPress={() => {
+              setPasswordModalVisible(false);
+              setPasswords({ current: "", new: "", confirm: "" });
+            }}
+            className="border-2 border-gray-300 rounded-xl p-3 items-center w-52"
+          >
+            <Text className="text-gray-500 font-bold uppercase tracking-widest text-xs">
+              Cancel
+            </Text>
+          </Pressable>
+        </View>
+      </View>
+        </KeyboardAvoidingView>
+      </View>
+    </Modal>
 
       <Navbar canNavigate={userLocation.trim() !== ""} userPfp={userData?.profile_picture_url || null} />
     </View>

@@ -26,6 +26,7 @@ const SignUpScreen = () => {
   const [showConfirmPass, setShowConfirmPass] = useState(false)
 
   const LOCATION_IQ_KEY = "pk.ff54db5bc5b50127d459385769a878a5"
+  const MA_VIEWBOX = "-73.5081,42.8868,-69.9284,41.2380";
 
 
   const handleLocationSearch = async (text: string) => {
@@ -36,7 +37,7 @@ const SignUpScreen = () => {
    }
 
 
-   const url = `https://api.locationiq.com/v1/autocomplete?key=${LOCATION_IQ_KEY}&q=${encodeURIComponent(text)}&limit=5&dedupe=1&lat=42.3601&lon=-71.0589&countrycodes=us`;
+   const url = `https://api.locationiq.com/v1/autocomplete?key=${LOCATION_IQ_KEY}&q=${encodeURIComponent(text)}&limit=5&dedupe=1&viewbox=${MA_VIEWBOX}&bounded=1&countrycodes=us`;
    try {
      const response = await fetch(url)
      const data = await response.json()

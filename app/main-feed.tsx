@@ -56,6 +56,11 @@ const Home = () => {
   const [showFilters, setShowFilters] = useState(false)
   const [suggestedQueries, setSuggestedQueries] = useState<string[]>([])
 
+  const toggleFilters = () => {
+   setShowFilters(!showFilters);
+ };
+
+
   const normalizeSuggestions = (raw: unknown): string[] => {
     if (!Array.isArray(raw)) return []
     return raw
@@ -186,21 +191,14 @@ const Home = () => {
   }, [])
 
   const FilterButton = ({ label, active, onPress }: any) => (
-    <Pressable
-      onPress={onPress}
-      style={{
-        paddingVertical: 8,
-        paddingHorizontal: 12,
-        borderRadius: 8,
-        borderWidth: 1,
-        marginRight: 8,
-        marginBottom: 8,
-        backgroundColor: active ? "#111" : "white",
-      }}
-    >
-      <Text style={{ color: active ? "white" : "black" }}>{label}</Text>
-    </Pressable>
-  );
+   <Pressable
+     onPress={onPress}
+     className={`py-2 px-4 rounded-full border mr-2 mb-2 ${active ? 'bg-umass-red border-umass-red' : 'bg-white border-gray-300'}`}
+   >
+     <Text className={`font-bold ${active ? 'text-white' : 'text-gray-600'}`}>{label}</Text>
+   </Pressable>
+ );
+
 
   return (
     <View>
@@ -210,35 +208,27 @@ const Home = () => {
           value={searchQuery}
           onChangeText={setSearchQuery}
           onSubmitSearch={runSearch}
+          onFilterPress={toggleFilters}
+          hideHistory={showFilters}
         />
-        <Pressable
-          onPress={() => setShowFilters(!showFilters)}
-          style={{
-            marginHorizontal: 12,
-            marginTop: 8,
-            padding: 10,
-            borderRadius: 10,
-            borderWidth: 1,
-            alignItems: "center",
-          }}
-        >
-          <Text>{showFilters ? "Hide Filters" : "Filters"}</Text>
-        </Pressable>
+        
 
         {showFilters && (
-          <View style={{ margin: 12, padding: 12, borderWidth: 1, borderRadius: 12 }}>
-            <Text style={{ fontWeight: "bold", marginBottom: 8 }}>Sort By</Text>
-
-            <View style={{ flexDirection: "row", flexWrap: "wrap" }}>
+          <View className="mx-4 p-4 bg-gray-50 rounded-2xl border border-gray-200 shadow-sm mb-4">
+            <Text className="text-lg font-bold text-gray-800 mb-3">Refine Search</Text>
+            
+            {/* Sort Section */}
+            <Text className="font-semibold text-gray-500 mb-2 uppercase text-[10px] tracking-wider">Sort By</Text>
+            <View className="flex-row flex-wrap">
               <FilterButton label="Newest" active={sortBy === "date"} onPress={() => setSortBy("date")} />
               <FilterButton label="Relevance" active={sortBy === "relevance"} onPress={() => setSortBy("relevance")} />
               <FilterButton label="Price" active={sortBy === "price"} onPress={() => setSortBy("price")} />
               <FilterButton label="Distance" active={sortBy === "distance"} onPress={() => setSortBy("distance")} />
             </View>
 
-            <Text style={{ fontWeight: "bold", marginTop: 10, marginBottom: 8 }}>Condition</Text>
-
-            <View style={{ flexDirection: "row", flexWrap: "wrap" }}>
+            {/* Condition Section */}
+            <Text className="font-semibold text-gray-500 mt-2 mb-2 uppercase text-[10px] tracking-wider">Condition</Text>
+            <View className="flex-row flex-wrap">
               <FilterButton label="Any" active={condition === undefined} onPress={() => setCondition(undefined)} />
               <FilterButton label="New" active={condition === "new"} onPress={() => setCondition("new")} />
               <FilterButton label="Good" active={condition === "good"} onPress={() => setCondition("good")} />
@@ -246,40 +236,38 @@ const Home = () => {
               <FilterButton label="Poor" active={condition === "poor"} onPress={() => setCondition("poor")} />
             </View>
 
-            <Text style={{ fontWeight: "bold", marginTop: 10 }}>Price Limit</Text>
-
-            <TextInput
-              value={priceLimit}
-              onChangeText={setPriceLimit}
-              placeholder="Max price"
-              keyboardType="numeric"
-              style={{
-                borderWidth: 1,
-                borderRadius: 8,
-                padding: 10,
-                marginTop: 6,
-                marginBottom: 12,
-              }}
-            />
-
-            <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 12 }}>
-              <Text style={{ marginRight: 10 }}>Available only</Text>
-              <Switch
-                value={sold === false}
-                onValueChange={(val) => setSold(val ? false : undefined)}
-              />
+            {/* Price and Availability Row */}
+            <View className="flex-row items-center justify-between mt-4">
+              <View className="flex-1 mr-4">
+                <Text className="font-semibold text-gray-500 mb-1 uppercase text-[10px] tracking-wider">Max Price</Text>
+                <TextInput
+                  value={priceLimit}
+                  onChangeText={setPriceLimit}
+                  placeholder="$ 0.00"
+                  keyboardType="numeric"
+                  className="bg-white border border-gray-300 rounded-lg p-2 text-gray-800"
+                />
+              </View>
+              <View className="items-center">
+                <Text className="font-semibold text-gray-500 mb-1 uppercase text-[10px] tracking-wider">Available Only</Text>
+                <Switch
+                  value={sold === false}
+                  onValueChange={(val) => setSold(val ? false : undefined)}
+                  trackColor={{ false: "#d1d5db", true: "#880000" }} // Using your UMass Red
+                  thumbColor={"#fff"}
+                />
+              </View>
             </View>
 
+            {/* Apply Button */}
             <Pressable
-              onPress={() => fetchListings(searchQuery)}
-              style={{
-                backgroundColor: "#111",
-                padding: 12,
-                borderRadius: 10,
-                alignItems: "center",
+              onPress={() => {
+                fetchListings(searchQuery);
+                setShowFilters(false);
               }}
+              className="bg-umass-red mt-6 py-3 rounded-xl items-center shadow-md active:opacity-90"
             >
-              <Text style={{ color: "white", fontWeight: "bold" }}>Apply Filters</Text>
+              <Text className="text-white font-bold text-lg">Apply Filters</Text>
             </Pressable>
           </View>
         )}        
