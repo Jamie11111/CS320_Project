@@ -8,10 +8,12 @@ returns table (
     seller_id uuid,
     customer_id uuid,
     message text,
-    sent_at timestamp
+    sent_at timestamp,
+    message_id integer,
+    sender_id uuid
 )
 as $$
-select c.chat_id, c.seller_id, c.customer_id, m.message, m.sent_at
+select c.chat_id, c.seller_id, c.customer_id, m.message, m.sent_at, m.message_id, m.sender_id
 from chats c left join messages m on c.chat_id = m.chat_id
 where (c.seller_id = uid or c.customer_id = uid)
 and (

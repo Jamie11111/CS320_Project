@@ -63,14 +63,15 @@ await loginUser(user1Client, profiles[0].email, "testPassword123");
 
 // can call these two functions and results will be printed
 //await testOnAmazonQueries();
-for (const query of DEMO_SEARCH_QUERIES) await testOnQuery(query, false, 3);
+//for (const query of DEMO_SEARCH_QUERIES) await testOnQuery(query, false, 3);
+addListings()
 
 // adds listings from ebay_titles_sample to listings table
 async function addListings() {
 
     // clear listings table first
-    const {error: deleteError} = await serviceClient.from('listings').delete().neq('listing_id', 0);
-    if (deleteError) return false;
+    //const {error: deleteError} = await serviceClient.from('listings').delete().neq('listing_id', 0);
+    //if (deleteError) return false;
 
     // load ebay titles and store array or product names
     const csv = fs.readFileSync('tests/database/data/ebay_titles_sample.csv', 'utf8');
