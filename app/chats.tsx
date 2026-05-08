@@ -12,6 +12,8 @@ const ChatListScreen = () => {
     chat_id: string
     seller_id: string
     customer_id: string
+    sender_id: string
+    message_id: string
     message: string
     sent_at: string
     is_unread: boolean
@@ -20,6 +22,8 @@ const ChatListScreen = () => {
   const {cachedData, updateCache} = useContext(DataContext);
   const { profileData } = cachedData;
   const [currentUser, setCurrentUserFn] = useState<any>(profileData);
+  const lastMessageIdByChat = cachedData.lastMessageIdByChat || {};
+  const isUnreadByChat = cachedData.isUnreadByChat || {};
   const setCurrentUser = (value: React.SetStateAction<any>) => {
     setCurrentUserFn(value);
     updateCache("profileData", value);
@@ -51,16 +55,29 @@ const ChatListScreen = () => {
         })
         if (!res.ok) throw new Error("Failed to fetch chats")
         const data = await res.json()
+        const newLastMessageIdByChat = { ...lastMessageIdByChat };
+        const newIsUnreadByChat = { ...isUnreadByChat };
+        data.forEach((chat: Chat) => {
+          if (chat.sender_id === currentUser?.user_id) {
+            newIsUnreadByChat[chat.chat_id] = false;
+            newLastMessageIdByChat[chat.chat_id] = chat.message_id;
+            return;
+          }
 
-        setChats(data)
-        chats.forEach((chat) => {
-          console.log("Chat ID:", chat.chat_id)
-          console.log("Seller ID:", chat.seller_id)
-          console.log("Customer ID:", chat.customer_id)
-          console.log("Last Message:", chat.message)
-          console.log("Last Message Time:", chat.sent_at)
-          console.log("Is Unread:", chat.is_unread)
+          if (chat.message_id != lastMessageIdByChat[chat.chat_id]) {
+            console.log("New message in chat " + chat.chat_id);
+            console.log("Old last message id: " + lastMessageIdByChat[chat.chat_id]);
+            newLastMessageIdByChat[chat.chat_id] = chat.message_id;
+            newIsUnreadByChat[chat.chat_id] = true;
+          }
+          else {
+            newIsUnreadByChat[chat.chat_id] = false;
+          }
         })
+        updateCache("lastMessageIdByChat", newLastMessageIdByChat);
+        updateCache("isUnreadByChat", newIsUnreadByChat);
+        setChats(data)
+        
 
       } catch (error) {
         console.error("Error fetching chats:", error)
@@ -69,11 +86,13 @@ const ChatListScreen = () => {
       }
     }
 
+    
     fetchChats();
     if (timeoutLoop === null){
       timeoutLoop = setInterval(() => {
         fetchChats()
-      }, 5000) // Poll every 5 seconds
+
+      }, 5000) 
     }
     fetchUser()
 
@@ -93,17 +112,19 @@ const ChatListScreen = () => {
             </View>
           }
           renderItem={({ item, index }) => (
-            // <Pressable onPress={() => router.push({ pathname: "/messages", params: { chatId: item.chat_id } })}>
-            <ChatRow 
-              sellerId={item.seller_id === currentUser?.user_id ? item.customer_id : item.seller_id}
-              chatId={item.chat_id}
-              lastMessageTime={new Date(item.sent_at + 'Z').toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} 
-              lastMessage={item.message} 
-              pfpUrl={null}
-              {...item}
-              isUnread={item.is_unread}
-            />
-          // </Pressable>
+            <Pressable onPress={() => {
+              updateCache("isUnreadByChat", { ...cachedData.isUnreadByChat, [item.chat_id]: false });
+            }}>
+              <ChatRow 
+                sellerId={item.seller_id === currentUser?.user_id ? item.customer_id : item.seller_id}
+                chatId={item.chat_id}
+                lastMessageTime={`${new Date(item.sent_at + 'Z').toLocaleDateString([], { month: '2-digit', day: '2-digit', year: 'numeric' })} ${new Date(item.sent_at + 'Z').toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`} 
+                lastMessage={item.message} 
+                pfpUrl={null}
+                {...item}
+                isUnread={isUnreadByChat[item.chat_id] || false}
+              />
+            </Pressable>
 
           )}
           keyExtractor={(_, i) => i.toString()}
