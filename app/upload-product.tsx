@@ -166,11 +166,12 @@ const UploadProductPage = ({
           throw new Error(`Failed to fetch photo for upload: ${errorText}`);
         }
         const blob = await res.blob();
+        console.log(blob.type)
         const uploadRes = await fetchFromBackend("/api/listings/photo-upload", {
                 method: "POST",
                 headers: {
-                        "Content-Type": "image/jpeg",
-                        'File-Metadata': JSON.stringify({"filename": `listing_${listingID}_${Date.now()}.jpg`, "type": "image/jpeg"})
+                  "Content-Type": "image/jpeg",
+                  'File-Metadata': JSON.stringify({"filename": `listing_${listingID}_${Date.now()}.jpg`})
                 },
                 body: blob,
         });
@@ -276,7 +277,7 @@ const UploadProductPage = ({
         alert("Listing updated successfully");
       } else {
         const userResponse = await fetchFromBackend(
-          "http://localhost:3000/api/user",
+          "/api/user",
           {
             headers: {
               "Content-Type": "application/json",
@@ -289,7 +290,7 @@ const UploadProductPage = ({
         }
         const userData = await userResponse.json();
         const response = await fetchFromBackend(
-          "http://localhost:3000/api/listing",
+          "/api/listing",
           {
             method: "POST",
             headers: {
