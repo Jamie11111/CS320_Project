@@ -3,12 +3,12 @@ import { useRouter } from "expo-router"
 import samplepfp from "../assets/images/samplepfp.png"
 import "../global.css"
 import React from "react"
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useContext } from "react";
 import { useLocalSearchParams } from "expo-router";
 import * as SecureStore from "expo-secure-store";
 import * as ImagePicker from "expo-image-picker";
 import { fetchFromBackend } from "../scripts/authFetch";
-
+import { DataContext } from "../components/data-context"
 const LISTING_CARD_PREFIX = "LISTING_CARD:";
 
 type ListingCard = {
@@ -62,6 +62,7 @@ const ChatDetailScreen = () => {
   
   const router = useRouter()
   const otherUserPfp = null
+  const {cachedData, updateCache} = useContext(DataContext);
 
   type Attachment = {
     attachment_url: string
@@ -230,7 +231,14 @@ const ChatDetailScreen = () => {
         <View 
           className="bg-umass-red py-3 br-rounded-2xl flex-row items-center justify-center"
         >
-        <Pressable onPress={() => router.push("/chats")} className="absolute left-4">
+        <Pressable onPress={() => {
+          const latestMessage = messages[messages.length - 1];
+          if (latestMessage) {
+            updateCache("lastMessageIdByChat", { ...cachedData.lastMessageIdByChat, [chatId!]: latestMessage.message_id });
+          }
+          updateCache("isUnreadByChat", { ...cachedData.isUnreadByChat, [chatId!]: false });
+        
+          router.push("/chats")}} className="absolute left-4">
             <Text className="text-white font-bold text-xl">{"<"}</Text>
         </Pressable>
           <Image 
@@ -266,7 +274,7 @@ const ChatDetailScreen = () => {
               </View>
             )}
             <Text className={`text-black text-sm mt-1 ${isSentByCurrentUser ? "mr-1" : "ml-1"}`}>
-              {new Date(item.sent_at + 'Z').toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+              {new Date(item.sent_at + 'Z').toLocaleString([], { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
             </Text>
           </View>
         )

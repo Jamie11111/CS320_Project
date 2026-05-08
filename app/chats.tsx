@@ -12,6 +12,8 @@ const ChatListScreen = () => {
     chat_id: string
     seller_id: string
     customer_id: string
+    sender_id: string
+    message_id: string
     message: string
     sent_at: string
     is_unread: boolean
@@ -20,7 +22,7 @@ const ChatListScreen = () => {
   const {cachedData, updateCache} = useContext(DataContext);
   const { profileData } = cachedData;
   const [currentUser, setCurrentUserFn] = useState<any>(profileData);
-  const lastSeenByChat = cachedData.lastSeenByChat || {};
+  const lastMessageIdByChat = cachedData.lastMessageIdByChat || {};
   const isUnreadByChat = cachedData.isUnreadByChat || {};
   const setCurrentUser = (value: React.SetStateAction<any>) => {
     setCurrentUserFn(value);
@@ -53,24 +55,26 @@ const ChatListScreen = () => {
         })
         if (!res.ok) throw new Error("Failed to fetch chats")
         const data = await res.json()
-        const newLastSeenByChat = { ...lastSeenByChat };
+        const newLastMessageIdByChat = { ...lastMessageIdByChat };
         const newIsUnreadByChat = { ...isUnreadByChat };
-        data.forEach((chat) => {
-          if (chat.seller_id === currentUser?.user_id || chat.customer_id === currentUser?.user_id) {
+        data.forEach((chat: Chat) => {
+          if (chat.sender_id === currentUser?.user_id) {
             newIsUnreadByChat[chat.chat_id] = false;
-            newLastSeenByChat[chat.chat_id] = chat.sent_at;
+            newLastMessageIdByChat[chat.chat_id] = chat.message_id;
             return;
           }
 
-          if (lastSeenByChat[chat.chat_id] === undefined || new Date(chat.sent_at) > new Date(lastSeenByChat[chat.chat_id])) {
-            newLastSeenByChat[chat.chat_id] = chat.sent_at;
+          if (chat.message_id != lastMessageIdByChat[chat.chat_id]) {
+            console.log("New message in chat " + chat.chat_id);
+            console.log("Old last message id: " + lastMessageIdByChat[chat.chat_id]);
+            newLastMessageIdByChat[chat.chat_id] = chat.message_id;
             newIsUnreadByChat[chat.chat_id] = true;
           }
           else {
             newIsUnreadByChat[chat.chat_id] = false;
           }
         })
-        updateCache("lastSeenByChat", newLastSeenByChat);
+        updateCache("lastMessageIdByChat", newLastMessageIdByChat);
         updateCache("isUnreadByChat", newIsUnreadByChat);
         setChats(data)
         
@@ -109,12 +113,12 @@ const ChatListScreen = () => {
           }
           renderItem={({ item, index }) => (
             <Pressable onPress={() => {
-              updateCache("isUnreadByChat", prev => ({ ...prev, [item.chat_id]: false }));
+              updateCache("isUnreadByChat", { ...cachedData.isUnreadByChat, [item.chat_id]: false });
             }}>
               <ChatRow 
                 sellerId={item.seller_id === currentUser?.user_id ? item.customer_id : item.seller_id}
                 chatId={item.chat_id}
-                lastMessageTime={new Date(item.sent_at + 'Z').toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} 
+                lastMessageTime={`${new Date(item.sent_at + 'Z').toLocaleDateString([], { month: '2-digit', day: '2-digit', year: 'numeric' })} ${new Date(item.sent_at + 'Z').toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`} 
                 lastMessage={item.message} 
                 pfpUrl={null}
                 {...item}

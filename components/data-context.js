@@ -5,7 +5,7 @@ export const DataContext = createContext();
 export const DataProvider = ({ children }) => {
   const [cachedData, setCache] = useState({
     "profileData": null,
-    lastSeenByChat: {},
+    lastMessageIdByChat: {},
     isUnreadByChat: {},
   });
   const updateCache = (key, data) => {

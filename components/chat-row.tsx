@@ -4,7 +4,6 @@ import React, { useEffect } from "react"
 import samplepfp from "../assets/images/samplepfp.png"
 import { useRouter } from "expo-router"
 import { fetchFromBackend } from "../scripts/authFetch"
-import { DataContext } from "../components/data-context"
 interface ChatRowProps {
   sellerId: string
   chatId: string
@@ -16,7 +15,6 @@ interface ChatRowProps {
 
 const ChatRow = ({ sellerId, chatId, lastMessage, lastMessageTime, isUnread, pfpUrl }: ChatRowProps) => {
   const [sellerName, setName] = React.useState("")
-  const isUnreadByChat = React.useContext(DataContext).cachedData.isUnreadByChat || {};
   const router = useRouter()
   useEffect(() => {
     const fetchSellerName = async () => {
