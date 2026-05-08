@@ -46,12 +46,19 @@ const ChatRow = ({ sellerId, chatId, lastMessage, lastMessageTime, isUnread, pfp
          <View className="w-3 h-3 rounded-full bg-red-500" />
        )}
      </View>
-
-      
+       <Pressable
+        onPress={() => {
+          router.push({
+        pathname: "/profile-feed",
+        params: { userId: sellerId },
+          })
+        }}
+      >
       <Image 
         source={pfpUrl ? { uri: pfpUrl } : samplepfp} 
         className="w-14 h-14 rounded-full bg-gray-300 shadow-sm mr-4" 
       />
+      </Pressable>
 
       
       <View className="flex-1">
