@@ -1,9 +1,12 @@
-import { View, Text, TextInput, Pressable, ScrollView, ActivityIndicator, Alert, KeyboardAvoidingView, Platform } from "react-native"
+import { View, Text, TextInput, Pressable, ScrollView, ActivityIndicator, Alert, KeyboardAvoidingView, Platform, Image } from "react-native"
 import { useRouter } from "expo-router"
 import { useState } from "react"
 import AsyncStorage from "@react-native-async-storage/async-storage"
+import * as SecureStore from 'expo-secure-store';
 import "../global.css"
 import React from "react"
+import { fetchFromBackend } from "../scripts/authFetch"
+import Logo from "../assets/images/Logo.png"
 
 const SignUpScreen = () => {
   const router = useRouter()
@@ -12,17 +15,57 @@ const SignUpScreen = () => {
   const [password, setPassword] = useState("")
   const [name, setName] = useState("")
   const [confirmPassword, setConfirmPassword] = useState("")
+
+  const [locationText, setLocationText] = useState("")
+  const [suggestions, setSuggestions] = useState<any[]>([])
+  const [coordinates, setCoordinates] = useState({ lat: null as number | null, lon: null as number | null })
+  const [isEditingLocation, setIsEditingLocation] = useState(true);
+
   
   const [showPass, setShowPass] = useState(false)
   const [showConfirmPass, setShowConfirmPass] = useState(false)
 
+  const LOCATION_IQ_KEY = "pk.ff54db5bc5b50127d459385769a878a5"
+  const MA_VIEWBOX = "-73.5081,42.8868,-69.9284,41.2380";
+
+
+  const handleLocationSearch = async (text: string) => {
+   setLocationText(text)
+   if (text.length < 3) {
+     setSuggestions([])
+     return
+   }
+
+
+   const url = `https://api.locationiq.com/v1/autocomplete?key=${LOCATION_IQ_KEY}&q=${encodeURIComponent(text)}&limit=5&dedupe=1&viewbox=${MA_VIEWBOX}&bounded=1&countrycodes=us`;
+   try {
+     const response = await fetch(url)
+     const data = await response.json()
+     if (Array.isArray(data)) {
+       setSuggestions(data)
+     }
+   } catch (error) {
+     console.error("Location Search Error:", error)
+   }
+  }
+//sets location
+  const handleSelectLocation = (item: any) => {
+   setLocationText(item.display_name);
+   setCoordinates({ lat: parseFloat(item.lat), lon: parseFloat(item.lon) });
+   setSuggestions([]);
+   setIsEditingLocation(false);
+  };
+
+
   const handleSignUp = async () => {
+    //@umass.edu check
     const umassRegex = /^[a-zA-Z0-9._%+-]+@umass\.edu$/
     if (!umassRegex.test(email)) {
       Alert.alert("UMass Only", "Please use a valid @umass.edu email address.")
       return
     }
 
+    //password constraints
     const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/
     if (!passwordRegex.test(password)) {
       Alert.alert(
@@ -37,7 +80,7 @@ const SignUpScreen = () => {
       return
     }
     try {
-      const response = await fetch('http://localhost:3000/api/account/signup', {
+      const response = await fetchFromBackend('/api/account/signup', {
       method: 'POST',
       headers: {
           'Content-Type': 'application/json',
@@ -48,24 +91,58 @@ const SignUpScreen = () => {
           password: password,
           name: name,
       })
-      });
+      }, false);
 
-      console.log("Response status:", response.status)
+   const responseJson: any = await response.json();
+   console.log("Signup Response status:", response.status);
 
-      const responseJson: any = await response.json();
-      
-      console.log("Response JSON:", responseJson);  
 
-  
-      const { session } = responseJson;
-      await AsyncStorage.setItem("access_token", session.accessToken);
-      await AsyncStorage.setItem("refresh_token", session.refreshToken);
-      if (session.accessToken) {
-        router.push("/")
-      }
-      else {
-        console.error("Login failed:", responseJson.message)
-      }
+   if (!response.ok) {
+     Alert.alert("Sign Up Failed", responseJson.error || "Could not create account.");
+     setLoading(false);
+     return;
+   }
+
+
+   const { session } = responseJson;
+
+
+   if (session) {
+     //Save tokens 
+    //  await SecureStore.setItemAsync("accessToken", session.accessToken);
+    //  await SecureStore.setItemAsync("refreshToken", session.refreshToken);
+    
+    //  console.log("Tokens saved. Attempting location update...");
+
+
+     // Update User Location
+     const locationResponse = await fetchFromBackend('/api/user', {
+       method: 'PATCH',
+       headers: {
+         'Content-Type': 'application/json',
+       },
+       body: JSON.stringify({
+         address: locationText,
+         latitude: coordinates.lat,
+         longitude: coordinates.lon,
+       }),
+     });
+
+
+     if (!locationResponse.ok) {
+       const errorData = await locationResponse.json();
+       console.error("Location update failed:", errorData);
+       Alert.alert("Account created, but could not save your location.");
+       router.push("/login");
+     } else {
+       console.log("Location synced successfully!");
+       router.push("/login");
+     }
+   } else {
+     console.error("Signup failed: No session returned", responseJson.message);
+     Alert.alert("Error", "Session could not be established.");
+   }
+
     } catch (error) {
       console.error("Login error", error)
     }
@@ -82,10 +159,44 @@ const SignUpScreen = () => {
           className="px-8 py-12"
           scrollEnabled={false}
         >
-          
-          <View className="bg-white w-full py-4 rounded-xl mb-4">
-            <Text className="text-center text-4xl font-black text-umass-red uppercase">UMarket</Text>
-          </View>
+        {/* Logo */}
+         <View className="flex-row items-center justify-center mt-2 mb-4">
+           <Text
+             className="text-white font-black uppercase"
+             style={{
+               fontSize: 42,
+               textShadowColor: '#000',
+               textShadowOffset: { width: 1, height: 1 },
+               textShadowRadius: 1,
+               fontFamily: Platform.OS === 'ios' ? 'Georgia-Bold' : 'serif'
+             }}
+           >
+             U
+           </Text>
+
+
+           <View className="mx-1">
+             <Image
+               source={Logo}
+               className="w-14 h-14"
+               resizeMode="contain"
+             />
+           </View>
+
+
+           <Text
+             className="text-white font-black uppercase"
+             style={{
+               fontSize: 42,
+               textShadowColor: '#000',
+               textShadowOffset: { width: 1, height: 1 },
+               textShadowRadius: 1,
+               fontFamily: Platform.OS === 'ios' ? 'Georgia-Bold' : 'serif'
+             }}
+           >
+             ARKET
+           </Text>
+         </View>
 
           <View className="mb-4">
             <Text className="text-white font-bold text-2xl mb-2">Name</Text>
@@ -98,7 +209,55 @@ const SignUpScreen = () => {
               onChangeText={setName}
             />
           </View>
+{/* location */}
+          <View className="mb-4 z-50">
+           <Text className="text-white font-bold text-xl mb-2">Location</Text>
+           <View className="bg-white h-16 rounded-2xl px-4 overflow-hidden justify-center">
+             {!isEditingLocation ? (
+               <Pressable
+                 onPress={() => setIsEditingLocation(true)}
+                 className="w-full h-full justify-center"
+               >
+                 <Text
+                   numberOfLines={1}
+                   ellipsizeMode="tail"
+                   className="text-xl text-black"
+                 >
+                   {locationText}
+                 </Text>
+               </Pressable>
+             ) : (
+               <TextInput
+                 className="text-xl h-full"
+                 placeholder="Search address..."
+                 placeholderTextColor="#666"
+                 value={locationText}
+                 onChangeText={handleLocationSearch}
+                 autoFocus={locationText.length > 0}
+                 multiline={false}
+                 numberOfLines={1}
+               />
+             )}
+           </View>
 
+
+           {suggestions.length > 0 && (
+             <View className="absolute top-24 left-0 right-0 bg-white border border-gray-200 rounded-xl shadow-2xl z-[100] overflow-hidden">
+               {suggestions.map((item, index) => (
+                 <Pressable
+                   key={index}
+                   className="p-4 border-b border-gray-50 active:bg-gray-100"
+                   onPress={() => handleSelectLocation(item)}
+                 >
+                   <Text numberOfLines={1} className="text-sm font-medium text-gray-700">
+                     {item.display_name}
+                   </Text>
+                 </Pressable>
+               ))}
+             </View>
+           )}
+         </View>
+{/* Email */}
           <View className="mb-4">
             <Text className="text-white font-bold text-2xl mb-2 ">UMass Email Address</Text>
             <TextInput 
@@ -112,7 +271,7 @@ const SignUpScreen = () => {
             />
           </View>
 
-          
+          {/* Password*/}
           <View className="mb-4">
             <Text className="text-white font-bold text-2xl mb-2 ">Password</Text>
             <Text className="text-white/80 text-xs mb-2 italic">
@@ -127,6 +286,8 @@ const SignUpScreen = () => {
                 value={password}
                 onChangeText={setPassword}
                 textAlign="left"
+                textContentType="oneTimeCode"
+                autoCorrect={false}
               />
               <Pressable onPress={() => setShowPass(!showPass)}>
                 <Text className="text-gray-600 font-bold">{showPass ? "Hide" : "Show"}</Text>
@@ -134,24 +295,23 @@ const SignUpScreen = () => {
             </View>
           </View>
 
-          
-          <View className="mb-8">
-            <Text className="text-white font-bold text-2xl mb-2 ">Confirm Password</Text>
-            <View className="bg-white h-16 rounded-2xl px-4 flex-row items-center">
-              <TextInput 
-                className="flex-1 text-xl font-bold"
-                secureTextEntry={!showConfirmPass}
-                placeholder=""
-                placeholderTextColor="#666"
-                value={confirmPassword}
-                onChangeText={setConfirmPassword}
-                textAlign="left"
-              />
-              <Pressable onPress={() => setShowConfirmPass(!showConfirmPass)}>
-                <Text className="text-gray-600 font-bold">{showConfirmPass ? "Hide" : "Show"}</Text>
-              </Pressable>
-            </View>
-          </View>
+          {/* Confirm Password */}
+         <View className="mb-2">
+           <Text className="text-white font-bold text-xl mb-1">Confirm Password</Text>
+           <View className="bg-white h-14 rounded-2xl px-4 flex-row items-center">
+             <TextInput
+               className="flex-1 text-lg font-bold"
+               secureTextEntry={!showConfirmPass}
+               value={confirmPassword}
+               onChangeText={setConfirmPassword}
+               textContentType="oneTimeCode"
+               autoCorrect={false}
+             />
+             <Pressable onPress={() => setShowConfirmPass(!showConfirmPass)}>
+               <Text className="text-gray-600 font-bold">{showConfirmPass ? "Hide" : "Show"}</Text>
+             </Pressable>
+           </View>
+         </View>
 
           
           <Pressable 

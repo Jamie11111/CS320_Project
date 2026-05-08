@@ -4,7 +4,7 @@ import Navbar from "../components/navbar"
 import ProfileFeedBanner from "../components/profile-feed-banner"
 import FeedCard from "../components/feed-card"
 import React, { useEffect, useState } from "react"
-import { fetchWithAuth } from "../scripts/authFetch"
+import { fetchFromBackend } from "../scripts/authFetch"
 import { useLocalSearchParams } from "expo-router"
 type ListingPhoto = {
   photoID?: number;
@@ -18,7 +18,7 @@ const ProfileFeedPage = () => {
     user_id: string
     name: string
     email: string
-    location: string
+    address: string
     profile_picture_url: string | null
   }
   type Listing = {
@@ -48,19 +48,19 @@ const ProfileFeedPage = () => {
     const fetchListings = async () => {
       try {
 
-        const meRes = await fetchWithAuth(`http://localhost:3000/api/user`);
+        const meRes = await fetchFromBackend(`/api/user`);
         if (meRes.ok) {
           setCurrentUser(await meRes.json());
         }
 
-        const userResponse = await fetchWithAuth(`http://localhost:3000/api/user/${userId}`, {
+        const userResponse = await fetchFromBackend(`/api/user/${userId}`, {
           headers: {
             'Content-Type': 'application/json'
           }
         });
         const userData = await userResponse.json();
         setUserData(userData);
-        const response = await fetchWithAuth(`http://localhost:3000/api/listings/user/${userId}`, {
+        const response = await fetchFromBackend(`/api/listings/user/${userId}`, {
           method: 'GET',
           headers: {
               'Content-Type': 'application/json',
@@ -93,14 +93,14 @@ const ProfileFeedPage = () => {
   return (
     <View >
       <View className="h-[92%]">
-        <ProfileFeedBanner authorName={userData?.name || "John Doe"} authorLocation={userData?.location || "Amherst, MA"} authorPfp={userData?.profile_picture_url || null} />
+        <ProfileFeedBanner authorName={userData?.name || "John Doe"} authorLocation={userData?.address || "Location not available"} authorPfp={userData?.profile_picture_url || null} />
         <ScrollView contentContainerStyle={{ flexDirection: "row", flexWrap: "wrap", marginLeft: 3}}>
             {listings.map((listing, index) => (
               <FeedCard
                 key={index}
                 name={listing.product_name}
                 price={listing.price}
-                location={userData?.location || "Amherst, MA"}
+                location={userData?.address || "Location not available"}
                 description={listing.product_desc ?? ""}
                 condition={listing.item_condition}
                 userId={listing.user_id}
