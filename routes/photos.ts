@@ -44,8 +44,9 @@ async function uploadPhoto(supabase: SupabaseClient, req: BunRequest, folder: 'l
     }
 
     const b: Blob = await req.blob();
-    if (!new Set(allowedTypes).has(b.type)){
-        return Response.json({error: `Blob type must be one of ${allowedTypes.join(' | ')}`}, {status: 415});
+    const lookup = new Set(allowedTypes);
+    if (!lookup.has(b.type) && !lookup.has(req.headers.get('Content-Type') || 'invalid')){
+        return Response.json({error: `Blob type ${b.type} is not one of ${allowedTypes.join(' | ')}`}, {status: 415});
     }
 
     return upload(supabase, folder, await b.arrayBuffer(), filename, b.type as 'image/jpeg' | 'image/png' | 'video/mp4')
