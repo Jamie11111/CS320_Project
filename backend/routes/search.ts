@@ -1,7 +1,7 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { BunRequest } from "bun";
 import { getJsonOrQuery } from "./helpers";
-import { filterListings } from "../database/listings";
+import { attachPhotosAndLocationToListings, attachPhotosToListings, filterListings } from "../database/listings";
 
 export const searchRoutes = {
     "/api/listings/search": {
@@ -22,6 +22,7 @@ export const searchRoutes = {
  * - `sold?: boolean`
  * - `sort_by?: 'price' | 'distance' | 'relevance' | 'date'`
  * - `lmt?: number`
+ * - `offset?: number`
  * @returns 
  * Listings matching the provided filters
  */
@@ -35,5 +36,7 @@ async function searchListings(supabase: SupabaseClient, req: BunRequest){
     } else if (!user) {
         return Response.json({error: "Must be logged in to search listings"}, {status: 401});
     }
-    return Response.json(await filterListings(supabase, query, user.id), {status: 200});
+    const res = await filterListings(supabase, query, user.id);
+    const listingsWithPhotos = await attachPhotosAndLocationToListings(supabase, res, 1);
+    return Response.json(listingsWithPhotos, {status: 200});
 }
