@@ -33,6 +33,8 @@ type Listing = {
   // condition: string
   // images: FeedImageSource[]
 }
+type SortBy = 'price' | 'distance' | 'relevance' | 'date'
+
 const Home = () => {
   const [listings, setListings] = useState<Listing[]>([]);
   const [offset, setOffset] = useState(0);
@@ -49,7 +51,7 @@ const Home = () => {
   
   const [searchQuery, setSearchQuery] = useState("")
 
-  const [sortBy, setSortBy] = useState<'price' | 'distance' | 'relevance' | 'date'>('distance')
+  const [sortBy, setSortBy] = useState<SortBy>('distance')
   const [condition, setCondition] = useState<'new' | 'good' | 'fair' | 'poor' | undefined>(undefined)
   const [priceLimit, setPriceLimit] = useState<string>("")
   const [sold, setSold] = useState<boolean | undefined>(false)
@@ -82,6 +84,7 @@ const Home = () => {
     limit: number = 10,
     offset: number = 0,
     queryForRequest?: string,
+    sortForRequest?: SortBy,
   ) => {
     const params = new URLSearchParams()
     const q =
@@ -89,7 +92,8 @@ const Home = () => {
         ? queryForRequest.trim()
         : searchQuery.trim()
     if (q.length > 0) params.append("query", q)
-    if (sortBy) params.append("sort_by", sortBy);
+    const sort = sortForRequest ?? sortBy
+    if (sortBy) params.append("sort_by", sort);
     if (condition) params.append("condition", condition);
     if (priceLimit.trim()) params.append("priceLimit", priceLimit.trim());
     if (sold !== undefined) params.append("sold", String(sold));
@@ -97,7 +101,7 @@ const Home = () => {
     params.set("limit", String(limit));
     params.set("offset", String(offset));
 
-    const response = await fetchFromBackend(`/api/listings?${params.toString()}`);
+    const response = await fetchFromBackend(`/api/listings?${params.toString()}`);    
     if (!response.ok) {
       throw new Error(`Failed: ${response.status}`);
     }
@@ -116,7 +120,7 @@ const Home = () => {
     return normalized;
   }
 
-  const fetchListings = async (activeQuery: string) => {
+  const fetchListings = async (activeQuery: string, sortForRequest?: SortBy) => {
     const trimmed = activeQuery.trim()
     setOffset(0)
     setHasMore(true)
@@ -125,7 +129,7 @@ const Home = () => {
     setSuggestedQueries([])
 
     try {
-      const page = await fetchNextListings(10, 0, trimmed)
+      const page = await fetchNextListings(10, 0, trimmed, sortForRequest)
       setListings(page)
       setOffset(page.length)
       setHasMore(page.length >= 10)
@@ -168,12 +172,14 @@ const Home = () => {
 
   const runSearch = async (query: string) => {
     const trimmed = query.trim()
-    setSearchQuery(trimmed)
 
-    // automatically sort by relevance whenever nonempty query submitted
+    // sort by relevance whenever nonempty query submitted
+    const nextSort: SortBy = trimmed.length > 0 ? "relevance" : sortBy
+    
+    setSearchQuery(trimmed)
     if (trimmed.length > 0) setSortBy("relevance") 
 
-    await fetchListings(trimmed)
+    await fetchListings(trimmed, nextSort)
   }
 
   useEffect(() => {
