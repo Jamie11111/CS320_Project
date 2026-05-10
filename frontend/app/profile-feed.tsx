@@ -1,0 +1,121 @@
+import { View, Text, ScrollView } from "react-native"
+import "../global.css"
+import Navbar from "../components/navbar"
+import ProfileFeedBanner from "../components/profile-feed-banner"
+import FeedCard from "../components/feed-card"
+import React, { useEffect, useState } from "react"
+import { fetchFromBackend } from "../scripts/authFetch"
+import { useLocalSearchParams } from "expo-router"
+type ListingPhoto = {
+  photoID?: number;
+  photoURL: string;
+  photoPath?: string;
+};
+
+const ProfileFeedPage = () => {
+    const { userId } = useLocalSearchParams<{ userId?: string }>()
+    type userData = {
+    user_id: string
+    name: string
+    email: string
+    address: string
+    profile_picture_url: string | null
+  }
+  type Listing = {
+    user_id: string
+    product_name: string
+    product_desc: string | null
+    item_condition: string
+    price: string
+    listing_id: string
+    photos: ListingPhoto[]
+    sold: boolean
+    // using API Listings (above) but actual listings (below) should have more dataa
+    // id: number
+    // name: string
+    // price: number
+    // location: string
+    // description: string
+    // condition: string
+    // images: FeedImageSource[]
+  }
+
+  const [userData, setUserData] = React.useState<userData | null>(null)
+  const [listings, setListings] = React.useState<Listing[]>([])
+  const [currentUser, setCurrentUser] = useState<userData | null>(null)
+
+  useEffect(() => {
+    const fetchListings = async () => {
+      try {
+
+        const meRes = await fetchFromBackend(`/api/user`);
+        if (meRes.ok) {
+          setCurrentUser(await meRes.json());
+        }
+
+        const userResponse = await fetchFromBackend(`/api/user/${userId}`, {
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        });
+        const userData = await userResponse.json();
+        setUserData(userData);
+        const response = await fetchFromBackend(`/api/listings/user/${userId}`, {
+          method: 'GET',
+          headers: {
+              'Content-Type': 'application/json',
+          }
+        });
+        if (!response.ok) {
+          throw new Error(`Failed: ${response.status}`);
+        }
+
+        const data: unknown = await response.json();
+        if (!Array.isArray(data)) throw new Error("Invalid response format")
+
+         if (!Array.isArray(data)) throw new Error("Invalid response format")
+        const normalized = data.map((listing: any) => ({
+          ...listing,
+          photos: listing.photos.map((photo: any) => ({
+              photoID: photo.photo_id,
+              photoURL: photo.photo_url,
+              photoPath: photo.photo_path,
+          }))
+        }));
+        setListings(normalized);
+      } catch (error) {
+        console.error("Error fetching listings", error)
+      }
+    }
+
+    fetchListings()
+  }, [])
+  return (
+    <View >
+      <View className="h-[92%]">
+        <ProfileFeedBanner authorName={userData?.name || "John Doe"} authorLocation={userData?.address || "Location not available"} authorPfp={userData?.profile_picture_url || null} />
+        <ScrollView contentContainerStyle={{ flexDirection: "row", flexWrap: "wrap", marginLeft: 3}}>
+            {listings.map((listing, index) => (
+              <FeedCard
+                key={index}
+                name={listing.product_name}
+                price={listing.price}
+                location={userData?.address || "Location not available"}
+                description={listing.product_desc ?? ""}
+                condition={listing.item_condition}
+                userId={listing.user_id}
+                images={listing.photos}
+                listingId={listing.listing_id}
+                sold={listing.sold}
+                sellerPfpUrl={userData?.profile_picture_url || null}
+              />
+            ))}
+          </ScrollView>
+
+      </View>
+      <Navbar userPfp={currentUser?.profile_picture_url || null}/>
+    </View>
+  )
+}
+
+export default ProfileFeedPage
