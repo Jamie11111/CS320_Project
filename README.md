@@ -1,15 +1,12 @@
-# 320-test-environment
+# CS320 Project - UMarket
 
-To install dependencies:
+Complete codebase for the project. 
 
-```bash
-bun install
+- See `./backend` for the backend code and instructions for running the backend server. 
+- See `./frontend` for the frontend code and instructions for running the frontend server.
+
+`/frontend` and `/backend` are set up as git subtrees, so if anyone accidentally makes changes to `backend-main` or `frontend-patch-1` after this branch gets merged into `main`, we can still easily update main by running `git subtree pull --prefix=<directory> <repository_url> <branch>`:
 ```
-
-To run:
-
-```bash
-bun run expo-router/entry
+git subtree pull --prefix=backend https://github.com/Jamie11111/CS320_Project.git backend-main
+git subtree pull --prefix=frontend https://github.com/Jamie11111/CS320_Project.git frontend-patch-1
 ```
-
-This project was created using `bun init` in bun v1.3.10. [Bun](https://bun.com) is a fast all-in-one JavaScript runtime.
