@@ -2,6 +2,10 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const RECENT_SEARCH_KEY = 'umass_marketplace_recent_searches';
 
+// Aditya - This file contains AI generated code for searchHistory
+// A link to the response can be found in the following doc for auditing:
+// https://docs.google.com/document/d/1q62T6QuffP31qpni-QgdSvDC1evNfK6aOIzQf9T2S4M/edit?usp=sharing
+
 export const SearchHistoryManager = {
   // 1. Retrieve the list
   // whenever a user clicks on the search bar make this call and display it
