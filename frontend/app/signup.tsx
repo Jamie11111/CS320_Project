@@ -58,6 +58,17 @@ const SignUpScreen = () => {
 
 
   const handleSignUp = async () => {
+
+    if (!name.trim()) {
+      Alert.alert("Missing name", "Please enter your name.");
+      return;
+    }
+
+    if (!locationText.trim() || !coordinates.lat || !coordinates.lon) {
+      Alert.alert("Missing location", "Please search and select your location");
+      return;
+    }
+
     //@umass.edu check
     const umassRegex = /^[a-zA-Z0-9._%+-]+@umass\.edu$/
     if (!umassRegex.test(email)) {
@@ -103,10 +114,26 @@ const SignUpScreen = () => {
      return;
    }
 
+  // Store user's location info in async storage so it can be added to database
+  // after user has been verified
+  if (coordinates.lat && coordinates.lon) {
+    await AsyncStorage.setItem("pendingLocation", JSON.stringify({
+      address: locationText,
+      latitude: coordinates.lat,
+      longitude: coordinates.lon
+    }))
+  }
 
-   const { session } = responseJson;
+  Alert.alert(
+      "Signup almost complete",
+      "Please click on the confirmation link send to your UMass email to activate your account. Then login.",
+   [{text: "OK", onPress:() => router.push("/login")}] 
+  );
 
 
+   /*const { session } = responseJson;
+
+   // CANNOT update location without the user verifying email first
    if (session) {
      //Save tokens 
     //  await SecureStore.setItemAsync("accessToken", session.accessToken);
@@ -141,15 +168,14 @@ const SignUpScreen = () => {
    } else {
      console.error("Signup failed: No session returned", responseJson.message);
      Alert.alert("Error", "Session could not be established.");
-   }
+   } */
 
     } catch (error) {
       console.error("Login error", error)
     }
 
     
-  }
-
+  } 
   return (
     <View className="flex-1 bg-umass-red ">
       <View className="bg-umass-red flex-1">

@@ -54,7 +54,7 @@ const MyProfilePage = () => {
     setUserDataFn(value);
     updateCache("profileData", value);
   }
-  const [userLocation, setUserLocation] = useState(userData?.address)
+  const [userLocation, setUserLocation] = useState(userData?.address ?? "")
   const [isPasswordModalVisible, setPasswordModalVisible] = useState(false)
   const [passwordLoading, setPasswordLoading] = useState(false)
   const [passwords, setPasswords] = useState({

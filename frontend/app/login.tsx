@@ -3,6 +3,7 @@ import { useRouter } from "expo-router"
 import { useState } from "react"
 import "../global.css"
 import * as SecureStore from 'expo-secure-store';
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { fetchFromBackend } from "../scripts/authFetch"
 import React from "react";
 import Home from "./main-feed";
@@ -42,6 +43,22 @@ const LoginScreen = () => {
       console.log("Response JSON:", responseJson);  
 
       if (response.ok) {
+            // make sure to update user's location after they login for the first time
+            try {
+              const pendingLoc = await AsyncStorage.getItem("pendingLocation");
+              if (pendingLoc) {
+                const {address, latitude, longitude} = JSON.parse(pendingLoc)
+                await fetchFromBackend('/api/user', {
+                  method: 'PATCH',
+                  headers: {'Content-Type': 'application/json'},
+                  body: JSON.stringify({address, latitude, longitude}),
+                })
+                await AsyncStorage.removeItem("pendingLocation");
+              }
+            }
+            catch (error) {
+              console.error("Failed to sync the pending location", error)
+            }
             // const { session } = responseJson;
             // //stores tokens
             // if (session && session.accessToken) {
