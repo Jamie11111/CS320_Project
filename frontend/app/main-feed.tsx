@@ -9,6 +9,8 @@ import React from 'react'
 import { fetchFromBackend } from "../scripts/authFetch"
 import { DataContext } from '../components/data-context'
 
+// nathan: I contributed to this page. Here's the link to my chat history: https://docs.google.com/document/d/1_EMUZ61HZkIx1ohpyCPF742EveQTH4tviphskW9GwLY/edit?usp=sharing
+// all my comments are human-written to demonstrate understanding.
 type ListingPhoto = {
   photoID?: number;
   photoURL: string;
@@ -23,15 +25,8 @@ type Listing = {
   sold: boolean
   listing_id: string
   photos: ListingPhoto[]
-  // using API Listings (above) but actual listings (below) should have more dataa
-  // id: number
-  // name: string
-  // price: number
   location: string
   distance: number | null // automatically returned whenever filterListings is called
-  // description: string
-  // condition: string
-  // images: FeedImageSource[]
 }
 type SortBy = 'price' | 'distance' | 'relevance' | 'date'
 
@@ -80,6 +75,7 @@ const Home = () => {
       .slice(0, 5)
   }
 
+
   const fetchNextListings = async (
     limit: number = 10,
     offset: number = 0,
@@ -101,6 +97,7 @@ const Home = () => {
     params.set("limit", String(limit));
     params.set("offset", String(offset));
 
+    // nathan: fetch listings using search parameters and pagination limits, then store them in a normalized array 
     const response = await fetchFromBackend(`/api/listings?${params.toString()}`);    
     if (!response.ok) {
       throw new Error(`Failed: ${response.status}`);
@@ -281,6 +278,7 @@ const Home = () => {
             </Pressable>
           </View>
         )}        
+        {/* nathan:  */}
         <FlatList
           data = {listings}
           key={2}

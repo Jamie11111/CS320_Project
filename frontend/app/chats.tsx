@@ -7,6 +7,8 @@ import ChatRow from "../components/chat-row"
 import Navbar from "../components/navbar"
 import React from "react"
 import { DataContext } from "../components/data-context"
+// nathan: I contributed to this page. Here's the link to my chat history: https://docs.google.com/document/d/1u9LGxUgeqAQaNWG-5akh0ubJIzHt86uWcvsi_7NozEk/edit?usp=sharing
+// all my comments are human-written to demonstrate understanding.
 const ChatListScreen = () => {
   type Chat = {
     chat_id: string
@@ -47,6 +49,8 @@ const ChatListScreen = () => {
 
     const fetchChats = async () => {
       try {
+
+        // nathan: fetch chats and update cache to check which chats have new messages (based on last message ID) 
         const res = await fetchFromBackend('/api/chats', {
           method: "GET",
           headers: {
@@ -58,22 +62,27 @@ const ChatListScreen = () => {
         const newLastMessageIdByChat = { ...lastMessageIdByChat };
         const newIsUnreadByChat = { ...isUnreadByChat };
         data.forEach((chat: Chat) => {
+          // nathan: if the sender of the last message is the current user, don't mark it as unread
           if (chat.sender_id === currentUser?.user_id) {
             newIsUnreadByChat[chat.chat_id] = false;
             newLastMessageIdByChat[chat.chat_id] = chat.message_id;
             return;
           }
 
+          // nathan: otherwise, if the last message ID is different, mark it as unread
           if (chat.message_id != lastMessageIdByChat[chat.chat_id]) {
             console.log("New message in chat " + chat.chat_id);
             console.log("Old last message id: " + lastMessageIdByChat[chat.chat_id]);
             newLastMessageIdByChat[chat.chat_id] = chat.message_id;
             newIsUnreadByChat[chat.chat_id] = true;
           }
+          // nathan: if they are the same, keep the chat marked as unread 
           else {
             newIsUnreadByChat[chat.chat_id] = false;
           }
         })
+
+        // nathan: update cache dictionaries: each chat (key) maps to the last message ID and whether it's unread 
         updateCache("lastMessageIdByChat", newLastMessageIdByChat);
         updateCache("isUnreadByChat", newIsUnreadByChat);
         setChats(data)
@@ -87,6 +96,7 @@ const ChatListScreen = () => {
     }
 
     
+    // nathan: fetch chats every 5 seconds
     fetchChats();
     if (timeoutLoop === null){
       timeoutLoop = setInterval(() => {

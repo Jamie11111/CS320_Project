@@ -9,26 +9,24 @@ import {
   Modal,
 } from "react-native";
 // import "../global.css";
-import Navbar from "../components/navbar";
-import ProfileFeedBanner from "../components/profile-feed-banner";
-import FeedCard from "../components/feed-card";
 import RedButton from "../components/red-button";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import DropDownPicker from "react-native-dropdown-picker";
 import { useState, useEffect } from "react";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import React from "react";
 import { fetchFromBackend } from "../scripts/authFetch";
 import * as ImagePicker from "expo-image-picker";
-import CheckBox from "expo-checkbox";
-import { get } from "react-native/Libraries/NativeComponent/NativeComponentRegistry";
+// nathan: I contributed to this page. Here's the link to my chat history: https://docs.google.com/document/d/1wr2XtPviSqx9qRnxpGCmb86drJmeO4Da0vNocOSU2zY/edit?usp=sharing
+// all my comments are human-written to demonstrate understanding.
 
+// nathan: types for photos that exist in the backend
 type ExistingPhoto = {
   photoID: number;
   photoURL: string;
   photoPath: string;
 };
 
+// nathan: types for photos that are selected in the frontend
 type SelectedPhoto = {
   uri: string;
   photoID?: number;
@@ -36,30 +34,11 @@ type SelectedPhoto = {
   isExisting: boolean;
 };
 
-interface UploadProductPageProps {
-  isEditing?: boolean;
-  initialName?: string;
-  initialPrice?: string;
-  initialLocation?: string;
-  initialDescription?: string;
-  initialCondition?: string;
-  listingId?: string;
-  initialPhotos?: string;
-  initialSold?: boolean;        
-}
-
-const UploadProductPage = ({
-  isEditing = false,
-  initialName = "",
-  initialPrice = "",
-  initialLocation = "",
-  initialDescription = "",
-  initialCondition = "",
-  initialSold = false,
-}: UploadProductPageProps) => {
+const UploadProductPage = () => {
+  // nathan: state variables for form fields
   const [open, setOpen] = useState(false);
-  const [value, setValue] = useState(null);
-  const [sold, setSold] = useState(initialSold);
+  const [value, setValue] = useState<string | null>(null);
+  const [sold, setSold] = useState(false);
   const [items, setItems] = useState([
     { label: "New", value: "New" },
     { label: "Good", value: "Good" },
@@ -70,12 +49,14 @@ const UploadProductPage = ({
   const [price, setPrice] = useState("");
   const [description, setDescription] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+
+  // nathan: state variables for image uploading/editing 
   const [selectedImages, setSelectedImages] = useState<SelectedPhoto[]>([]);
   const [removedPhotoIds, setRemovedPhotoIds] = useState<number[]>([]);
 
   const router = useRouter();
 
-  // 
+  // nathan: this page is structured such that it can be used for creating a new listing or editing an existing listing
   const params = useLocalSearchParams<{
     isEditing?: string;
     initialName?: string;
@@ -87,16 +68,20 @@ const UploadProductPage = ({
     initialSold?: string;
     initialPhotos?: string;
   }>();
-  const resolvedIsEditing = params.isEditing === "true" || isEditing;
-  const resolvedName = params.initialName ?? initialName;
-  const resolvedPrice = params.initialPrice ?? initialPrice;
-  const resolvedCondition = params.initialCondition ?? initialCondition;
-  const resolvedLocation = params.initialLocation ?? initialLocation;
-  const resolvedDescription = params.initialDescription ?? initialDescription; 
+
+  // nathan: when editing, the parameters will be passed in as strings, but when uploading, they will not exist, in which case we need to set them to their default values
+  const resolvedIsEditing = params.isEditing === "true";
+  const resolvedName = params.initialName ?? "";
+  const resolvedPrice = params.initialPrice ?? "";
+  const resolvedCondition = params.initialCondition ?? "";
+  const resolvedDescription = params.initialDescription ?? ""; 
   const resolvedSold = params.initialSold === "true";
+
+
+  // nathan: function to fetch listing photos that already exist 
   const getListingPhotos = async () => {
       const existingPhotos: ExistingPhoto[] = [];
-      const response = await fetchFromBackend(`/api/listing/photos?listingID=${parseFloat(params.listingId)}`, {
+      const response = await fetchFromBackend(`/api/listing/photos?listingID=${params.listingId ? parseFloat(params.listingId) : NaN}`, {
         method: "GET",
       });
       const data = await response.json();
@@ -104,6 +89,8 @@ const UploadProductPage = ({
         const errorText = data.error || "Failed to fetch listing photos";
         throw new Error(errorText);
       }
+
+      // nathan: add to list of existing photos
       data.map((photo: any) => {
         existingPhotos.push({
           photoID: photo.photo_id,
@@ -113,6 +100,8 @@ const UploadProductPage = ({
       });
       return existingPhotos;
     };
+
+    // nathan: function to load in existing photos when editing a listing 
    const loadPhotos = async () => {
         try {
                 const photos = await getListingPhotos();
@@ -128,6 +117,8 @@ const UploadProductPage = ({
                 console.error("Failed to fetch listing photos", error);
         }
         };
+
+  
   useEffect(() => {
     setProductName(resolvedName);
     setPrice(resolvedPrice);
@@ -147,17 +138,19 @@ const UploadProductPage = ({
 
 
 
+  // nathan: function to add photos selected in the frontend to the backend 
   const createListingPhotos = async (
     listingID: number,
     photos: SelectedPhoto[],
   ) => {
+
+    // nathan: distinguish between photos that already exist and new photos; if no new photos, return
     const newPhotos = photos.filter((photo) => !photo.isExisting);
     if (newPhotos.length === 0) {
       return;
     }
 
-
-
+    // nathan: for each new photos, send the blob to the backend so it can add it to an image bucket and return the public URL
     const responses = await Promise.all(
       newPhotos.map(async (photo) => {
         const res = await fetch(photo.uri);
@@ -180,7 +173,7 @@ const UploadProductPage = ({
                 throw new Error(`Failed to upload photo: ${errorText}`);
         }
         
-        
+        // nathan: get the file path and URL from the backend for the phot then add that to the database with the listing ID
         const { filePath, publicUrl } = await uploadRes.json();
         console.log("Photo url", publicUrl);
         return fetchFromBackend("/api/listing/photos", {
@@ -204,6 +197,7 @@ const UploadProductPage = ({
 
   };
 
+  // nathan: function to deltete photos by ID by removing them from the backend 
   const deleteListingPhotos = async (photoIds: number[]) => {
     if (photoIds.length === 0) {
         
@@ -228,6 +222,8 @@ const UploadProductPage = ({
     }
   };
 
+   // nathan: function to handle form submission
+   // works for uploading and editing 
   const handleSubmit = async () => {
     if (!productName.trim() || !price.trim() || !value) {
       alert("Please fill in all required fields");
@@ -255,6 +251,7 @@ const UploadProductPage = ({
           return;
         }
 
+        // nathan: if editng, make a patch request 
         const response = await fetchFromBackend(
           `/api/listing/${listingId}`,
           {
@@ -271,11 +268,13 @@ const UploadProductPage = ({
         }
         console.log(response.body);
 
+        // nathan: delete photos that were removed and create photos taht were added
         await deleteListingPhotos(removedPhotoIds);
         await createListingPhotos(listingId, selectedImages);
 
         alert("Listing updated successfully");
       } else {
+        // nathan: if not editing, post the listing in the database associated with the user and create the added photos 
         const userResponse = await fetchFromBackend(
           "/api/user",
           {
@@ -332,17 +331,21 @@ const UploadProductPage = ({
     }
   };
 
+  // nathan: if delete button is clicked (only when editing), delete the listing
   const handleDelete = async () => {
     if (!resolvedIsEditing) {
       alert("Not in editing mode");
       return;
     }
+
     const listingId = params.listingId ? parseFloat(params.listingId) : NaN;
     if (!listingId) {
       alert("Listing ID is missing");
       return;
     }
     setIsLoading(true);
+
+    // nathan: delete listing from backend
     try {
       const response = await fetchFromBackend(
         `/api/listing/${listingId}`,
@@ -376,12 +379,16 @@ const UploadProductPage = ({
     }
   };
 
+  // nathan: function that uses expo image picker to handle uploaded images 
+  // frontend handles maximum of 5 images
+
   const handlePickImages = async () => {
     if (selectedImages.length >= 5) {
       Alert.alert("Image limit reached", "You can upload up to 5 images.");
       return;
     }
 
+    // nathan: expo image picker uses this function to request permission from user to access photos 
     const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (!permission.granted) {
       Alert.alert(
@@ -402,6 +409,7 @@ const UploadProductPage = ({
       return;
     }
 
+    // nathan: update selected images with the photos obtained from expo image picker
     const pickedUris = result.assets.map((asset) => asset.uri);
     const pickedPhotos: SelectedPhoto[] = pickedUris.map((uri) => ({
       uri,

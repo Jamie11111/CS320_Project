@@ -9,6 +9,8 @@ import * as SecureStore from "expo-secure-store";
 import * as ImagePicker from "expo-image-picker";
 import { fetchFromBackend } from "../scripts/authFetch";
 import { DataContext } from "../components/data-context"
+// nathan: I worked on this page. Here's the link to my chat history: https://docs.google.com/document/d/13YOiN9XWPuTklOacpOOBlbKOUQGUYepCArZZ600iG0M/edit?usp=sharing 
+// all my comments are human-written to demonstrate understanding.
 const LISTING_CARD_PREFIX = "LISTING_CARD:";
 
 type ListingCard = {
@@ -58,8 +60,9 @@ const cardStyles = StyleSheet.create({
   price: { color: "white", fontSize: 13, fontWeight: "600", marginLeft: 8 },
 })
 
+
+
 const ChatDetailScreen = () => {
-  
   const router = useRouter()
   const otherUserPfp = null
   const {cachedData, updateCache} = useContext(DataContext);
@@ -67,6 +70,7 @@ const ChatDetailScreen = () => {
   type Attachment = {
     attachment_url: string
   }
+
 
   type ChatMessage = {
     message_id: string
@@ -76,6 +80,8 @@ const ChatDetailScreen = () => {
     sender_id: string
     attachments?: Attachment[]
   }
+
+  
   const {chatId} = useLocalSearchParams<{chatId?: string}>()
   let {sellerName} = useLocalSearchParams<{sellerName?: string}>()  
   const [messages, setMessages] = useState<ChatMessage[]>([])
@@ -83,6 +89,8 @@ const ChatDetailScreen = () => {
   const wsRef = useRef<WebSocket | null>(null)
   const [senderId, setSenderId] = useState<string | null>(null)
   const flatListRef = useRef<FlatList<ChatMessage>>(null)
+
+
 
   fetchFromBackend("/api/user", {
       headers: {
@@ -94,11 +102,6 @@ const ChatDetailScreen = () => {
     .catch(err => console.error("Failed to fetch user data:", err));
 
   useEffect(() => {
-    let alive = true;
-
-
-    
-
     async function init() {
       if (!chatId) {
         console.error("No chatId provided in search params");
@@ -110,6 +113,7 @@ const ChatDetailScreen = () => {
         return;
       }
 
+      // nathan: get messages based on chat ID
       const historyRes = await fetchFromBackend(`/api/chats/${cid}/messages`, {
         method: "GET",
         headers: {
@@ -122,6 +126,7 @@ const ChatDetailScreen = () => {
         return;
       }
 
+      // nathan: add messages to an array
       const historyData = await historyRes.json();
       setMessages(Array.isArray(historyData) ? historyData : []);
 
@@ -132,13 +137,18 @@ const ChatDetailScreen = () => {
         return;
       }
 
+      // nathan: create a websocket connection using the chat ID and tokens 
       const ws = new WebSocket(`ws://localhost:3000/api/chat/ws?chat_id=${cid}&token=${accessToken}&refresh_token=${refreshToken}`);
       wsRef.current = ws;
+
+      // nathan: check if connection is opened
       ws.onopen = () => {
           
         console.log("WebSocket connection opened");
       };
 
+
+      // nathan: when a message is received, add it to messages array
       ws.onmessage = (event) => {
         try {
           const msg = JSON.parse(String(event.data));
@@ -152,10 +162,12 @@ const ChatDetailScreen = () => {
         }
       };
 
+      // nathan: log when error occurs
       ws.onerror = (error) => {
         console.error("WebSocket error:", error);
       };
 
+      // nathan: log when connection closes
       ws.onclose = () => {
         console.log("WebSocket connection closed");
       };
@@ -165,14 +177,15 @@ const ChatDetailScreen = () => {
 
 
 
+    // nathan: cleanup 
     return () => {
-      alive = false;
       if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
         wsRef.current.close();
       }
     };
   }, [chatId]);
 
+  // nathan: function to send message 
   async function sendMessage() {
     const text = draft.trim();
     if (!text) return;
@@ -234,6 +247,7 @@ const ChatDetailScreen = () => {
         <Pressable onPress={() => {
           const latestMessage = messages[messages.length - 1];
           if (latestMessage) {
+            // nathan: update cache to cache to mark message as read when going back to chats page
             updateCache("lastMessageIdByChat", { ...cachedData.lastMessageIdByChat, [chatId!]: latestMessage.message_id });
           }
           updateCache("isUnreadByChat", { ...cachedData.isUnreadByChat, [chatId!]: false });
