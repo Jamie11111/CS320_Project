@@ -4,7 +4,7 @@ import {resetDatabase, fullCleanUp} from './test_helpers';
 
 const url = process.env.SUPABASE_URL!;
 const key = process.env.SUPABASE_ANON_KEY!;
-const service_key: string = process.env.SUPABASE_KEY!;
+const service_key: string = process.env.SUPABASE_SERVICE_KEY!;
 
 const supabase = createClient(url, key);
 let serviceClient: SupabaseClient = createClient(url, service_key);

@@ -35,7 +35,7 @@ const TEST_QUERIES = [
 
 const url: string = process.env.SUPABASE_URL!;
 const key: string = process.env.SUPABASE_ANON_KEY!;
-const service_key: string = process.env.SUPABASE_KEY!;
+const service_key: string = process.env.SUPABASE_SERVICE_KEY!;
 
 const user1Client = createClient(url, key);
 const serviceClient = createClient(url, service_key);
