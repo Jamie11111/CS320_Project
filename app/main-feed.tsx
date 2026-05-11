@@ -9,6 +9,9 @@ import React from 'react'
 import { fetchFromBackend } from "../scripts/authFetch"
 import { DataContext } from '../components/data-context'
 
+// -- Shravan - AI assistance used for filter button 
+// -- pages 16-20 https://docs.google.com/document/d/1TK0iLnH-EV3rvX1j_EgH3SucgBUCP1FOlxMgwF1bwo4/edit?usp=sharing
+
 type ListingPhoto = {
   photoID?: number;
   photoURL: string;
