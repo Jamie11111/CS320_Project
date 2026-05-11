@@ -19,8 +19,8 @@ From the `./frontend` folder, do the following:
 
 To test the code, switch to the `./backend` folder and do the following:
 - Create a `.env.test` file containing `SUPABASE_URL`, `SUPABASE_ANON_KEY`, and `SUPABASE_SERVICE_KEY` database connection keys
-- Do `bun test ./test/database/[file].test.ts` to run database tests
-- Do `bun test ./test/routes/[file].test.ts` to run backend route tests
+- Do `bun test ./tests/database/[file].test.ts` to run database tests
+- Do `bun test ./tests/routes/[file].test.ts` to run backend route tests
 
 ## Updating code in this branch
 
