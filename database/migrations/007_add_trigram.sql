@@ -1,3 +1,6 @@
+-- Some AI assistance used
+-- pages 12-13 https://docs.google.com/document/d/1TK0iLnH-EV3rvX1j_EgH3SucgBUCP1FOlxMgwF1bwo4/edit?usp=sharing
+
 create extension if not exists pg_trgm;
 
 create index if not exists listings_name_trgm_idx
