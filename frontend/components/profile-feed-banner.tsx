@@ -14,7 +14,7 @@ const ProfileFeedBanner = ({ authorName, authorLocation, authorPfp }: ProfileFee
   const formatLocation = (loc: string) => {
     if (!loc) return "Location not available";
     const parts = loc.split(',');
-    console.log("Parts:", parts);
+    // console.log("Parts:", parts);
     if (parts.length >= 5) {
       return `${parts[parts.length - 5].trim()}, ${parts[parts.length - 3].trim()}`;
     }
