@@ -8,6 +8,8 @@ import RedButton from "./red-button"
 
 // nathan: I contributed to this component. Here's a link to my chat history:https://docs.google.com/document/d/1sPEbSqP5HPfRucyhG0-j6rfEW1yU_ly4xRf3905LXhU/edit?usp=sharing 
 // all my comments are human-written to demonstrate understanding.
+
+// nathan: listing photo type
 type ListingPhoto = {
   photoID?: number;
   photoURL: string;
@@ -36,6 +38,8 @@ const FeedCardExpanded = ({ name, location, price, condition, description, image
     if(distance === null || distance === undefined) return "";
     return `${distance.toFixed(2)} mi`;
   }
+
+  // nathan: I attempted to handle different location formats, but the locations returned are fairly inconsistent
   const formatLocation = (loc: string) => {
     if (!loc) return "Location not available";
     const parts = loc.split(',');
@@ -54,6 +58,8 @@ const FeedCardExpanded = ({ name, location, price, condition, description, image
   const [sellerName, setName] = React.useState("")
   const [listingImages, setImages] = React.useState<ListingPhoto[]>([])
   const createOrGetChat = async () => {
+
+    // nathan: create or go to a chat when the uesr clicks "message this seller"
     try {
       const response = await fetchFromBackend(`/api/chats`, {
         method: 'POST',
@@ -76,6 +82,7 @@ const FeedCardExpanded = ({ name, location, price, condition, description, image
     }
   };
   useEffect(() => {
+    // nathan: get the name of the seller
       const fetchSellerName = async () => {
         try {
           const response = await fetchFromBackend(`/api/user/${userId}`, {
@@ -95,6 +102,7 @@ const FeedCardExpanded = ({ name, location, price, condition, description, image
         }
       }
 
+      // nathan: get photos for the listing
       const fetchImages = async () => {
         try {
           const response = await fetchFromBackend(`/api/listing/${listingId}/photos`, {
@@ -182,16 +190,7 @@ const FeedCardExpanded = ({ name, location, price, condition, description, image
       </ScrollView>
     </View>
     <View className="flex-row justify-around">
-      {/* <Pressable onPress={onClose} className="mb-4 mt-auto w-52 bg-umass-red rounded-xl p-3 items-center">
-      <Text className="text-white font-bold">Close</Text>
-      </Pressable> */}
       <RedButton onPressFunction={onClose} text="Close" />
-      {/* <Pressable onPress={async () => {
-        onClose()
-        router.push({ pathname: "/messages", params: { chatId: await createOrGetChat() , sellerName: sellerName} })
-      }} className="mb-4 mt-auto w-52 bg-umass-red rounded-xl p-3 items-center">
-        <Text className="text-white font-bold">Message this Seller</Text>
-      </Pressable> */}
       <RedButton onPressFunction={async () => {
         const chatId = await createOrGetChat()
         const prefix = `LISTING_CARD:{"id":"${listingId}"`

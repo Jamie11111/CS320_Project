@@ -2,7 +2,7 @@ import { Pressable, Text } from "react-native"
 import React from "react"
 import { useRouter } from "expo-router"
 import { fetchFromBackend } from "../scripts/authFetch"
-
+// nathan: I made this component. 
 interface RedButtonProps {
     text: string,
     onPressFunction ?: () => void
