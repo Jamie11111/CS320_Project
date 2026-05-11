@@ -5,6 +5,10 @@ to use - call this function with appropriate parameters, store returned info
 into database. when needed, use url from the separate database to display from frontend.
 can use file path to remove from storage in the future. */
 
+// Some AI assistance used
+// Page 1-8 https://docs.google.com/document/d/1TK0iLnH-EV3rvX1j_EgH3SucgBUCP1FOlxMgwF1bwo4/edit?usp=sharing
+
+
 export async function upload(
     supabase: SupabaseClient,
     folder: 'listings' | 'attachments' | 'profile_photos',
