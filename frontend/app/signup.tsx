@@ -352,7 +352,7 @@ const SignUpScreen = () => {
           </Pressable>
 
           <Pressable onPress={() => router.push("/login")} className="mt-6 bottom self-center ">
-            <Text className="text-white  text-lg underline ">Back to Login</Text>
+            <Text className="text-white font-bold text-lg underline ">Back to Log In</Text>
           </Pressable> 
         </ScrollView>
       </View>

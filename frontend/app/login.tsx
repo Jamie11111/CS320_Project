@@ -59,15 +59,7 @@ const LoginScreen = () => {
             catch (error) {
               console.error("Failed to sync the pending location", error)
             }
-            // const { session } = responseJson;
-            // //stores tokens
-            // if (session && session.accessToken) {
-            //   await SecureStore.setItemAsync("accessToken", session.accessToken);
-            //   await SecureStore.setItemAsync("refreshToken", session.refreshToken);
             router.push("main-feed");
-            // } else {
-            //   Alert.alert("Login Error", "Session data was missing from server.");
-            // }
           } else { //error check password and email
             Alert.alert("Login Failed", responseJson.error || "Invalid email or password.");
             setLoading(false); // Stop loading so user can try again
@@ -78,11 +70,7 @@ const LoginScreen = () => {
           Alert.alert("Error", "A network error occurred. Please try again.");
           setLoading(false); 
         }
-//     Once logged in, you should include the following line in all your fetch request headers:
-// 'Authorization': `Bearer ${accessToken} ${refreshToken}`
 
-// Additionally, all responses that the server sends to signed-in users will include the following in the header:
-// "Session-Tokens": `${session.access_token} ${session.refresh_token}`You should periodically update the locally stored accessToken and refreshToken using these values, since the tokens will expire after some time. But it's not super important for now
   }
 
   return (
@@ -171,7 +159,7 @@ const LoginScreen = () => {
             {loading ? (
               <ActivityIndicator color="#881C1C" size="large" />
             ) : (
-              <Text className="text-center text-4xl font-bold">Login</Text>
+              <Text className="text-center text-4xl font-bold">Log In</Text>
             )}
           </Pressable>
 
