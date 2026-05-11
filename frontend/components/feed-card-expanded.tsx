@@ -5,6 +5,9 @@ import React, { useEffect } from "react"
 import samplepfp from "../assets/images/samplepfp.png"
 import { fetchFromBackend } from "../scripts/authFetch"
 import RedButton from "./red-button"
+
+// nathan: I contributed to this component. Here's a link to my chat history:https://docs.google.com/document/d/1sPEbSqP5HPfRucyhG0-j6rfEW1yU_ly4xRf3905LXhU/edit?usp=sharing 
+// all my comments are human-written to demonstrate understanding.
 type ListingPhoto = {
   photoID?: number;
   photoURL: string;

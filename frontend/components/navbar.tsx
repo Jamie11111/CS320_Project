@@ -6,6 +6,8 @@ import Logo from "../assets/images/Logo.png"
 import React from "react"
 import { useEffect } from "react"
 import samplepfp from "../assets/images/samplepfp.png"
+// nathan: I contributed to this component.
+// all comments are human-written to demonstrate understanding
 interface NavbarProps {
   canNavigate?: boolean
   userPfp?: string | null; 
@@ -30,7 +32,7 @@ const Navbar = ({ canNavigate = true, userPfp }: NavbarProps) => {
     console.log("Current path:", currentPath);
   }, [currentPath]);
   return (
-    
+    // nathan: when + clicked, go to upload product page
     <View className="w-full h-24 bg-umass-red  px-6">
       <View className="flex-row items-center justify-between mt-3">
         <Pressable onPress={() => handleNavAttempt("/main-feed")} className={`mt-2 flex-row items-center justify-around w-12 h-12 rounded-lg ${currentPath === "/" ? "shadow-xl -translate-y-1" :"shadow-sm"}`}>
@@ -47,9 +49,12 @@ const Navbar = ({ canNavigate = true, userPfp }: NavbarProps) => {
           >
             <Text className="text-umass-red text-2xl font-bold">+</Text>
         </Pressable>
+        {/* nathan: when PFP clicked, go to my profile page */}
           <Pressable onPress={() => router.push("/my-profile")} className={`${currentPath === "/my-profile" ? "shadow-xl -translate-y-1" : "shadow-sm"}`}>
             <Image source={userPfp ? { uri: userPfp } : samplepfp} className={`bg-gray-200 w-14 h-14 rounded-full`}></Image>
           </Pressable>
+
+          {/* nathan: when chat bubble clicked, go to chats page */}
           <Pressable
             onPress={(e) => {
               e.stopPropagation()

@@ -4,13 +4,16 @@ import { useState } from "react"
 import { useRouter } from "expo-router"
 import FeedCardExpanded from "./feed-card-expanded"
 import React from "react"
+
+// nathan: I contributed to this component. 
+// all comments are human-written to demonstrate understanding. 
 type ListingPhoto = {
   photoID?: number;
   photoURL: string;
   photoPath?: string;
 };
 
-
+// nathan: feed card props interface
 interface FeedCardProps {
   name?: string
   location?: string
@@ -48,21 +51,7 @@ const FeedCard = ({
     return `${distance.toFixed(2)} mi`;
   }
   
-  // console.log("FeedCard props:", { name, location, price, description, condition, images, isEditing, userId, listingId, sold, sellerPfpUrl })
-  /*const formatLocation = (loc: string) => {
-    if (!loc) return "Location not available";
-    const parts = loc.split(',');
-    if (parts.length >= 5) {
-      return `${parts[parts.length - 5].trim()}, ${parts[parts.length - 3].trim()}`;
-    }
-    if (parts.length >= 4) {
-      return `${parts[parts.length - 2].trim()}, ${parts[parts.length - 1].trim()}`;
-    }
-    if (parts.length >= 3) {
-      return `${parts[parts.length - 3].trim()}, ${parts[parts.length - 2].trim()}`;
-    }
-    return loc;
-  };*/
+    // nathan: I attempted to handle different location formats, but the locations returned are fairly inconsistent
     const formatLocation = (loc: string) => {
     if (!loc) return "Location not available";
     console.log("Original location:", loc);
@@ -80,6 +69,7 @@ const FeedCard = ({
 
   const displayLocation = formatLocation(location);
   const handlePress = () => {
+    // nathan: if the user is editing, go to the upload product page with isEditing set to true
     if (isEditing) {
       router.push({
         pathname: "/upload-product",
@@ -98,6 +88,7 @@ const FeedCard = ({
       return
     }
 
+    // nathan: otherwise, open expanded feed card
     setExpanded(true)
   }
 

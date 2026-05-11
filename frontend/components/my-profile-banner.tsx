@@ -5,7 +5,6 @@ import { useEffect, useState } from "react"
 import React from "react"
 import samplepfp from "../assets/images/samplepfp.png"
 import * as ImagePicker from 'expo-image-picker';
-
 interface MyProfileBannerProps {
     name: string
     location: string
