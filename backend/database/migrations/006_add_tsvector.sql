@@ -2,6 +2,9 @@
 -- to allow efficient query-based searching later on
 -- accounts for null case using coalesce
 
+-- Some AI assistance used
+-- pages 8-11 https://docs.google.com/document/d/1TK0iLnH-EV3rvX1j_EgH3SucgBUCP1FOlxMgwF1bwo4/edit?usp=sharing
+
 alter table listings
 add column search_vector tsvector;
 

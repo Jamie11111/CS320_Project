@@ -7,7 +7,7 @@ import { getSearchSuggestion } from '../../database/similarity-search';
 
 const url: string = process.env.SUPABASE_URL!;
 const key: string = process.env.SUPABASE_ANON_KEY!;
-const service_key: string = process.env.SUPABASE_KEY!;
+const service_key: string = process.env.SUPABASE_SERVICE_KEY!;
 
 describe('similarity search tests', () => {
     

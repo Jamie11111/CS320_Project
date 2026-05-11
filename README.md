@@ -9,13 +9,18 @@ Prerequisites:
 
 From the `./backend` folder, do the following:
 - Run `bun install`
-- Create a `.env` folder containing `SUPABASE_URL` and `SUPABASE_ANON_KEY` variables
+- Create a `.env` file containing `SUPABASE_URL` and `SUPABASE_ANON_KEY` database connection keys
 - Run `bun run index.ts` to start the backend server
 
 From the `./frontend` folder, do the following:
 - Run `bun install`
 - Run `bun expo start` to start the frontend
 - Note: depending on what emulator you're using, you may need to change the `backendURL` variable inside of [`scripts/authFetch.ts`](https://github.com/Jamie11111/CS320_Project/blob/clear-main/frontend/scripts/authFetch.ts)
+
+To test the code, switch to the `./backend` folder and do the following:
+- Create a `.env.test` file containing `SUPABASE_URL`, `SUPABASE_ANON_KEY`, and `SUPABASE_SERVICE_KEY` database connection keys
+- Do `bun test ./tests/database/[file].test.ts` to run database tests
+- Do `bun test ./tests/routes/[file].test.ts` to run backend route tests
 
 ## Updating code in this branch
 

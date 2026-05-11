@@ -6,53 +6,36 @@ import {filterListings} from '../../../database/listings';
 
 // run from root using bun run tests/database/scripts/perform_search.ts
 
-const DEMO_SEARCH_QUERIES = [
-  'monitor',
-  'desk lamp',
-  'microwave',
-  'printer',
-  'bookshelf',
+const TEST_QUERIES = [
   'vacuum',
+  'monitor',
   'fan',
   'backpack',
-  'hoodie',
-  'winter coat',
-
+  'soccer cleats',
   'moniter',
   'micorwave',
   'vaccum',
-  'backpak',
-  'hoodiee',
-
   'screen',
   'computer',
+  'books',
+  'textbook',
   'notebook',
-  'school bag',
   'sneakers',
-
-  'study chair',
   'storage bin',
   'water bottle',
   'phone charger',
-  'bluetooth speaker',
-
   'cheap printer',
   'black backpack',
-  'small fan',
-  'used monitor',
+  'dorm fan',
   'white desk lamp',
-
   'mirror stand',
   'shoe rack',
-  'office shelf',
-  'gaming chair',
-  'portable speaker'
 ];
 
 
 const url: string = process.env.SUPABASE_URL!;
 const key: string = process.env.SUPABASE_ANON_KEY!;
-const service_key: string = process.env.SUPABASE_KEY!;
+const service_key: string = process.env.SUPABASE_SERVICE_KEY!;
 
 const user1Client = createClient(url, key);
 const serviceClient = createClient(url, service_key);
@@ -63,7 +46,7 @@ await loginUser(user1Client, profiles[0].email, "testPassword123");
 
 // can call these two functions and results will be printed
 //await testOnAmazonQueries();
-//for (const query of DEMO_SEARCH_QUERIES) await testOnQuery(query, false, 3);
+//for (const query of TEST_QUERIES) await testOnQuery(query, false, 3);
 addListings()
 
 // adds listings from ebay_titles_sample to listings table

@@ -1,6 +1,11 @@
 -- added offset for pagination, put nulls last, fixed name collision, fix distance calculation
 -- made searching more lenient, name-focused
 
+-- This is the final version of the filter function
+-- Some AI assistance used for relevance score and distance calculation
+-- All weights were tuned by myself and a teammate
+-- pages 14-16 https://docs.google.com/document/d/1TK0iLnH-EV3rvX1j_EgH3SucgBUCP1FOlxMgwF1bwo4/edit?usp=sharing
+
 create or replace function filter_listings(
     viewer_id uuid default null,
     query text default null,

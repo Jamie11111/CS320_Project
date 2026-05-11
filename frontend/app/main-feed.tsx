@@ -11,6 +11,9 @@ import { DataContext } from '../components/data-context'
 
 // nathan: I contributed to this page. Here's the link to my chat history: https://docs.google.com/document/d/1_EMUZ61HZkIx1ohpyCPF742EveQTH4tviphskW9GwLY/edit?usp=sharing
 // all my comments are human-written to demonstrate understanding.
+// -- Shravan - AI assistance used for filter button 
+// -- pages 16-20 https://docs.google.com/document/d/1TK0iLnH-EV3rvX1j_EgH3SucgBUCP1FOlxMgwF1bwo4/edit?usp=sharing
+
 type ListingPhoto = {
   photoID?: number;
   photoURL: string;
