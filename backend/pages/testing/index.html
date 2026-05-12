@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fetch Tester</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="script.js" defer></script>
+</head>
+<body>
+    <div class="container">
+        <h1>Login</h1>
+        <form id="login-form">
+            <label for="email">Email:</label>
+            <input type="email" id="email" name="email" required>
+            <label for="password">Password:</label>
+            <input type="password" id="password" name="password" required>
+            <button type="submit">Login</button>
+        </form>
+        <div id="login-status">
+            Status: Signed out
+        </div>
+    </div>
+    <div class="container">
+        <h1>Make Request</h1>
+        <form id="fetch-form">
+            <div class="input-line">
+                <label for="url">URL:</label>
+                <input type="text" id="url" name="url" placeholder="/api/listings" required>
+            </div>
+            <label for="method">Method:</label>
+            <select name="method" id="method">
+                <option value="GET">GET</option>
+                <option value="POST">POST</option>
+                <option value="PATCH">PATCH</option>
+                <option value="PUT">PUT</option>
+                <option value="DELETE">DELETE</option>
+            </select>
+            <label for="content-type">Content-Type:</label>
+            <select name="content-type" id="content-type">
+                <option value="plain">plain</option>
+                <option value="json">json</option>
+                <option value="file">file</option>
+            </select>
+
+            <details>
+                <summary>
+                    Headers
+                </summary>
+                <div id="add-headers-container">
+                    
+                </div>
+                <button type="button" id="add-header-btn">+</button>
+            </details>
+
+            <div id="dynamic-input-container">
+            </div>
+
+            <button type="submit">Make Request</button>
+        </form>
+        <hr>
+        <div id="fetch-status">
+            
+        </div>
+        <div id="fetch-response">
+            
+        </div>
+        <button id="load-photos">Load photos</button>
+        <div id="photos-container">
+            <!-- Photos will be loaded here -->
+        </div>
+        <details>
+            <summary>
+                History
+            </summary>
+            <div id="history-container">
+                <!-- History will be loaded here -->
+            </div>
+        </details>
+    </div>
+</html>
