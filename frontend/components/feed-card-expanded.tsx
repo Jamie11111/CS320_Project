@@ -6,6 +6,7 @@ import samplepfp from "../assets/images/samplepfp.png"
 import { fetchFromBackend } from "../scripts/authFetch"
 import RedButton from "./red-button"
 
+// kushaan AI prompts: https://docs.google.com/document/d/1VrYvRUGM8CwcBM2Zgj57wDyvcOBnUZW4inWj-TO-jKM/edit?tab=t.0
 // nathan: I contributed to this component. Here's a link to my chat history:https://docs.google.com/document/d/1sPEbSqP5HPfRucyhG0-j6rfEW1yU_ly4xRf3905LXhU/edit?usp=sharing 
 // all my comments are human-written to demonstrate understanding.
 

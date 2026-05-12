@@ -11,6 +11,7 @@ import { fetchFromBackend } from "../scripts/authFetch";
 import { DataContext } from "../components/data-context"
 // nathan: I worked on this page. Here's the link to my chat history: https://docs.google.com/document/d/13YOiN9XWPuTklOacpOOBlbKOUQGUYepCArZZ600iG0M/edit?usp=sharing 
 // all my comments are human-written to demonstrate understanding.
+// kushaan AI prompts: https://docs.google.com/document/d/1VrYvRUGM8CwcBM2Zgj57wDyvcOBnUZW4inWj-TO-jKM/edit?tab=t.0
 const LISTING_CARD_PREFIX = "LISTING_CARD:";
 
 type ListingCard = {
