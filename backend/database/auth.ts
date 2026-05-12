@@ -4,14 +4,15 @@ import { createClient, SupabaseClient } from '@supabase/supabase-js';
 /**
  * SIGNUP FUNCTION
  */
-export async function signUpUser(supabase: SupabaseClient, email: string, password: string, fullName: string) {
+export async function signUpUser(supabase: SupabaseClient, email: string, password: string, fullName: string, redirectTo?: string) {
   const { data, error } = await supabase.auth.signUp({
     email: email,
     password: password,
     options: {
+      emailRedirectTo: redirectTo,
       data: {
         full_name: fullName 
-      }
+      },
     }
   });
 
